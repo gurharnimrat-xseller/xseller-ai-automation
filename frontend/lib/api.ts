@@ -1,4 +1,6 @@
-const BASE_URL = 'http://localhost:8000';
+// Use relative URLs for same-origin requests (works with Next.js rewrites)
+// Falls back to environment variable if set, otherwise empty string for relative URLs
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 // ==================== Types ====================
 

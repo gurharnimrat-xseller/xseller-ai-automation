@@ -50,7 +50,7 @@ export default function Dashboard() {
             try {
                 setLoading(true);
                 setError(null);
-                const response = await fetch('http://localhost:8000/api/stats/dashboard');
+                const response = await fetch('/api/stats/dashboard');
 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
