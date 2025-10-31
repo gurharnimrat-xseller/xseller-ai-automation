@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
+import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,7 +14,7 @@ from app import scheduler
 from app.routes import router
 
 
-DATABASE_URL = "sqlite:///./xseller.db"
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./xseller.db")
 
 
 @asynccontextmanager
@@ -31,9 +32,15 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 app = FastAPI(lifespan=lifespan)
 
 # CORS: allow localhost:3000 (MUST be added before routers)
+# Production: Set ALLOWED_ORIGINS environment variable (comma-separated)
+ALLOWED_ORIGINS = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:3000"
+).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
