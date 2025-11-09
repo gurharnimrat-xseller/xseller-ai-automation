@@ -1,0 +1,43 @@
+{
+  "name": "xseller-ai-video-analysis",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    }
+  },
+  "remoteUser": "vscode",
+  "mounts": [
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+  ],
+  "postCreateCommand": "pip install --no-cache-dir -r /workspaces/xseller-ai-automation/.devcontainer/requirements.txt && pre-commit install || true",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-toolsai.jupyter",
+        "GitHub.copilot",
+        "esbenp.prettier-vscode"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.analysis.typeCheckingMode": "basic",
+        "editor.formatOnSave": true
+      }
+    }
+  },
+  "containerEnv": {
+    "PIP_DISABLE_PIP_VERSION_CHECK": "1",
+    "PIP_NO_CACHE_DIR": "off"
+  },
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/xseller-ai-automation,type=bind",
+  "workspaceFolder": "/workspaces/xseller-ai-automation",
+  "forwardPorts": [
+    3000,
+    8000
+  ]
+}
