@@ -53,7 +53,14 @@ def main():
         TRANSCRIPT_PATH, metrics["duration_seconds"]
     )
 
-    serializable = {k: float(v) if isinstance(v, (np.floating, np.ndarray)) else v for k, v in metrics.items()}
+    serializable = {}
+    for key, value in metrics.items():
+        if isinstance(value, np.ndarray):
+            serializable[key] = float(np.mean(value))
+        elif isinstance(value, np.floating):
+            serializable[key] = float(value)
+        else:
+            serializable[key] = value
     REPORT_PATH.write_text(json.dumps(serializable, indent=2))
     print(f"Voice profile saved to {REPORT_PATH}")
 
