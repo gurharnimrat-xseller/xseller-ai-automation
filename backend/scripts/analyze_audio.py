@@ -49,9 +49,12 @@ def estimate_words_per_minute(transcript: Path, duration: float) -> float:
 def main():
     signal, sr = load_audio(AUDIO_PATH)
     metrics = compute_voice_metrics(signal, sr)
-    metrics["words_per_minute"] = estimate_words_per_minute(TRANSCRIPT_PATH, metrics["duration_seconds"])
+    metrics["words_per_minute"] = estimate_words_per_minute(
+        TRANSCRIPT_PATH, metrics["duration_seconds"]
+    )
 
-    REPORT_PATH.write_text(json.dumps(metrics, indent=2))
+    serializable = {k: float(v) if isinstance(v, (np.floating, np.ndarray)) else v for k, v in metrics.items()}
+    REPORT_PATH.write_text(json.dumps(serializable, indent=2))
     print(f"Voice profile saved to {REPORT_PATH}")
 
 
