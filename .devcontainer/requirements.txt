@@ -1,0 +1,11 @@
+yt-dlp==2025.10.22
+openai-whisper==20240930
+opencv-python-headless==4.10.0.84
+moviepy==1.0.3
+librosa==0.10.2.post1
+pydub==0.25.1
+pandas==2.2.3
+numpy==2.1.2
+scipy==1.14.1
+matplotlib==3.9.2
+tqdm==4.66.5

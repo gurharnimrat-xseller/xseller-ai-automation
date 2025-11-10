@@ -42,3 +42,13 @@ coverage/
 *.bak
 *.backup
 *.tmp
+
+# Output files (generated videos, audio, images)
+backend/output/videos/*.mp4
+backend/output/audio/*.mp3
+backend/output/test_videos/*.mp4
+backend/output/test_videos/*.png
+backend/output/test_videos/frames*/*.png
+
+# Competitor video (too large for GitHub, download with yt-dlp)
+backend/output/competitor_analysis/*.mp4

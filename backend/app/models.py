@@ -73,6 +73,13 @@ class Post(SQLModel, table=True):
     deleted_at: Optional[datetime] = Field(
         default=None, sa_column=Column(DateTime(timezone=True))
     )
+    
+    # Additional fields for content management
+    hook_type: Optional[str] = Field(default=None, index=True)  # Type of viral hook used
+    video_duration: Optional[int] = Field(default=None)  # Duration in seconds for video posts
+    regeneration_count: int = Field(default=0, sa_column=Column(Integer))  # Number of times regenerated
+    total_cost: Optional[float] = Field(default=None)  # Total cost of regeneration
+    extra_data: Optional[dict] = Field(default=None, sa_column=Column(JSON))  # Extra data for voice selection, etc.
 
     # Relationships (commented out for now due to SQLModel version compatibility)
     # assets: List["Asset"] = Relationship(back_populates="post")

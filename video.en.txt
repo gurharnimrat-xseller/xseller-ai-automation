@@ -1,0 +1,416 @@
+In this video, I will show you how to
+In this video, I will show you how to
+In this video, I will show you how to
+make cloud code more efficient using the
+make cloud code more efficient using the
+make cloud code more efficient using the
+free tier of the Gemini CLI. If you're
+free tier of the Gemini CLI. If you're
+free tier of the Gemini CLI. If you're
+new here, welcome. My name is Natalie.
+new here, welcome. My name is Natalie.
+new here, welcome. My name is Natalie.
+I'm a professional software engineer and
+I'm a professional software engineer and
+I'm a professional software engineer and
+in my free time, I love to dabble with
+in my free time, I love to dabble with
+in my free time, I love to dabble with
+vibe coding. We will start with a quick
+vibe coding. We will start with a quick
+vibe coding. We will start with a quick
+overview of what you need before you can
+overview of what you need before you can
+overview of what you need before you can
+integrate Gemini CLI into cloud code.
+integrate Gemini CLI into cloud code.
+integrate Gemini CLI into cloud code.
+Then we will generate a cloudmd file
+Then we will generate a cloudmd file
+Then we will generate a cloudmd file
+specific to your codebase. look over a
+specific to your codebase. look over a
+specific to your codebase. look over a
+cloudmd file from a Reddit post where I
+cloudmd file from a Reddit post where I
+cloudmd file from a Reddit post where I
+got all of this from and then we will
+got all of this from and then we will
+got all of this from and then we will
+get cloud code to update the generated
+get cloud code to update the generated
+get cloud code to update the generated
+cloudmd file with the specific Gemini
+cloudmd file with the specific Gemini
+cloudmd file with the specific Gemini
+commands. Gemini CLI was just recently
+commands. Gemini CLI was just recently
+commands. Gemini CLI was just recently
+released a few weeks ago as of the
+released a few weeks ago as of the
+released a few weeks ago as of the
+filming of this video. It's a wonderful
+filming of this video. It's a wonderful
+filming of this video. It's a wonderful
+tool. It has an incredibly large context
+tool. It has an incredibly large context
+tool. It has an incredibly large context
+window. The Gemini API provides a free
+window. The Gemini API provides a free
+window. The Gemini API provides a free
+tier with 100 requests per day using
+tier with 100 requests per day using
+tier with 100 requests per day using
+Gemini 2.5 Pro which is amazing. It
+Gemini 2.5 Pro which is amazing. It
+Gemini 2.5 Pro which is amazing. It
+gives you control over which model you
+gives you control over which model you
+gives you control over which model you
+use. And of course, you can always
+use. And of course, you can always
+use. And of course, you can always
+access higher rate limits with a paid
+access higher rate limits with a paid
+access higher rate limits with a paid
+plan. Before you can use it, make sure
+plan. Before you can use it, make sure
+plan. Before you can use it, make sure
+you have NodeJS version 20 or higher
+you have NodeJS version 20 or higher
+you have NodeJS version 20 or higher
+installed on your system and then run
+installed on your system and then run
+installed on your system and then run
+the CLI installation script. Or you can
+the CLI installation script. Or you can
+the CLI installation script. Or you can
+simply install it with npm
+simply install it with npm
+simply install it with npm
+installed-google/geminite-cl.
+But in this video, we will let Claude
+But in this video, we will let Claude
+But in this video, we will let Claude
+start it up for us. For me, the
+start it up for us. For me, the
+start it up for us. For me, the
+discovery came from finding this really
+discovery came from finding this really
+discovery came from finding this really
+funny thread on Reddit called Gemini CLA
+funny thread on Reddit called Gemini CLA
+funny thread on Reddit called Gemini CLA
+is awesome, but only when you make cloud
+is awesome, but only when you make cloud
+is awesome, but only when you make cloud
+code use it as its And it makes
+code use it as its And it makes
+code use it as its And it makes
+some great points about how if you just
+some great points about how if you just
+some great points about how if you just
+pipe in Gemini CLI into the cloudmd
+pipe in Gemini CLI into the cloudmd
+pipe in Gemini CLI into the cloudmd
+file, you can get so much more use out
+file, you can get so much more use out
+file, you can get so much more use out
+of both cloud code and Gemini CLI and
+of both cloud code and Gemini CLI and
+of both cloud code and Gemini CLI and
+overall it will be much better for your
+overall it will be much better for your
+overall it will be much better for your
+product. Here I'm just going to start up
+product. Here I'm just going to start up
+product. Here I'm just going to start up
+a new Astro project. Here I can start up
+a new Astro project. Here I can start up
+a new Astro project. Here I can start up
+cloud and now I can init the cloud.md
+cloud and now I can init the cloud.md
+cloud and now I can init the cloud.md
+file with /init. And here it's giving us
+file with /init. And here it's giving us
+file with /init. And here it's giving us
+an outline what it's put in the
+an outline what it's put in the
+an outline what it's put in the
+cloud.mmd file. So let's take a quick
+cloud.mmd file. So let's take a quick
+cloud.mmd file. So let's take a quick
+look. I've created the claw.mmd file
+look. I've created the claw.mmd file
+look. I've created the claw.mmd file
+with guidance for future instances of
+with guidance for future instances of
+with guidance for future instances of
+cloud code working with this project.
+cloud code working with this project.
+cloud code working with this project.
+The file includes essential commands all
+The file includes essential commands all
+The file includes essential commands all
+the key npm scripts for development
+the key npm scripts for development
+the key npm scripts for development
+building and previewing architecture
+building and previewing architecture
+building and previewing architecture
+overview filebased routing system
+overview filebased routing system
+overview filebased routing system
+component structure and how Astro
+component structure and how Astro
+component structure and how Astro
+components work. directory organization
+components work. directory organization
+components work. directory organization
+and their purposes. TypeScript
+and their purposes. TypeScript
+and their purposes. TypeScript
+configuration details. The document
+configuration details. The document
+configuration details. The document
+focuses on the highlevel architecture
+focuses on the highlevel architecture
+focuses on the highlevel architecture
+workflow pattern specific to Astro
+workflow pattern specific to Astro
+workflow pattern specific to Astro
+avoiding generic advice while providing
+avoiding generic advice while providing
+avoiding generic advice while providing
+the essential information needed to be
+the essential information needed to be
+the essential information needed to be
+productive in this codebase. Let's take
+productive in this codebase. Let's take
+productive in this codebase. Let's take
+a look.
+a look.
+a look.
+Project overview development commands.
+Project overview development commands.
+Project overview development commands.
+Astro CLI commands. This is great.
+Astro CLI commands. This is great.
+Astro CLI commands. This is great.
+Architecture and structure. So a lot of
+Architecture and structure. So a lot of
+Architecture and structure. So a lot of
+this stuff the architecture analysis can
+this stuff the architecture analysis can
+this stuff the architecture analysis can
+be done with Gemini. So you're saving
+be done with Gemini. So you're saving
+be done with Gemini. So you're saving
+your cloud code tokens which is what I
+your cloud code tokens which is what I
+your cloud code tokens which is what I
+prefer to do especially because cloud
+prefer to do especially because cloud
+prefer to do especially because cloud
+code becomes overloaded a lot recently.
+code becomes overloaded a lot recently.
+code becomes overloaded a lot recently.
+So I find it really helpful to use a
+So I find it really helpful to use a
+So I find it really helpful to use a
+different CLI for that. Let me paste the
+different CLI for that. Let me paste the
+different CLI for that. Let me paste the
+cloudd file that I found on Reddit into
+cloudd file that I found on Reddit into
+cloudd file that I found on Reddit into
+my repo and let's have a look at it
+my repo and let's have a look at it
+my repo and let's have a look at it
+here. So basically we are directing
+here. So basically we are directing
+here. So basically we are directing
+cloud to use Gemini CLI for large code
+cloud to use Gemini CLI for large code
+cloud to use Gemini CLI for large code
+bases and multiple files that might
+bases and multiple files that might
+bases and multiple files that might
+exceed context limits. It includes
+exceed context limits. It includes
+exceed context limits. It includes
+examples how to analyze a specific file,
+examples how to analyze a specific file,
+examples how to analyze a specific file,
+multiple files, entire directory,
+multiple files, entire directory,
+multiple files, entire directory,
+multiple directories, current directory
+multiple directories, current directory
+multiple directories, current directory
+or use the d-all files flag. Then it
+or use the d-all files flag. Then it
+or use the d-all files flag. Then it
+also directs Claude to use Gemini to
+also directs Claude to use Gemini to
+also directs Claude to use Gemini to
+verify if a feature is implemented which
+verify if a feature is implemented which
+verify if a feature is implemented which
+is incredibly useful. Ah, and here we
+is incredibly useful. Ah, and here we
+is incredibly useful. Ah, and here we
+go. When to use Gemini CLI? Use
+go. When to use Gemini CLI? Use
+go. When to use Gemini CLI? Use
+Gemini-P1.
+Gemini-P1.
+Gemini-P1.
+Analyzing entire code bases or large
+Analyzing entire code bases or large
+Analyzing entire code bases or large
+directories. Comparing multiple large
+directories. Comparing multiple large
+directories. Comparing multiple large
+files. Need to understand projectwide
+files. Need to understand projectwide
+files. Need to understand projectwide
+patterns or architecture.
+patterns or architecture.
+patterns or architecture.
+Current context window is insufficient
+Current context window is insufficient
+Current context window is insufficient
+for the task. Working with files totally
+for the task. Working with files totally
+for the task. Working with files totally
+more than 100 kilobytes, which honestly
+more than 100 kilobytes, which honestly
+more than 100 kilobytes, which honestly
+isn't that much. Okay, important notes.
+isn't that much. Okay, important notes.
+isn't that much. Okay, important notes.
+I really like this one. Gemini's context
+I really like this one. Gemini's context
+I really like this one. Gemini's context
+window can handle entire code bases that
+window can handle entire code bases that
+window can handle entire code bases that
+would overflow Claude's context. So,
+would overflow Claude's context. So,
+would overflow Claude's context. So,
+it's really interesting that we are
+it's really interesting that we are
+it's really interesting that we are
+telling Claude this directly. Now that
+telling Claude this directly. Now that
+telling Claude this directly. Now that
+we have both the generated claude.md for
+we have both the generated claude.md for
+we have both the generated claude.md for
+the specific repository and the custom
+the specific repository and the custom
+the specific repository and the custom
+one, let's see how we can mish mash them
+one, let's see how we can mish mash them
+one, let's see how we can mish mash them
+together. Let's say read our custom
+together. Let's say read our custom
+together. Let's say read our custom
+Reddit CloudMD file
+and update the generated CloudMD file
+and update the generated CloudMD file
+and update the generated CloudMD file
+with the Gemini specific commands. Make
+with the Gemini specific commands. Make
+with the Gemini specific commands. Make
+no other code changes. I love these.
+no other code changes. I love these.
+no other code changes. I love these.
+It's taking a while. All right, here we
+It's taking a while. All right, here we
+It's taking a while. All right, here we
+go. I've successfully updated the
+go. I've successfully updated the
+go. I've successfully updated the
+cloudmomd file by adding the gem cla
+cloudmomd file by adding the gem cla
+cloudmomd file by adding the gem cla
+section from the reddit file. The update
+section from the reddit file. The update
+section from the reddit file. The update
+includes all the things that we talked
+includes all the things that we talked
+includes all the things that we talked
+about. Let's take a look. I should have
+about. Let's take a look. I should have
+about. Let's take a look. I should have
+probably committed this the first.
+probably committed this the first.
+probably committed this the first.
+That's okay. Ah, here we go. Here it is.
+That's okay. Ah, here we go. Here it is.
+That's okay. Ah, here we go. Here it is.
+Using Gemini CLI for large codebase
+Using Gemini CLI for large codebase
+Using Gemini CLI for large codebase
+analysis. Okay. And now that we've added
+analysis. Okay. And now that we've added
+analysis. Okay. And now that we've added
+the Gemini CLI to CloudMD, it will
+the Gemini CLI to CloudMD, it will
+the Gemini CLI to CloudMD, it will
+usually use it, but sometimes it does
+usually use it, but sometimes it does
+usually use it, but sometimes it does
+forget, I noticed. So what I like to do
+forget, I noticed. So what I like to do
+forget, I noticed. So what I like to do
+is just prefix my commands with use
+is just prefix my commands with use
+is just prefix my commands with use
+Gemini 2. Especially if I'm implementing
+Gemini 2. Especially if I'm implementing
+Gemini 2. Especially if I'm implementing
+a bigger feature that would affect the
+a bigger feature that would affect the
+a bigger feature that would affect the
+whole codebase. Let's say I want to
+whole codebase. Let's say I want to
+whole codebase. Let's say I want to
+implement authentication. So I would
+implement authentication. So I would
+implement authentication. So I would
+need to protect routes and current
+need to protect routes and current
+need to protect routes and current
+components and all of that. I would say
+components and all of that. I would say
+components and all of that. I would say
+something like use Gemini to analyze the
+something like use Gemini to analyze the
+something like use Gemini to analyze the
+current architecture and plan how to
+current architecture and plan how to
+current architecture and plan how to
+implement applicationwide authentication
+implement applicationwide authentication
+implement applicationwide authentication
+to protect all routes except for/lo.
+to protect all routes except for/lo.
+to protect all routes except for/lo.
+And then I usually say, "Put this plan
+And then I usually say, "Put this plan
+And then I usually say, "Put this plan
+into a markdown file and pause for my
+into a markdown file and pause for my
+into a markdown file and pause for my
+feedback." Learn more about how to plan
+feedback." Learn more about how to plan
+feedback." Learn more about how to plan
+better with cloud code and markdown
+better with cloud code and markdown
+better with cloud code and markdown
+files. Watch this next video.
+[Music]
+[Music]

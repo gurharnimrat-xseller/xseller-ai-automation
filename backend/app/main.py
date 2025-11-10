@@ -1,18 +1,27 @@
 from __future__ import annotations
 
+# CRITICAL: Load .env file FIRST before any other imports that might use environment variables
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+env_path = Path(__file__).parent.parent / ".env"
+load_dotenv(env_path)
+
+# Now import everything else (after .env is loaded)
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
-import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from sqlmodel import SQLModel
 from app.database import engine
 
 from app.models import *  # noqa: F401,F403 - import models to register metadata
 from app import scheduler
 from app.routes import router
-
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./xseller.db")
 
@@ -49,6 +58,11 @@ app.add_middleware(
 # Include router with all API endpoints
 app.include_router(router)
 
+# Mount static files for serving videos and other output
+output_dir = Path(__file__).parent.parent / "output"
+output_dir.mkdir(exist_ok=True)
+app.mount("/output", StaticFiles(directory=str(output_dir)), name="output")
+
 
 @app.get("/")
 async def root():
@@ -67,3 +81,13 @@ async def health():
 
     scheduler_status = "running" if scheduler.is_running() else "stopped"
     return {"api": "healthy", "database": database_status, "scheduler": scheduler_status}
+
+
+# Allow running via: python -m app.main
+if __name__ == "__main__":
+    import uvicorn
+
+    # Read port from environment (default 8000)
+    port = int(os.getenv("PORT", 8000))
+
+    uvicorn.run(app, host="0.0.0.0", port=port)
