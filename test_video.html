@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Video Test</title>
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        video {
+            max-width: 400px;
+            border: 2px solid #0f0;
+        }
+        .info {
+            margin: 20px 0;
+            padding: 10px;
+            background: #222;
+            border-radius: 5px;
+        }
+        .error {
+            color: #f00;
+            background: #300;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success {
+            color: #0f0;
+            background: #030;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Direct Video Test</h1>
+
+    <div class="info">
+        <h2>Test 1: Direct File Access</h2>
+        <video id="video1" controls preload="metadata" style="width: 400px;">
+            <source src="http://localhost:8000/output/test_videos/competitor_test_1.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div id="status1"></div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video1');
+        const status = document.getElementById('status1');
+
+        video.addEventListener('loadedmetadata', () => {
+            status.innerHTML = `<div class="success">✅ Metadata loaded<br>Duration: ${video.duration}s<br>Size: ${video.videoWidth}x${video.videoHeight}</div>`;
+        });
+
+        video.addEventListener('canplay', () => {
+            status.innerHTML += '<div class="success">✅ Video can play!</div>';
+        });
+
+        video.addEventListener('error', (e) => {
+            const error = video.error;
+            let errorMsg = 'Unknown error';
+            if (error) {
+                errorMsg = `Error ${error.code}: ${error.message}`;
+                switch(error.code) {
+                    case 1: errorMsg += ' (MEDIA_ERR_ABORTED)'; break;
+                    case 2: errorMsg += ' (MEDIA_ERR_NETWORK)'; break;
+                    case 3: errorMsg += ' (MEDIA_ERR_DECODE)'; break;
+                    case 4: errorMsg += ' (MEDIA_ERR_SRC_NOT_SUPPORTED)'; break;
+                }
+            }
+            status.innerHTML = `<div class="error">❌ ${errorMsg}<br>URL: ${video.currentSrc}</div>`;
+            console.error('Video error:', error);
+        });
+
+        console.log('Video src:', video.currentSrc);
+    </script>
+</body>
+</html>

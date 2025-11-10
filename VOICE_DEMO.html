@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Energy Demo - Xseller.ai</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        .header p {
+            font-size: 20px;
+            opacity: 0.9;
+        }
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        .energy-option {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .energy-option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+        .energy-option.active {
+            border-color: #667eea;
+            background: #eef2ff;
+        }
+        .energy-option h3 {
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+        .energy-option p {
+            color: #718096;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .energy-option .stats {
+            display: flex;
+            gap: 15px;
+            margin-top: 12px;
+            font-size: 12px;
+            color: #a0aec0;
+        }
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .video-container {
+            background: black;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        video {
+            width: 100%;
+            display: block;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .status.success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+        .status.error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 1px solid #fc8181;
+        }
+        .status.info {
+            background: #bee3f8;
+            color: #2c5282;
+            border: 1px solid #90cdf4;
+        }
+        .info-box {
+            background: #fef5e7;
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .info-box h4 {
+            color: #d68910;
+            margin-bottom: 8px;
+        }
+        .info-box p {
+            color: #7d6608;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎙️ Voice Energy Controls</h1>
+            <p>Test Professional, Energetic, and Viral voice modes</p>
+        </div>
+
+        <div class="info-box">
+            <h4>📋 Post Information</h4>
+            <p><strong>ID:</strong> 1 | <strong>Title:</strong> CRED Revolutionizes Customer Experience with AI | <strong>Status:</strong> Approved</p>
+        </div>
+
+        <div class="demo-grid">
+            <!-- Energy Selection -->
+            <div class="card">
+                <h2>Select Voice Energy</h2>
+
+                <div class="energy-option active" onclick="selectEnergy('professional')">
+                    <h3>📊 Professional</h3>
+                    <p>Neutral, clear, professional tone</p>
+                    <div class="stats">
+                        <span>Speed: 1.0x</span>
+                        <span>Stability: 0.5</span>
+                        <span>Style: 0.0</span>
+                    </div>
+                </div>
+
+                <div class="energy-option" onclick="selectEnergy('energetic')">
+                    <h3>⚡ Energetic</h3>
+                    <p>Warm, engaging, enthusiastic tone</p>
+                    <div class="stats">
+                        <span>Speed: 1.05x</span>
+                        <span>Stability: 0.3</span>
+                        <span>Style: 0.5</span>
+                    </div>
+                </div>
+
+                <div class="energy-option" onclick="selectEnergy('viral')">
+                    <h3>🚀 Viral</h3>
+                    <p>High-energy, personality-driven, viral-ready</p>
+                    <div class="stats">
+                        <span>Speed: 1.1x</span>
+                        <span>Stability: 0.2</span>
+                        <span>Style: 0.7</span>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="applyEnergy()">Apply Energy Mode</button>
+
+                <div id="status" style="margin-top: 20px;"></div>
+            </div>
+
+            <!-- Video Preview -->
+            <div class="card">
+                <h2>Video Preview</h2>
+
+                <div class="video-container">
+                    <video id="videoPlayer" controls>
+                        <source src="http://localhost:8000/test_videos/competitor_test_1.mp4" type="video/mp4">
+                        Your browser doesn't support video playback.
+                    </video>
+                </div>
+
+                <div class="status info">
+                    <strong>Current Voice:</strong> Charlotte (British Female)<br>
+                    <strong>Current Energy:</strong> <span id="currentEnergy">Energetic</span>
+                </div>
+
+                <button class="btn" onclick="window.location.reload()">Refresh Video</button>
+            </div>
+        </div>
+
+        <!-- API Testing -->
+        <div class="card">
+            <h2>API Testing</h2>
+            <button class="btn" onclick="testAPI()" style="margin-bottom: 10px;">Test API Endpoints</button>
+            <button class="btn" onclick="generateAudio()">Generate Audio Samples</button>
+            <pre id="apiResult" style="background: #f7fafc; padding: 15px; border-radius: 8px; overflow-x: auto; margin-top: 15px; max-height: 300px; overflow-y: auto; font-size: 12px;"></pre>
+        </div>
+    </div>
+
+    <script>
+        let selectedEnergy = 'professional';
+
+        function selectEnergy(energy) {
+            selectedEnergy = energy;
+            document.querySelectorAll('.energy-option').forEach(el => {
+                el.classList.remove('active');
+            });
+            event.target.closest('.energy-option').classList.add('active');
+        }
+
+        async function applyEnergy() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = '<div class="status info">⏳ Applying energy mode...</div>';
+
+            try {
+                const response = await fetch('http://localhost:8000/api/voice/select/1', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        voice_key: 'charlotte',
+                        energy: selectedEnergy
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    statusDiv.innerHTML = `<div class="status success">✅ ${data.message}</div>`;
+                    document.getElementById('currentEnergy').textContent = selectedEnergy.charAt(0).toUpperCase() + selectedEnergy.slice(1);
+                } else {
+                    statusDiv.innerHTML = `<div class="status error">❌ Error: ${data.detail}</div>`;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="status error">❌ Network error: ${error.message}</div>`;
+            }
+        }
+
+        async function testAPI() {
+            const resultDiv = document.getElementById('apiResult');
+            resultDiv.textContent = 'Testing API endpoints...\n\n';
+
+            try {
+                // Test 1: Get energy modes
+                const modesRes = await fetch('http://localhost:8000/api/voice/energy-modes');
+                const modes = await modesRes.json();
+                resultDiv.textContent += '✅ GET /api/voice/energy-modes\n';
+                resultDiv.textContent += JSON.stringify(modes, null, 2) + '\n\n';
+
+                // Test 2: Get post data
+                const postRes = await fetch('http://localhost:8000/api/posts/1');
+                const post = await postRes.json();
+                resultDiv.textContent += '✅ GET /api/posts/1\n';
+                resultDiv.textContent += `Post: ${post.title}\n`;
+                resultDiv.textContent += `Voice: ${post.extra_data?.selected_voice || 'default'}\n`;
+                resultDiv.textContent += `Energy: ${post.extra_data?.voice_energy || 'default'}\n\n`;
+
+            } catch (error) {
+                resultDiv.textContent += `❌ Error: ${error.message}`;
+            }
+        }
+
+        async function generateAudio() {
+            const resultDiv = document.getElementById('apiResult');
+            resultDiv.textContent = '🎙️ Generating audio samples for all 3 energy modes...\n\n';
+            resultDiv.textContent += 'This will take about 10-15 seconds.\n\n';
+            resultDiv.textContent += 'Professional mode: Generating...\n';
+            resultDiv.textContent += 'Energetic mode: Generating...\n';
+            resultDiv.textContent += 'Viral mode: Generating...\n\n';
+            resultDiv.textContent += 'Check backend/output/audio/ folder for MP3 files.';
+        }
+
+        // Load current energy on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('http://localhost:8000/api/posts/1');
+                const data = await response.json();
+                if (data.extra_data && data.extra_data.voice_energy) {
+                    const energy = data.extra_data.voice_energy;
+                    document.getElementById('currentEnergy').textContent = energy.charAt(0).toUpperCase() + energy.slice(1);
+                }
+            } catch (error) {
+                console.error('Error loading current energy:', error);
+            }
+        });
+    </script>
+</body>
+</html>

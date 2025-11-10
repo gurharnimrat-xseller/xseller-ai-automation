@@ -1,265 +1,816 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { Filter, FileText, CheckCircle, XCircle, Loader2, Clock } from 'lucide-react';
-import { getQueue, approvePost, rejectPost, type Post as PostType } from '@/lib/api';
+import { useState, useEffect, useRef } from 'react'
+import { Loader2, FileText } from 'lucide-react'
+import VideoPlayer from '@/components/VideoPlayer'
+import RegenerateModal from '@/components/RegenerateModal'
+import VideoGenerationProgress from '@/components/VideoGenerationProgress'
 
 export default function QueuePage() {
-    const [posts, setPosts] = useState<PostType[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [filter, setFilter] = useState<'all' | 'draft' | 'approved' | 'published'>('draft');
-    const [processingId, setProcessingId] = useState<number | null>(null);
+    const [activeTab, setActiveTab] = useState('text')
+    const [posts, setPosts] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
+    const [regenerateModalOpen, setRegenerateModalOpen] = useState(false)
+    const [selectedPostId, setSelectedPostId] = useState<number | null>(null)
+    const [selectedPostType, setSelectedPostType] = useState<'text' | 'video'>('text')
+    const [generatingVideoIds, setGeneratingVideoIds] = useState<Set<number>>(new Set())
+    const pollIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
     useEffect(() => {
-        fetchPosts();
-    }, [filter]);
+        loadQueue()
 
-    const fetchPosts = async () => {
-        try {
-            setLoading(true);
-            setError(null);
-            const status = filter === 'all' ? undefined : filter;
-            const response = await getQueue(status, undefined, 50, 0);
-            setPosts(response.posts);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to fetch posts');
-            console.error('Error fetching posts:', err);
-        } finally {
-            setLoading(false);
-        }
-    };
+        // Poll for updates every 5 seconds if there are videos in production
+        pollIntervalRef.current = setInterval(() => {
+            const videoProducing = posts.filter(p => p.kind === 'video' && p.status === 'video_production')
+            if (videoProducing.length > 0) {
+                loadQueue()
+            }
+        }, 5000)
 
-    const handleApprove = async (postId: number) => {
-        try {
-            setProcessingId(postId);
-            await approvePost(postId, false);
-            // Refresh posts after approval
-            await fetchPosts();
-        } catch (err) {
-            console.error('Error approving post:', err);
-            alert('Failed to approve post');
-        } finally {
-            setProcessingId(null);
+        return () => {
+            if (pollIntervalRef.current) {
+                clearInterval(pollIntervalRef.current)
+            }
         }
-    };
+    }, [posts])
+
+    const loadQueue = async () => {
+        try {
+            // Fetch more posts to see all of them
+            const res = await fetch('/api/content/queue?limit=100')
+            const data = await res.json()
+            console.log('Queue loaded:', {
+                total: data.total,
+                postsCount: data.posts?.length,
+                byKind: {
+                    text: data.posts?.filter((p: any) => p.kind === 'text').length,
+                    video: data.posts?.filter((p: any) => p.kind === 'video').length,
+                },
+                byStatus: {
+                    draft: data.posts?.filter((p: any) => p.status === 'draft').length,
+                    approved: data.posts?.filter((p: any) => p.status === 'approved').length,
+                    video_production: data.posts?.filter((p: any) => p.status === 'video_production').length,
+                },
+                posts: data.posts
+            })
+            setPosts(data.posts || [])
+            setLoading(false)
+        } catch (error) {
+            console.error('Error loading queue:', error)
+            setLoading(false)
+        }
+    }
+
+    const handleRegenerateText = (postId: number) => {
+        setSelectedPostId(postId)
+        setSelectedPostType('text')
+        setRegenerateModalOpen(true)
+    }
+
+    const handleRegenerateVideo = (postId: number) => {
+        setSelectedPostId(postId)
+        setSelectedPostType('video')
+        setRegenerateModalOpen(true)
+    }
+
+    const handleRegenerateSubmit = async (options: any) => {
+        if (!selectedPostId) return
+
+        const endpoint = selectedPostType === 'text'
+            ? `/api/content/${selectedPostId}/regenerate-text`
+            : `/api/content/${selectedPostId}/regenerate-video`
+
+        try {
+            // Ensure body is sent even if empty
+            const body = Object.keys(options).length > 0 ? JSON.stringify(options) : JSON.stringify({})
+
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: body
+            })
+
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}))
+                const errorMsg = errorData.detail || errorData.message || `HTTP ${res.status}: Regeneration failed`
+                throw new Error(errorMsg)
+            }
+
+            const data = await res.json()
+            console.log('Regeneration success:', data)
+
+            alert(`✅ ${data.message || 'Regenerated successfully!'}`)
+            setRegenerateModalOpen(false)
+            loadQueue()
+        } catch (error: any) {
+            console.error('Regeneration error:', error)
+            const errorMessage = error.message || 'Failed to regenerate. Please try again.'
+            alert(`❌ Error: ${errorMessage}`)
+            // Don't throw - let modal stay open so user can try again
+        }
+    }
+
+    const handleApproveText = async (postId: number) => {
+        if (!confirm('Approve this text post?')) return
+
+        try {
+            const res = await fetch(`/api/content/${postId}/approve`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            })
+
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}))
+                throw new Error(errorData.detail || 'Approval failed')
+            }
+
+            const data = await res.json()
+            console.log('Approval response:', data)
+
+            // Always reload queue first
+            await loadQueue()
+
+            // If a video post was created, add it to generating set and switch to video tab
+            if (data.video_post_id) {
+                console.log('Video post created:', data.video_post_id)
+                setGeneratingVideoIds(prev => new Set(prev).add(data.video_post_id))
+                setActiveTab('video')
+                // Reload again after a short delay to ensure video posts are loaded
+                setTimeout(() => {
+                    loadQueue()
+                }, 500)
+            } else {
+                console.log('No video_post_id in response')
+            }
+        } catch (error: any) {
+            console.error('Approval error:', error)
+            alert('Error: ' + error.message)
+        }
+    }
+
+    const handleApproveVideo = async (postId: number) => {
+        if (!confirm('Approve this video?')) return
+
+        try {
+            await fetch(`/api/content/${postId}/approve-video`, { method: 'POST' })
+            alert('✅ Video approved! Scheduled for publishing...')
+            loadQueue()
+        } catch (error: any) {
+            alert('Error: ' + error.message)
+        }
+    }
 
     const handleReject = async (postId: number) => {
-        if (!confirm('Are you sure you want to reject this post?')) {
-            return;
-        }
+        if (!confirm('Reject this post?')) return
 
         try {
-            setProcessingId(postId);
-            await rejectPost(postId);
-            // Refresh posts after rejection
-            await fetchPosts();
-        } catch (err) {
-            console.error('Error rejecting post:', err);
-            alert('Failed to reject post');
-        } finally {
-            setProcessingId(null);
+            await fetch(`/api/content/${postId}/reject`, { method: 'POST' })
+            alert('Post rejected')
+            loadQueue()
+        } catch (error: any) {
+            alert('Error: ' + error.message)
         }
-    };
+    }
 
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffMs = now.getTime() - date.getTime();
-        const diffMins = Math.floor(diffMs / 60000);
-        const diffHours = Math.floor(diffMs / 3600000);
-        const diffDays = Math.floor(diffMs / 86400000);
+    const handleTestCompetitorVideo = async (postId: number) => {
+        if (!confirm('Generate competitor-style video for this post?')) return
 
-        if (diffMins < 60) {
-            return `${diffMins}m ago`;
-        } else if (diffHours < 24) {
-            return `${diffHours}h ago`;
-        } else {
-            return `${diffDays}d ago`;
+        try {
+            const res = await fetch(`/api/video/competitor-test/${postId}`, {
+                method: 'POST'
+            })
+
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}))
+                throw new Error(errorData.detail || 'Failed to generate test video')
+            }
+
+            const data = await res.json()
+            alert(`✅ Video created!\n\nPath: ${data.video_path}\n\nCheck backend/output/test_videos/`)
+        } catch (err: any) {
+            alert('❌ Error: ' + err.message)
         }
-    };
+    }
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'draft':
-                return 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20';
-            case 'approved':
-                return 'text-green-500 bg-green-500/10 border-green-500/20';
-            case 'published':
-                return 'text-blue-500 bg-blue-500/10 border-blue-500/20';
-            case 'failed':
-                return 'text-red-500 bg-red-500/10 border-red-500/20';
-            default:
-                return 'text-gray-500 bg-gray-500/10 border-gray-500/20';
-        }
-    };
+    // Show all posts in different tabs
+    const textPosts = posts.filter(p => p.kind === 'text' && p.status === 'draft')
+    const videoPosts = posts.filter(p => p.kind === 'video' && (p.status === 'video_production' || p.status === 'approved'))
+    const scheduledPosts = posts.filter(p => p.status === 'ready_to_publish' || p.status === 'approved')
+    const allApprovedPosts = posts.filter(p => p.status === 'approved')
+
+    console.log('Filtered posts:', {
+        textPosts: textPosts.length,
+        videoPosts: videoPosts.length,
+        scheduledPosts: scheduledPosts.length,
+        allApproved: allApprovedPosts.length,
+        videoPostsDetails: videoPosts.map((p: any) => ({ id: p.id, status: p.status, kind: p.kind }))
+    })
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-[400px]">
-                <Loader2 className="w-8 h-8 animate-spin text-[#10F4A0]" />
+            <div className="max-w-7xl mx-auto">
+                <div className="flex items-center justify-center min-h-[50vh]">
+                    <div className="text-center">
+                        <Loader2 className="w-10 h-10 text-blue-500 animate-spin mx-auto mb-4" />
+                        <p className="text-gray-400">Loading content queue...</p>
+                    </div>
+                </div>
             </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="bg-red-500/10 border border-red-500 rounded-lg p-6 text-red-400">
-                <p className="font-semibold mb-2">Error Loading Queue</p>
-                <p className="text-sm">{error}</p>
-            </div>
-        );
+        )
     }
 
     return (
-        <div className="space-y-6">
-            {/* Header with Filters */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-white mb-2">Content Queue</h1>
-                    <p className="text-gray-400">Review and approve AI-generated posts</p>
-                </div>
+        <div className="max-w-7xl mx-auto space-y-6 animate-fadeIn">
+            {/* Header */}
+            <div className="mb-6">
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 bg-clip-text text-transparent mb-2">
+                    Content Queue
+                </h1>
+                <p className="text-gray-600 font-medium">Review and manage your content pipeline</p>
+            </div>
 
-                {/* Filter Buttons */}
-                <div className="flex items-center gap-2 flex-wrap">
-                    <Filter className="w-5 h-5 text-gray-400" />
+            {/* Tabs */}
+            <div className="bg-white border-2 border-gray-200 rounded-2xl p-2 shadow-md">
+                <div className="flex gap-2 overflow-x-auto">
                     <button
-                        onClick={() => setFilter('all')}
-                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${filter === 'all'
-                            ? 'bg-[#10F4A0] text-black'
-                            : 'bg-[#1A1D24] text-gray-400 hover:bg-[#2A2D34]'
-                            }`}
+                        onClick={() => setActiveTab('text')}
+                        className={`px-6 py-3 font-semibold transition-all whitespace-nowrap rounded-xl ${
+                            activeTab === 'text'
+                                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg'
+                                : 'text-gray-600 hover:bg-gray-50'
+                        }`}
                     >
-                        All
+                        <span className="flex items-center gap-2">
+                            📝 Text Posts
+                            <span className={`px-2 py-0.5 text-xs rounded-full font-bold ${
+                                activeTab === 'text'
+                                    ? 'bg-white/20 text-white'
+                                    : 'bg-gray-200 text-gray-600'
+                            }`}>
+                                {textPosts.length}
+                            </span>
+                        </span>
                     </button>
                     <button
-                        onClick={() => setFilter('draft')}
-                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${filter === 'draft'
-                            ? 'bg-[#10F4A0] text-black'
-                            : 'bg-[#1A1D24] text-gray-400 hover:bg-[#2A2D34]'
-                            }`}
+                        onClick={() => setActiveTab('video')}
+                        className={`px-6 py-3 font-semibold transition-all whitespace-nowrap rounded-xl ${
+                            activeTab === 'video'
+                                ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg'
+                                : 'text-gray-600 hover:bg-gray-50'
+                        }`}
                     >
-                        Draft
+                        <span className="flex items-center gap-2">
+                            🎬 Video Production
+                            <span className={`px-2 py-0.5 text-xs rounded-full font-bold ${
+                                activeTab === 'video'
+                                    ? 'bg-white/20 text-white'
+                                    : 'bg-gray-200 text-gray-600'
+                            }`}>
+                                {videoPosts.length}
+                            </span>
+                        </span>
                     </button>
                     <button
-                        onClick={() => setFilter('approved')}
-                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${filter === 'approved'
-                            ? 'bg-[#10F4A0] text-black'
-                            : 'bg-[#1A1D24] text-gray-400 hover:bg-[#2A2D34]'
-                            }`}
+                        onClick={() => setActiveTab('approved')}
+                        className={`px-6 py-3 font-semibold transition-all whitespace-nowrap rounded-xl ${
+                            activeTab === 'approved'
+                                ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg'
+                                : 'text-gray-600 hover:bg-gray-50'
+                        }`}
                     >
-                        Approved
+                        <span className="flex items-center gap-2">
+                            ✅ Approved
+                            <span className={`px-2 py-0.5 text-xs rounded-full font-bold ${
+                                activeTab === 'approved'
+                                    ? 'bg-white/20 text-white'
+                                    : 'bg-gray-200 text-gray-600'
+                            }`}>
+                                {allApprovedPosts.length}
+                            </span>
+                        </span>
                     </button>
                     <button
-                        onClick={() => setFilter('published')}
-                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${filter === 'published'
-                            ? 'bg-[#10F4A0] text-black'
-                            : 'bg-[#1A1D24] text-gray-400 hover:bg-[#2A2D34]'
-                            }`}
+                        onClick={() => setActiveTab('scheduled')}
+                        className={`px-6 py-3 font-semibold transition-all whitespace-nowrap rounded-xl ${
+                            activeTab === 'scheduled'
+                                ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
+                                : 'text-gray-600 hover:bg-gray-50'
+                        }`}
                     >
-                        Published
+                        <span className="flex items-center gap-2">
+                            📅 Scheduled
+                            <span className={`px-2 py-0.5 text-xs rounded-full font-bold ${
+                                activeTab === 'scheduled'
+                                    ? 'bg-white/20 text-white'
+                                    : 'bg-gray-200 text-gray-600'
+                            }`}>
+                                {scheduledPosts.length}
+                            </span>
+                        </span>
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('all')}
+                        className={`px-6 py-3 font-semibold transition-all whitespace-nowrap rounded-xl ${
+                            activeTab === 'all'
+                                ? 'bg-gradient-to-r from-gray-700 to-gray-900 text-white shadow-lg'
+                                : 'text-gray-600 hover:bg-gray-50'
+                        }`}
+                    >
+                        <span className="flex items-center gap-2">
+                            📋 All Posts
+                            <span className={`px-2 py-0.5 text-xs rounded-full font-bold ${
+                                activeTab === 'all'
+                                    ? 'bg-white/20 text-white'
+                                    : 'bg-gray-200 text-gray-600'
+                            }`}>
+                                {posts.length}
+                            </span>
+                        </span>
                     </button>
                 </div>
             </div>
 
-            {/* Posts Grid */}
-            {posts.length === 0 ? (
-                <div className="bg-[#1A1D24] rounded-lg p-12 border border-gray-700">
-                    <div className="flex flex-col items-center justify-center text-center">
-                        <FileText className="w-16 h-16 text-gray-600 mb-4" />
-                        <h3 className="text-xl font-semibold text-white mb-2">No posts in queue</h3>
-                        <p className="text-gray-400">
-                            {filter === 'all'
-                                ? 'No posts found'
-                                : `No ${filter} posts found`}
-                        </p>
-                    </div>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {posts.map((post) => (
-                        <div
-                            key={post.id}
-                            className="bg-[#1A1D24] rounded-lg p-6 border border-gray-700 hover:border-[#10F4A0] transition-colors"
-                        >
-                            {/* Header */}
-                            <div className="flex items-start justify-between mb-4">
-                                <div className="flex items-center gap-2">
-                                    <div className={`px-2 py-1 rounded text-xs font-medium border ${getStatusColor(post.status)}`}>
-                                        {post.status.toUpperCase()}
-                                    </div>
+            {/* TEXT POSTS TAB */}
+            {activeTab === 'text' && (
+                <div className="space-y-4">
+                    {textPosts.length === 0 ? (
+                        <div className="bg-white border-2 border-gray-200 rounded-2xl p-12 text-center shadow-md">
+                            <FileText className="w-20 h-20 text-gray-400 mx-auto mb-4" />
+                            <p className="text-gray-700 font-bold text-lg mb-1">No text posts awaiting approval</p>
+                            <p className="text-sm text-gray-500">Generate content to get started</p>
+                        </div>
+                    ) : (
+                        textPosts.map(post => (
+                            <div key={post.id} className="bg-white border-2 border-gray-200 rounded-2xl p-6 hover:border-blue-300 hover:shadow-xl transition-all">
+                                {/* Header with badges */}
+                                <div className="flex flex-wrap items-center gap-2 mb-4">
+                                    {post.regeneration_count > 0 && (
+                                        <span className="badge badge-green">
+                                            🔄 Regenerated {post.regeneration_count}x
+                                        </span>
+                                    )}
+                                    {post.total_cost > 0 && (
+                                        <span className="badge badge-blue">
+                                            💰 ${(post.total_cost || 0).toFixed(3)}
+                                        </span>
+                                    )}
+                                    {post.hook_type && (
+                                        <span className="badge badge-yellow">
+                                            🎯 {post.hook_type.replace(/_/g, ' ')}
+                                        </span>
+                                    )}
                                 </div>
-                                <div className="flex items-center gap-1 text-gray-500 text-sm">
-                                    <Clock className="w-4 h-4" />
-                                    {formatDate(post.created_at)}
+
+                                {/* Title */}
+                                <h3 className="text-2xl font-bold text-gray-900 mb-4">{post.title}</h3>
+
+                                {/* Content */}
+                                <div className="bg-gradient-to-br from-gray-50 to-blue-50 border-2 border-gray-200 rounded-xl p-5 mb-4">
+                                    <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">
+                                        {post.body}
+                                    </p>
+                                </div>
+
+                                {/* Meta info */}
+                                <div className="space-y-3 mb-4">
+                                    {/* Source */}
+                                    {post.source_url && (
+                                        <a
+                                            href={post.source_url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold text-sm transition-colors"
+                                        >
+                                            🔗 View Source
+                                        </a>
+                                    )}
+
+                                    {/* Platforms */}
+                                    {post.platforms && post.platforms.length > 0 && (
+                                        <div className="flex flex-wrap gap-2">
+                                            {post.platforms.map((platform: string) => (
+                                                <span
+                                                    key={platform}
+                                                    className="badge badge-purple"
+                                                >
+                                                    {platform}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* Hashtags */}
+                                    {post.tags && post.tags.length > 0 && (
+                                        <div className="flex flex-wrap gap-2">
+                                            {post.tags.map((tag: string, i: number) => (
+                                                <span key={i} className="text-blue-600 font-semibold text-sm">#{tag}</span>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Actions */}
+                                <div className="flex flex-wrap gap-3 pt-5 border-t-2 border-gray-200">
+                                    <button
+                                        onClick={() => handleApproveText(post.id)}
+                                        className="btn btn-success flex-1 min-w-[180px] py-3"
+                                    >
+                                        ✅ Approve Post
+                                    </button>
+                                    <button
+                                        onClick={() => handleRegenerateText(post.id)}
+                                        className="btn btn-secondary flex-1 min-w-[140px] py-3"
+                                    >
+                                        🔄 Regenerate
+                                    </button>
+                                    <button className="btn btn-ghost px-5 py-3">
+                                        ✏️ Edit
+                                    </button>
+                                    <button
+                                        onClick={() => handleReject(post.id)}
+                                        className="btn btn-danger px-5 py-3"
+                                    >
+                                        ❌ Reject
+                                    </button>
                                 </div>
                             </div>
+                        ))
+                    )}
+                </div>
+            )}
 
-                            {/* Title */}
-                            <h3 className="text-lg font-semibold text-white mb-2 line-clamp-2">
-                                {post.title}
-                            </h3>
+            {/* VIDEO PRODUCTION TAB */}
+            {activeTab === 'video' && (
+                <div className="space-y-4">
+                    {videoPosts.length === 0 ? (
+                        <div className="bg-white border-2 border-gray-200 rounded-2xl p-12 text-center shadow-md">
+                            <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl flex items-center justify-center text-6xl">
+                                🎬
+                            </div>
+                            <p className="text-gray-700 font-bold text-lg mb-2">No videos in production</p>
+                            <p className="text-sm text-gray-500 mb-4">Approve text posts to create videos</p>
+                            <button
+                                onClick={() => setActiveTab('text')}
+                                className="btn btn-primary px-6 py-3"
+                            >
+                                Go to Text Posts
+                            </button>
+                        </div>
+                    ) : (
+                        videoPosts.map(post => {
+                            const isGenerating = post.status === 'video_production'
+                            const showProgress = isGenerating && generatingVideoIds.has(post.id)
 
-                            {/* Body Preview */}
-                            <p className="text-gray-400 text-sm mb-4 line-clamp-3">
-                                {post.body}
-                            </p>
+                            // Debug logging for video posts
+                            console.log('🎬 Rendering video post:', {
+                                id: post.id,
+                                title: post.title,
+                                status: post.status,
+                                has_assets: !!post.assets,
+                                asset_count: post.assets?.length || 0,
+                                first_asset: post.assets?.[0],
+                                isGenerating,
+                                showProgress
+                            })
 
-                            {/* Platforms */}
-                            {post.platforms && post.platforms.length > 0 && (
-                                <div className="flex flex-wrap gap-2 mb-4">
-                                    {post.platforms.map((platform, idx) => (
+                            return (
+                                <div key={post.id} className="bg-[#1A1D24] rounded-xl p-6">
+                                    {isGenerating ? (
+                                        <div className="flex items-center gap-2 mb-6">
+                                            <Loader2 className="w-5 h-5 text-purple-500 animate-spin" />
+                                            <span className="text-purple-400 font-medium">Generating video...</span>
+                                            <span className="ml-auto text-purple-500 font-bold">In Progress</span>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-2 mb-6">
+                                            <span className="text-green-500">✅</span>
+                                            <span className="text-white font-medium">Video ready for review</span>
+                                            <span className="ml-auto text-green-500 font-bold">100%</span>
+                                        </div>
+                                    )}
+
+                                    {/* VIDEO PLAYER - Show if video exists, otherwise show placeholder */}
+                                    {post.assets && post.assets.length > 0 && post.assets[0].path ? (
+                                        <VideoPlayer
+                                            videoUrl={`/output/${post.assets[0].path}`}
+                                            duration={post.video_duration || 18}
+                                            title={post.title}
+                                        />
+                                    ) : isGenerating ? (
+                                        <div className="aspect-[9/16] max-w-[400px] mx-auto bg-gray-900 rounded-lg flex items-center justify-center">
+                                            <div className="text-center">
+                                                <Loader2 className="w-16 h-16 text-purple-500 animate-spin mx-auto mb-4" />
+                                                <p className="text-white font-medium">Generating video...</p>
+                                                <p className="text-gray-400 text-sm mt-2">Using Eleven Labs & StockStack</p>
+                                                <button
+                                                    onClick={async () => {
+                                                        try {
+                                                            await fetch(`/api/content/${post.id}/generate-video`, { method: 'POST' })
+                                                            alert('Video generation triggered!')
+                                                            loadQueue()
+                                                        } catch (e: any) {
+                                                            alert('Error: ' + e.message)
+                                                        }
+                                                    }}
+                                                    className="mt-4 px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm"
+                                                >
+                                                    Force Generate Video
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="aspect-[9/16] max-w-[400px] mx-auto bg-gray-900 rounded-lg flex items-center justify-center">
+                                            <div className="text-center">
+                                                <p className="text-white font-medium mb-4">No video generated yet</p>
+                                                <button
+                                                    onClick={async () => {
+                                                        try {
+                                                            await fetch(`/api/content/${post.id}/generate-video`, { method: 'POST' })
+                                                            alert('Video generation started!')
+                                                            loadQueue()
+                                                        } catch (e: any) {
+                                                            alert('Error: ' + e.message)
+                                                        }
+                                                    }}
+                                                    className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg"
+                                                >
+                                                    Generate Video Now
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Details */}
+                                    <div className="mt-6">
+                                        <h3 className="text-2xl font-bold text-white mb-4">{post.title}</h3>
+
+                                        {/* Script */}
+                                        <div className="bg-[#0E1117] rounded-lg p-5 mb-4 border border-gray-800">
+                                            <div className="text-sm text-gray-400 mb-2">📜 Video Script:</div>
+                                            <p className="text-white whitespace-pre-wrap">{post.body}</p>
+                                        </div>
+
+                                        {/* Platforms */}
+                                        <div className="flex gap-2 mb-4">
+                                            {post.platforms?.map((platform: string) => (
+                                                <span
+                                                    key={platform}
+                                                    className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-sm"
+                                                >
+                                                    {platform}
+                                                </span>
+                                            ))}
+                                        </div>
+
+                                        {/* Video Stats */}
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 p-4 bg-[#0E1117] rounded-lg">
+                                            <div>
+                                                <div className="text-gray-400 text-xs">Duration</div>
+                                                <div className="text-white font-bold">{post.video_duration || 18}s</div>
+                                            </div>
+                                            <div>
+                                                <div className="text-gray-400 text-xs">Format</div>
+                                                <div className="text-white font-bold">9:16</div>
+                                            </div>
+                                            <div>
+                                                <div className="text-gray-400 text-xs">Voiceover</div>
+                                                <div className="text-green-500 font-bold">✅</div>
+                                            </div>
+                                            <div>
+                                                <div className="text-gray-400 text-xs">Captions</div>
+                                                <div className="text-green-500 font-bold">✅</div>
+                                            </div>
+                                        </div>
+
+                                        {/* Actions */}
+                                        <div className="flex flex-wrap gap-3">
+                                            <button
+                                                onClick={() => handleRegenerateVideo(post.id)}
+                                                className="flex-1 min-w-[200px] bg-gray-700 hover:bg-gray-600 text-white px-5 py-3 rounded-lg font-medium"
+                                            >
+                                                🔄 Regenerate Video (~$0.15)
+                                            </button>
+                                            <button
+                                                onClick={() => handleApproveVideo(post.id)}
+                                                className="flex-1 min-w-[200px] bg-green-500 hover:bg-green-600 text-white px-5 py-3 rounded-lg font-bold"
+                                            >
+                                                ✅ Approve Video
+                                            </button>
+                                            <button
+                                                onClick={() => handleTestCompetitorVideo(post.id)}
+                                                className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                                            >
+                                                🧪 Test Competitor Video
+                                            </button>
+                                            <button className="bg-gray-700 hover:bg-gray-600 text-white px-5 py-3 rounded-lg">
+                                                ✏️
+                                            </button>
+                                            <button
+                                                onClick={() => handleReject(post.id)}
+                                                className="bg-red-500 hover:bg-red-600 text-white px-5 py-3 rounded-lg"
+                                            >
+                                                ❌
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )
+                        })
+                    )}
+                </div>
+            )}
+
+            {/* APPROVED TAB */}
+            {activeTab === 'approved' && (
+                <div className="space-y-6">
+                    {allApprovedPosts.length === 0 ? (
+                        <div className="text-center py-12 text-gray-400">
+                            No approved posts
+                        </div>
+                    ) : (
+                        allApprovedPosts.map(post => (
+                            <div key={post.id} className="bg-[#1A1D24] rounded-xl p-6">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div>
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span className="text-2xl">{post.kind === 'video' ? '🎬' : '📝'}</span>
+                                            <span className={`px-3 py-1 rounded-full text-sm ${post.kind === 'video'
+                                                ? 'bg-purple-500/20 text-purple-400'
+                                                : 'bg-blue-500/20 text-blue-400'
+                                                }`}>
+                                                {post.kind}
+                                            </span>
+                                            <span className="px-3 py-1 rounded-full text-sm bg-green-500/20 text-green-400">
+                                                {post.status}
+                                            </span>
+                                        </div>
+                                        <h3 className="text-xl font-bold text-white">{post.title}</h3>
+                                    </div>
+                                </div>
+                                <div className="bg-[#0E1117] rounded-lg p-4 mb-4 border border-gray-800">
+                                    <p className="text-white whitespace-pre-wrap text-sm">{post.body}</p>
+                                </div>
+                                {post.kind === 'video' && (
+                                    <div className="mb-4">
+                                        <VideoPlayer
+                                            videoUrl={post.assets?.[0]?.path ? `/output/${post.assets[0].path}` : 'https://www.w3schools.com/html/mov_bbb.mp4'}
+                                            duration={post.video_duration || 18}
+                                            title={post.title}
+                                        />
+                                    </div>
+                                )}
+                                <div className="flex gap-2 mb-4">
+                                    {post.platforms?.map((platform: string) => (
                                         <span
-                                            key={idx}
-                                            className="px-2 py-1 bg-[#6D28D9]/20 text-[#6D28D9] rounded text-xs"
+                                            key={platform}
+                                            className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-sm"
                                         >
                                             {platform}
                                         </span>
                                     ))}
                                 </div>
-                            )}
+                                {post.kind === 'video' && (
+                                    <div className="flex gap-2 pt-4 border-t border-gray-800">
+                                        <button
+                                            onClick={() => handleTestCompetitorVideo(post.id)}
+                                            className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                                        >
+                                            🧪 Test Competitor Video
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        ))
+                    )}
+                </div>
+            )}
 
-                            {/* Action Buttons */}
-                            {post.status === 'draft' && (
-                                <div className="flex gap-2 pt-4 border-t border-gray-700">
-                                    <button
-                                        onClick={() => handleApprove(post.id)}
-                                        disabled={processingId === post.id}
-                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        {processingId === post.id ? (
-                                            <Loader2 className="w-4 h-4 animate-spin" />
-                                        ) : (
-                                            <CheckCircle className="w-4 h-4" />
-                                        )}
-                                        Approve
-                                    </button>
-                                    <button
-                                        onClick={() => handleReject(post.id)}
-                                        disabled={processingId === post.id}
-                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        {processingId === post.id ? (
-                                            <Loader2 className="w-4 h-4 animate-spin" />
-                                        ) : (
-                                            <XCircle className="w-4 h-4" />
-                                        )}
-                                        Reject
-                                    </button>
-                                </div>
-                            )}
+            {/* SCHEDULED TAB */}
+            {activeTab === 'scheduled' && (
+                <div className="space-y-6">
+                    {scheduledPosts.length === 0 ? (
+                        <div className="text-center py-12 text-gray-400">
+                            No posts scheduled
                         </div>
-                    ))}
+                    ) : (
+                        scheduledPosts.map(post => (
+                            <div key={post.id} className="bg-[#1A1D24] rounded-xl p-6">
+                                <h3 className="text-xl font-bold text-white">{post.title}</h3>
+                                <p className="text-gray-400 mt-2">Scheduled for publishing</p>
+                            </div>
+                        ))
+                    )}
                 </div>
             )}
 
-            {/* Total count */}
-            {posts.length > 0 && (
-                <div className="text-center text-gray-400 text-sm">
-                    Showing {posts.length} post{posts.length !== 1 ? 's' : ''}
+            {/* ALL POSTS TAB */}
+            {activeTab === 'all' && (
+                <div className="space-y-6">
+                    {posts.length === 0 ? (
+                        <div className="text-center py-12 text-gray-400">
+                            No posts found
+                        </div>
+                    ) : (
+                        posts.map(post => (
+                            <div key={post.id} className="bg-[#1A1D24] rounded-xl p-6">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-2xl">{post.kind === 'video' ? '🎬' : '📝'}</span>
+                                        <h3 className="text-xl font-bold text-white">{post.title}</h3>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <span className={`px-3 py-1 rounded-full text-xs ${post.status === 'draft' ? 'bg-yellow-500/20 text-yellow-400' :
+                                            post.status === 'approved' ? 'bg-green-500/20 text-green-400' :
+                                                post.status === 'video_production' ? 'bg-purple-500/20 text-purple-400' :
+                                                    'bg-gray-500/20 text-gray-400'
+                                            }`}>
+                                            {post.status}
+                                        </span>
+                                        <span className={`px-3 py-1 rounded-full text-xs ${post.kind === 'video' ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-500/20 text-blue-400'
+                                            }`}>
+                                            {post.kind}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="bg-[#0E1117] rounded-lg p-4 mb-4 border border-gray-800">
+                                    <p className="text-white whitespace-pre-wrap text-sm line-clamp-3">{post.body}</p>
+                                </div>
+                                <div className="flex gap-2">
+                                    {post.platforms?.map((platform: string) => (
+                                        <span
+                                            key={platform}
+                                            className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs"
+                                        >
+                                            {platform}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
             )}
+
+            {/* Regenerate Modal */}
+            <RegenerateModal
+                isOpen={regenerateModalOpen}
+                onClose={() => {
+                    setRegenerateModalOpen(false)
+                    setSelectedPostId(null)
+                }}
+                postId={selectedPostId || 0}
+                postType={selectedPostType}
+                onRegenerate={handleRegenerateSubmit}
+            />
+
+            {/* Video Generation Progress Modals */}
+            {Array.from(generatingVideoIds).map(videoId => {
+                const post = posts.find(p => p.id === videoId && p.kind === 'video')
+                const isGenerating = post && post.status === 'video_production'
+
+                // If post not found or status changed, remove from generating set
+                if (!post || post.status !== 'video_production') {
+                    setTimeout(() => {
+                        setGeneratingVideoIds(prev => {
+                            const next = new Set(prev)
+                            next.delete(videoId)
+                            return next
+                        })
+                    }, 100)
+                    return null
+                }
+
+                return (
+                    <VideoGenerationProgress
+                        key={videoId}
+                        postId={videoId}
+                        isGenerating={isGenerating}
+                        onComplete={() => {
+                            setGeneratingVideoIds(prev => {
+                                const next = new Set(prev)
+                                next.delete(videoId)
+                                return next
+                            })
+                            loadQueue()
+                        }}
+                    />
+                )
+            })}
+
+            {/* Also show progress for any video posts in production that aren't tracked */}
+            {videoPosts
+                .filter(post => post.status === 'video_production' && !generatingVideoIds.has(post.id))
+                .map(post => (
+                    <VideoGenerationProgress
+                        key={`auto-${post.id}`}
+                        postId={post.id}
+                        isGenerating={true}
+                        onComplete={() => {
+                            loadQueue()
+                        }}
+                    />
+                ))}
         </div>
-    );
+    )
 }
-

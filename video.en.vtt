@@ -1,0 +1,1136 @@
+WEBVTT
+Kind: captions
+Language: en
+
+00:00:00.160 --> 00:00:01.990 align:start position:0%
+ 
+In<00:00:00.400><c> this</c><00:00:00.640><c> video,</c><00:00:01.040><c> I</c><00:00:01.199><c> will</c><00:00:01.439><c> show</c><00:00:01.520><c> you</c><00:00:01.680><c> how</c><00:00:01.839><c> to</c>
+
+00:00:01.990 --> 00:00:02.000 align:start position:0%
+In this video, I will show you how to
+ 
+
+00:00:02.000 --> 00:00:04.230 align:start position:0%
+In this video, I will show you how to
+make<00:00:02.240><c> cloud</c><00:00:02.639><c> code</c><00:00:02.879><c> more</c><00:00:03.120><c> efficient</c><00:00:03.600><c> using</c><00:00:04.000><c> the</c>
+
+00:00:04.230 --> 00:00:04.240 align:start position:0%
+make cloud code more efficient using the
+ 
+
+00:00:04.240 --> 00:00:06.869 align:start position:0%
+make cloud code more efficient using the
+free<00:00:04.560><c> tier</c><00:00:04.880><c> of</c><00:00:05.040><c> the</c><00:00:05.200><c> Gemini</c><00:00:05.759><c> CLI.</c><00:00:06.480><c> If</c><00:00:06.720><c> you're</c>
+
+00:00:06.869 --> 00:00:06.879 align:start position:0%
+free tier of the Gemini CLI. If you're
+ 
+
+00:00:06.879 --> 00:00:08.710 align:start position:0%
+free tier of the Gemini CLI. If you're
+new<00:00:07.040><c> here,</c><00:00:07.359><c> welcome.</c><00:00:07.759><c> My</c><00:00:08.000><c> name</c><00:00:08.080><c> is</c><00:00:08.240><c> Natalie.</c>
+
+00:00:08.710 --> 00:00:08.720 align:start position:0%
+new here, welcome. My name is Natalie.
+ 
+
+00:00:08.720 --> 00:00:10.709 align:start position:0%
+new here, welcome. My name is Natalie.
+I'm<00:00:08.960><c> a</c><00:00:09.120><c> professional</c><00:00:09.599><c> software</c><00:00:10.080><c> engineer</c><00:00:10.559><c> and</c>
+
+00:00:10.709 --> 00:00:10.719 align:start position:0%
+I'm a professional software engineer and
+ 
+
+00:00:10.719 --> 00:00:12.790 align:start position:0%
+I'm a professional software engineer and
+in<00:00:10.960><c> my</c><00:00:11.120><c> free</c><00:00:11.360><c> time,</c><00:00:11.679><c> I</c><00:00:12.000><c> love</c><00:00:12.160><c> to</c><00:00:12.320><c> dabble</c><00:00:12.639><c> with</c>
+
+00:00:12.790 --> 00:00:12.800 align:start position:0%
+in my free time, I love to dabble with
+ 
+
+00:00:12.800 --> 00:00:15.270 align:start position:0%
+in my free time, I love to dabble with
+vibe<00:00:13.200><c> coding.</c><00:00:14.000><c> We</c><00:00:14.240><c> will</c><00:00:14.400><c> start</c><00:00:14.639><c> with</c><00:00:14.880><c> a</c><00:00:15.040><c> quick</c>
+
+00:00:15.270 --> 00:00:15.280 align:start position:0%
+vibe coding. We will start with a quick
+ 
+
+00:00:15.280 --> 00:00:17.269 align:start position:0%
+vibe coding. We will start with a quick
+overview<00:00:15.759><c> of</c><00:00:15.920><c> what</c><00:00:16.160><c> you</c><00:00:16.320><c> need</c><00:00:16.560><c> before</c><00:00:16.800><c> you</c><00:00:17.039><c> can</c>
+
+00:00:17.269 --> 00:00:17.279 align:start position:0%
+overview of what you need before you can
+ 
+
+00:00:17.279 --> 00:00:19.910 align:start position:0%
+overview of what you need before you can
+integrate<00:00:17.760><c> Gemini</c><00:00:18.240><c> CLI</c><00:00:18.640><c> into</c><00:00:18.880><c> cloud</c><00:00:19.199><c> code.</c>
+
+00:00:19.910 --> 00:00:19.920 align:start position:0%
+integrate Gemini CLI into cloud code.
+ 
+
+00:00:19.920 --> 00:00:22.310 align:start position:0%
+integrate Gemini CLI into cloud code.
+Then<00:00:20.240><c> we</c><00:00:20.400><c> will</c><00:00:20.640><c> generate</c><00:00:21.119><c> a</c><00:00:21.359><c> cloudmd</c><00:00:22.080><c> file</c>
+
+00:00:22.310 --> 00:00:22.320 align:start position:0%
+Then we will generate a cloudmd file
+ 
+
+00:00:22.320 --> 00:00:24.950 align:start position:0%
+Then we will generate a cloudmd file
+specific<00:00:22.720><c> to</c><00:00:22.960><c> your</c><00:00:23.199><c> codebase.</c><00:00:24.320><c> look</c><00:00:24.560><c> over</c><00:00:24.720><c> a</c>
+
+00:00:24.950 --> 00:00:24.960 align:start position:0%
+specific to your codebase. look over a
+ 
+
+00:00:24.960 --> 00:00:27.509 align:start position:0%
+specific to your codebase. look over a
+cloudmd<00:00:25.600><c> file</c><00:00:25.840><c> from</c><00:00:26.080><c> a</c><00:00:26.400><c> Reddit</c><00:00:26.800><c> post</c><00:00:27.199><c> where</c><00:00:27.359><c> I</c>
+
+00:00:27.509 --> 00:00:27.519 align:start position:0%
+cloudmd file from a Reddit post where I
+ 
+
+00:00:27.519 --> 00:00:29.429 align:start position:0%
+cloudmd file from a Reddit post where I
+got<00:00:27.760><c> all</c><00:00:27.920><c> of</c><00:00:28.000><c> this</c><00:00:28.240><c> from</c><00:00:28.720><c> and</c><00:00:28.960><c> then</c><00:00:29.119><c> we</c><00:00:29.279><c> will</c>
+
+00:00:29.429 --> 00:00:29.439 align:start position:0%
+got all of this from and then we will
+ 
+
+00:00:29.439 --> 00:00:32.470 align:start position:0%
+got all of this from and then we will
+get<00:00:29.679><c> cloud</c><00:00:30.080><c> code</c><00:00:30.320><c> to</c><00:00:30.640><c> update</c><00:00:31.439><c> the</c><00:00:31.760><c> generated</c>
+
+00:00:32.470 --> 00:00:32.480 align:start position:0%
+get cloud code to update the generated
+ 
+
+00:00:32.480 --> 00:00:35.190 align:start position:0%
+get cloud code to update the generated
+cloudmd<00:00:33.200><c> file</c><00:00:33.680><c> with</c><00:00:33.920><c> the</c><00:00:34.160><c> specific</c><00:00:34.640><c> Gemini</c>
+
+00:00:35.190 --> 00:00:35.200 align:start position:0%
+cloudmd file with the specific Gemini
+ 
+
+00:00:35.200 --> 00:00:38.069 align:start position:0%
+cloudmd file with the specific Gemini
+commands.<00:00:36.000><c> Gemini</c><00:00:36.640><c> CLI</c><00:00:37.120><c> was</c><00:00:37.360><c> just</c><00:00:37.520><c> recently</c>
+
+00:00:38.069 --> 00:00:38.079 align:start position:0%
+commands. Gemini CLI was just recently
+ 
+
+00:00:38.079 --> 00:00:39.990 align:start position:0%
+commands. Gemini CLI was just recently
+released<00:00:38.480><c> a</c><00:00:38.719><c> few</c><00:00:38.879><c> weeks</c><00:00:39.120><c> ago</c><00:00:39.360><c> as</c><00:00:39.600><c> of</c><00:00:39.840><c> the</c>
+
+00:00:39.990 --> 00:00:40.000 align:start position:0%
+released a few weeks ago as of the
+ 
+
+00:00:40.000 --> 00:00:42.389 align:start position:0%
+released a few weeks ago as of the
+filming<00:00:40.320><c> of</c><00:00:40.559><c> this</c><00:00:40.800><c> video.</c><00:00:41.520><c> It's</c><00:00:41.760><c> a</c><00:00:42.000><c> wonderful</c>
+
+00:00:42.389 --> 00:00:42.399 align:start position:0%
+filming of this video. It's a wonderful
+ 
+
+00:00:42.399 --> 00:00:45.430 align:start position:0%
+filming of this video. It's a wonderful
+tool.<00:00:43.200><c> It</c><00:00:43.440><c> has</c><00:00:43.600><c> an</c><00:00:43.840><c> incredibly</c><00:00:44.399><c> large</c><00:00:44.879><c> context</c>
+
+00:00:45.430 --> 00:00:45.440 align:start position:0%
+tool. It has an incredibly large context
+ 
+
+00:00:45.440 --> 00:00:47.910 align:start position:0%
+tool. It has an incredibly large context
+window.<00:00:46.079><c> The</c><00:00:46.239><c> Gemini</c><00:00:46.719><c> API</c><00:00:47.200><c> provides</c><00:00:47.520><c> a</c><00:00:47.680><c> free</c>
+
+00:00:47.910 --> 00:00:47.920 align:start position:0%
+window. The Gemini API provides a free
+ 
+
+00:00:47.920 --> 00:00:50.069 align:start position:0%
+window. The Gemini API provides a free
+tier<00:00:48.239><c> with</c><00:00:48.559><c> 100</c><00:00:48.800><c> requests</c><00:00:49.280><c> per</c><00:00:49.520><c> day</c><00:00:49.760><c> using</c>
+
+00:00:50.069 --> 00:00:50.079 align:start position:0%
+tier with 100 requests per day using
+ 
+
+00:00:50.079 --> 00:00:53.830 align:start position:0%
+tier with 100 requests per day using
+Gemini<00:00:50.640><c> 2.5</c><00:00:51.360><c> Pro</c><00:00:51.920><c> which</c><00:00:52.160><c> is</c><00:00:52.399><c> amazing.</c><00:00:53.600><c> It</c>
+
+00:00:53.830 --> 00:00:53.840 align:start position:0%
+Gemini 2.5 Pro which is amazing. It
+ 
+
+00:00:53.840 --> 00:00:55.750 align:start position:0%
+Gemini 2.5 Pro which is amazing. It
+gives<00:00:54.000><c> you</c><00:00:54.239><c> control</c><00:00:54.559><c> over</c><00:00:54.879><c> which</c><00:00:55.120><c> model</c><00:00:55.520><c> you</c>
+
+00:00:55.750 --> 00:00:55.760 align:start position:0%
+gives you control over which model you
+ 
+
+00:00:55.760 --> 00:00:57.990 align:start position:0%
+gives you control over which model you
+use.<00:00:56.480><c> And</c><00:00:56.719><c> of</c><00:00:56.879><c> course,</c><00:00:57.199><c> you</c><00:00:57.440><c> can</c><00:00:57.600><c> always</c>
+
+00:00:57.990 --> 00:00:58.000 align:start position:0%
+use. And of course, you can always
+ 
+
+00:00:58.000 --> 00:01:00.389 align:start position:0%
+use. And of course, you can always
+access<00:00:58.480><c> higher</c><00:00:59.120><c> rate</c><00:00:59.440><c> limits</c><00:00:59.840><c> with</c><00:01:00.000><c> a</c><00:01:00.160><c> paid</c>
+
+00:01:00.389 --> 00:01:00.399 align:start position:0%
+access higher rate limits with a paid
+ 
+
+00:01:00.399 --> 00:01:02.389 align:start position:0%
+access higher rate limits with a paid
+plan.<00:01:01.120><c> Before</c><00:01:01.440><c> you</c><00:01:01.600><c> can</c><00:01:01.680><c> use</c><00:01:01.840><c> it,</c><00:01:02.079><c> make</c><00:01:02.239><c> sure</c>
+
+00:01:02.389 --> 00:01:02.399 align:start position:0%
+plan. Before you can use it, make sure
+ 
+
+00:01:02.399 --> 00:01:04.710 align:start position:0%
+plan. Before you can use it, make sure
+you<00:01:02.559><c> have</c><00:01:02.719><c> NodeJS</c><00:01:03.520><c> version</c><00:01:03.920><c> 20</c><00:01:04.159><c> or</c><00:01:04.400><c> higher</c>
+
+00:01:04.710 --> 00:01:04.720 align:start position:0%
+you have NodeJS version 20 or higher
+ 
+
+00:01:04.720 --> 00:01:07.109 align:start position:0%
+you have NodeJS version 20 or higher
+installed<00:01:05.119><c> on</c><00:01:05.360><c> your</c><00:01:05.600><c> system</c><00:01:06.400><c> and</c><00:01:06.640><c> then</c><00:01:06.880><c> run</c>
+
+00:01:07.109 --> 00:01:07.119 align:start position:0%
+installed on your system and then run
+ 
+
+00:01:07.119 --> 00:01:10.469 align:start position:0%
+installed on your system and then run
+the<00:01:07.360><c> CLI</c><00:01:07.840><c> installation</c><00:01:08.640><c> script.</c><00:01:09.840><c> Or</c><00:01:10.080><c> you</c><00:01:10.240><c> can</c>
+
+00:01:10.469 --> 00:01:10.479 align:start position:0%
+the CLI installation script. Or you can
+ 
+
+00:01:10.479 --> 00:01:12.230 align:start position:0%
+the CLI installation script. Or you can
+simply<00:01:10.880><c> install</c><00:01:11.280><c> it</c><00:01:11.439><c> with</c><00:01:11.760><c> npm</c>
+
+00:01:12.230 --> 00:01:12.240 align:start position:0%
+simply install it with npm
+ 
+
+00:01:12.240 --> 00:01:19.350 align:start position:0%
+simply install it with npm
+installed-google/geminite-cl.
+
+00:01:19.350 --> 00:01:19.360 align:start position:0%
+ 
+ 
+
+00:01:19.360 --> 00:01:21.510 align:start position:0%
+ 
+But<00:01:19.600><c> in</c><00:01:19.759><c> this</c><00:01:20.000><c> video,</c><00:01:20.400><c> we</c><00:01:20.640><c> will</c><00:01:20.799><c> let</c><00:01:21.040><c> Claude</c>
+
+00:01:21.510 --> 00:01:21.520 align:start position:0%
+But in this video, we will let Claude
+ 
+
+00:01:21.520 --> 00:01:23.429 align:start position:0%
+But in this video, we will let Claude
+start<00:01:21.680><c> it</c><00:01:21.920><c> up</c><00:01:22.080><c> for</c><00:01:22.320><c> us.</c><00:01:22.799><c> For</c><00:01:23.040><c> me,</c><00:01:23.200><c> the</c>
+
+00:01:23.429 --> 00:01:23.439 align:start position:0%
+start it up for us. For me, the
+ 
+
+00:01:23.439 --> 00:01:25.429 align:start position:0%
+start it up for us. For me, the
+discovery<00:01:23.920><c> came</c><00:01:24.240><c> from</c><00:01:24.400><c> finding</c><00:01:24.799><c> this</c><00:01:25.119><c> really</c>
+
+00:01:25.429 --> 00:01:25.439 align:start position:0%
+discovery came from finding this really
+ 
+
+00:01:25.439 --> 00:01:27.429 align:start position:0%
+discovery came from finding this really
+funny<00:01:25.680><c> thread</c><00:01:25.920><c> on</c><00:01:26.080><c> Reddit</c><00:01:26.479><c> called</c><00:01:26.720><c> Gemini</c><00:01:27.119><c> CLA</c>
+
+00:01:27.429 --> 00:01:27.439 align:start position:0%
+funny thread on Reddit called Gemini CLA
+ 
+
+00:01:27.439 --> 00:01:29.270 align:start position:0%
+funny thread on Reddit called Gemini CLA
+is<00:01:27.680><c> awesome,</c><00:01:27.920><c> but</c><00:01:28.159><c> only</c><00:01:28.400><c> when</c><00:01:28.560><c> you</c><00:01:28.720><c> make</c><00:01:28.880><c> cloud</c>
+
+00:01:29.270 --> 00:01:29.280 align:start position:0%
+is awesome, but only when you make cloud
+ 
+
+00:01:29.280 --> 00:01:31.670 align:start position:0%
+is awesome, but only when you make cloud
+code<00:01:29.520><c> use</c><00:01:29.759><c> it</c><00:01:29.920><c> as</c><00:01:30.080><c> its</c><00:01:31.119><c> And</c><00:01:31.280><c> it</c><00:01:31.439><c> makes</c>
+
+00:01:31.670 --> 00:01:31.680 align:start position:0%
+code use it as its And it makes
+ 
+
+00:01:31.680 --> 00:01:33.510 align:start position:0%
+code use it as its And it makes
+some<00:01:31.840><c> great</c><00:01:32.079><c> points</c><00:01:32.400><c> about</c><00:01:32.640><c> how</c><00:01:32.960><c> if</c><00:01:33.119><c> you</c><00:01:33.280><c> just</c>
+
+00:01:33.510 --> 00:01:33.520 align:start position:0%
+some great points about how if you just
+ 
+
+00:01:33.520 --> 00:01:36.469 align:start position:0%
+some great points about how if you just
+pipe<00:01:33.840><c> in</c><00:01:34.320><c> Gemini</c><00:01:34.880><c> CLI</c><00:01:35.280><c> into</c><00:01:35.600><c> the</c><00:01:35.759><c> cloudmd</c>
+
+00:01:36.469 --> 00:01:36.479 align:start position:0%
+pipe in Gemini CLI into the cloudmd
+ 
+
+00:01:36.479 --> 00:01:38.950 align:start position:0%
+pipe in Gemini CLI into the cloudmd
+file,<00:01:37.200><c> you</c><00:01:37.439><c> can</c><00:01:37.600><c> get</c><00:01:37.759><c> so</c><00:01:38.000><c> much</c><00:01:38.159><c> more</c><00:01:38.400><c> use</c><00:01:38.720><c> out</c>
+
+00:01:38.950 --> 00:01:38.960 align:start position:0%
+file, you can get so much more use out
+ 
+
+00:01:38.960 --> 00:01:42.469 align:start position:0%
+file, you can get so much more use out
+of<00:01:39.200><c> both</c><00:01:39.680><c> cloud</c><00:01:40.159><c> code</c><00:01:40.479><c> and</c><00:01:40.880><c> Gemini</c><00:01:41.360><c> CLI</c><00:01:42.159><c> and</c>
+
+00:01:42.469 --> 00:01:42.479 align:start position:0%
+of both cloud code and Gemini CLI and
+ 
+
+00:01:42.479 --> 00:01:44.630 align:start position:0%
+of both cloud code and Gemini CLI and
+overall<00:01:43.040><c> it</c><00:01:43.200><c> will</c><00:01:43.360><c> be</c><00:01:43.600><c> much</c><00:01:43.920><c> better</c><00:01:44.240><c> for</c><00:01:44.400><c> your</c>
+
+00:01:44.630 --> 00:01:44.640 align:start position:0%
+overall it will be much better for your
+ 
+
+00:01:44.640 --> 00:01:46.630 align:start position:0%
+overall it will be much better for your
+product.<00:01:45.280><c> Here</c><00:01:45.520><c> I'm</c><00:01:45.759><c> just</c><00:01:45.920><c> going</c><00:01:46.079><c> to</c><00:01:46.240><c> start</c><00:01:46.479><c> up</c>
+
+00:01:46.630 --> 00:01:46.640 align:start position:0%
+product. Here I'm just going to start up
+ 
+
+00:01:46.640 --> 00:01:49.510 align:start position:0%
+product. Here I'm just going to start up
+a<00:01:46.799><c> new</c><00:01:46.960><c> Astro</c><00:01:47.520><c> project.</c><00:01:48.399><c> Here</c><00:01:48.720><c> I</c><00:01:48.960><c> can</c><00:01:49.040><c> start</c><00:01:49.280><c> up</c>
+
+00:01:49.510 --> 00:01:49.520 align:start position:0%
+a new Astro project. Here I can start up
+ 
+
+00:01:49.520 --> 00:01:52.550 align:start position:0%
+a new Astro project. Here I can start up
+cloud<00:01:50.079><c> and</c><00:01:50.399><c> now</c><00:01:50.640><c> I</c><00:01:50.880><c> can</c><00:01:51.119><c> init</c><00:01:51.439><c> the</c><00:01:51.680><c> cloud.md</c>
+
+00:01:52.550 --> 00:01:52.560 align:start position:0%
+cloud and now I can init the cloud.md
+ 
+
+00:01:52.560 --> 00:01:55.990 align:start position:0%
+cloud and now I can init the cloud.md
+file<00:01:52.880><c> with</c><00:01:53.680><c> /init.</c><00:01:54.799><c> And</c><00:01:55.040><c> here</c><00:01:55.200><c> it's</c><00:01:55.520><c> giving</c><00:01:55.759><c> us</c>
+
+00:01:55.990 --> 00:01:56.000 align:start position:0%
+file with /init. And here it's giving us
+ 
+
+00:01:56.000 --> 00:01:57.590 align:start position:0%
+file with /init. And here it's giving us
+an<00:01:56.240><c> outline</c><00:01:56.720><c> what</c><00:01:56.960><c> it's</c><00:01:57.200><c> put</c><00:01:57.280><c> in</c><00:01:57.439><c> the</c>
+
+00:01:57.590 --> 00:01:57.600 align:start position:0%
+an outline what it's put in the
+ 
+
+00:01:57.600 --> 00:01:59.830 align:start position:0%
+an outline what it's put in the
+cloud.mmd<00:01:58.479><c> file.</c><00:01:58.799><c> So</c><00:01:58.960><c> let's</c><00:01:59.200><c> take</c><00:01:59.360><c> a</c><00:01:59.600><c> quick</c>
+
+00:01:59.830 --> 00:01:59.840 align:start position:0%
+cloud.mmd file. So let's take a quick
+ 
+
+00:01:59.840 --> 00:02:02.709 align:start position:0%
+cloud.mmd file. So let's take a quick
+look.<00:02:00.640><c> I've</c><00:02:00.960><c> created</c><00:02:01.280><c> the</c><00:02:01.520><c> claw.mmd</c><00:02:02.479><c> file</c>
+
+00:02:02.709 --> 00:02:02.719 align:start position:0%
+look. I've created the claw.mmd file
+ 
+
+00:02:02.719 --> 00:02:04.469 align:start position:0%
+look. I've created the claw.mmd file
+with<00:02:02.880><c> guidance</c><00:02:03.280><c> for</c><00:02:03.520><c> future</c><00:02:03.840><c> instances</c><00:02:04.320><c> of</c>
+
+00:02:04.469 --> 00:02:04.479 align:start position:0%
+with guidance for future instances of
+ 
+
+00:02:04.479 --> 00:02:06.469 align:start position:0%
+with guidance for future instances of
+cloud<00:02:04.880><c> code</c><00:02:05.200><c> working</c><00:02:05.600><c> with</c><00:02:05.840><c> this</c><00:02:06.079><c> project.</c>
+
+00:02:06.469 --> 00:02:06.479 align:start position:0%
+cloud code working with this project.
+ 
+
+00:02:06.479 --> 00:02:08.869 align:start position:0%
+cloud code working with this project.
+The<00:02:06.640><c> file</c><00:02:06.880><c> includes</c><00:02:07.680><c> essential</c><00:02:08.160><c> commands</c><00:02:08.720><c> all</c>
+
+00:02:08.869 --> 00:02:08.879 align:start position:0%
+The file includes essential commands all
+ 
+
+00:02:08.879 --> 00:02:10.790 align:start position:0%
+The file includes essential commands all
+the<00:02:09.039><c> key</c><00:02:09.280><c> npm</c><00:02:09.759><c> scripts</c><00:02:10.080><c> for</c><00:02:10.319><c> development</c>
+
+00:02:10.790 --> 00:02:10.800 align:start position:0%
+the key npm scripts for development
+ 
+
+00:02:10.800 --> 00:02:12.869 align:start position:0%
+the key npm scripts for development
+building<00:02:11.120><c> and</c><00:02:11.280><c> previewing</c><00:02:12.239><c> architecture</c>
+
+00:02:12.869 --> 00:02:12.879 align:start position:0%
+building and previewing architecture
+ 
+
+00:02:12.879 --> 00:02:15.190 align:start position:0%
+building and previewing architecture
+overview<00:02:13.760><c> filebased</c><00:02:14.319><c> routing</c><00:02:14.800><c> system</c>
+
+00:02:15.190 --> 00:02:15.200 align:start position:0%
+overview filebased routing system
+ 
+
+00:02:15.200 --> 00:02:16.790 align:start position:0%
+overview filebased routing system
+component<00:02:15.680><c> structure</c><00:02:16.000><c> and</c><00:02:16.239><c> how</c><00:02:16.400><c> Astro</c>
+
+00:02:16.790 --> 00:02:16.800 align:start position:0%
+component structure and how Astro
+ 
+
+00:02:16.800 --> 00:02:19.190 align:start position:0%
+component structure and how Astro
+components<00:02:17.280><c> work.</c><00:02:17.920><c> directory</c><00:02:18.560><c> organization</c>
+
+00:02:19.190 --> 00:02:19.200 align:start position:0%
+components work. directory organization
+ 
+
+00:02:19.200 --> 00:02:21.030 align:start position:0%
+components work. directory organization
+and<00:02:19.440><c> their</c><00:02:19.680><c> purposes.</c><00:02:20.400><c> TypeScript</c>
+
+00:02:21.030 --> 00:02:21.040 align:start position:0%
+and their purposes. TypeScript
+ 
+
+00:02:21.040 --> 00:02:23.350 align:start position:0%
+and their purposes. TypeScript
+configuration<00:02:21.760><c> details.</c><00:02:22.640><c> The</c><00:02:22.879><c> document</c>
+
+00:02:23.350 --> 00:02:23.360 align:start position:0%
+configuration details. The document
+ 
+
+00:02:23.360 --> 00:02:25.589 align:start position:0%
+configuration details. The document
+focuses<00:02:23.760><c> on</c><00:02:24.080><c> the</c><00:02:24.239><c> highlevel</c><00:02:24.879><c> architecture</c>
+
+00:02:25.589 --> 00:02:25.599 align:start position:0%
+focuses on the highlevel architecture
+ 
+
+00:02:25.599 --> 00:02:28.229 align:start position:0%
+focuses on the highlevel architecture
+workflow<00:02:26.080><c> pattern</c><00:02:26.560><c> specific</c><00:02:27.040><c> to</c><00:02:27.280><c> Astro</c>
+
+00:02:28.229 --> 00:02:28.239 align:start position:0%
+workflow pattern specific to Astro
+ 
+
+00:02:28.239 --> 00:02:30.390 align:start position:0%
+workflow pattern specific to Astro
+avoiding<00:02:28.800><c> generic</c><00:02:29.280><c> advice</c><00:02:29.680><c> while</c><00:02:30.080><c> providing</c>
+
+00:02:30.390 --> 00:02:30.400 align:start position:0%
+avoiding generic advice while providing
+ 
+
+00:02:30.400 --> 00:02:32.229 align:start position:0%
+avoiding generic advice while providing
+the<00:02:30.720><c> essential</c><00:02:31.120><c> information</c><00:02:31.599><c> needed</c><00:02:31.920><c> to</c><00:02:32.080><c> be</c>
+
+00:02:32.229 --> 00:02:32.239 align:start position:0%
+the essential information needed to be
+ 
+
+00:02:32.239 --> 00:02:34.390 align:start position:0%
+the essential information needed to be
+productive<00:02:32.640><c> in</c><00:02:32.879><c> this</c><00:02:33.120><c> codebase.</c><00:02:33.920><c> Let's</c><00:02:34.239><c> take</c>
+
+00:02:34.390 --> 00:02:34.400 align:start position:0%
+productive in this codebase. Let's take
+ 
+
+00:02:34.400 --> 00:02:36.470 align:start position:0%
+productive in this codebase. Let's take
+a<00:02:34.640><c> look.</c>
+
+00:02:36.470 --> 00:02:36.480 align:start position:0%
+a look.
+ 
+
+00:02:36.480 --> 00:02:40.150 align:start position:0%
+a look.
+Project<00:02:37.120><c> overview</c><00:02:38.239><c> development</c><00:02:38.800><c> commands.</c>
+
+00:02:40.150 --> 00:02:40.160 align:start position:0%
+Project overview development commands.
+ 
+
+00:02:40.160 --> 00:02:42.869 align:start position:0%
+Project overview development commands.
+Astro<00:02:40.720><c> CLI</c><00:02:41.280><c> commands.</c><00:02:42.000><c> This</c><00:02:42.239><c> is</c><00:02:42.400><c> great.</c>
+
+00:02:42.869 --> 00:02:42.879 align:start position:0%
+Astro CLI commands. This is great.
+ 
+
+00:02:42.879 --> 00:02:45.270 align:start position:0%
+Astro CLI commands. This is great.
+Architecture<00:02:43.519><c> and</c><00:02:43.760><c> structure.</c><00:02:44.640><c> So</c><00:02:44.879><c> a</c><00:02:45.040><c> lot</c><00:02:45.200><c> of</c>
+
+00:02:45.270 --> 00:02:45.280 align:start position:0%
+Architecture and structure. So a lot of
+ 
+
+00:02:45.280 --> 00:02:48.309 align:start position:0%
+Architecture and structure. So a lot of
+this<00:02:45.519><c> stuff</c><00:02:46.000><c> the</c><00:02:46.720><c> architecture</c><00:02:47.519><c> analysis</c><00:02:48.160><c> can</c>
+
+00:02:48.309 --> 00:02:48.319 align:start position:0%
+this stuff the architecture analysis can
+ 
+
+00:02:48.319 --> 00:02:50.150 align:start position:0%
+this stuff the architecture analysis can
+be<00:02:48.480><c> done</c><00:02:48.640><c> with</c><00:02:48.800><c> Gemini.</c><00:02:49.360><c> So</c><00:02:49.519><c> you're</c><00:02:49.760><c> saving</c>
+
+00:02:50.150 --> 00:02:50.160 align:start position:0%
+be done with Gemini. So you're saving
+ 
+
+00:02:50.160 --> 00:02:53.670 align:start position:0%
+be done with Gemini. So you're saving
+your<00:02:50.480><c> cloud</c><00:02:50.800><c> code</c><00:02:51.200><c> tokens</c><00:02:52.640><c> which</c><00:02:52.879><c> is</c><00:02:53.200><c> what</c><00:02:53.440><c> I</c>
+
+00:02:53.670 --> 00:02:53.680 align:start position:0%
+your cloud code tokens which is what I
+ 
+
+00:02:53.680 --> 00:02:55.910 align:start position:0%
+your cloud code tokens which is what I
+prefer<00:02:54.000><c> to</c><00:02:54.160><c> do</c><00:02:54.400><c> especially</c><00:02:54.800><c> because</c><00:02:55.599><c> cloud</c>
+
+00:02:55.910 --> 00:02:55.920 align:start position:0%
+prefer to do especially because cloud
+ 
+
+00:02:55.920 --> 00:02:58.470 align:start position:0%
+prefer to do especially because cloud
+code<00:02:56.239><c> becomes</c><00:02:56.640><c> overloaded</c><00:02:57.280><c> a</c><00:02:57.440><c> lot</c><00:02:57.680><c> recently.</c>
+
+00:02:58.470 --> 00:02:58.480 align:start position:0%
+code becomes overloaded a lot recently.
+ 
+
+00:02:58.480 --> 00:03:00.390 align:start position:0%
+code becomes overloaded a lot recently.
+So<00:02:58.560><c> I</c><00:02:58.800><c> find</c><00:02:58.959><c> it</c><00:02:59.200><c> really</c><00:02:59.440><c> helpful</c><00:02:59.760><c> to</c><00:03:00.000><c> use</c><00:03:00.160><c> a</c>
+
+00:03:00.390 --> 00:03:00.400 align:start position:0%
+So I find it really helpful to use a
+ 
+
+00:03:00.400 --> 00:03:02.550 align:start position:0%
+So I find it really helpful to use a
+different<00:03:00.720><c> CLI</c><00:03:01.200><c> for</c><00:03:01.360><c> that.</c><00:03:01.840><c> Let</c><00:03:02.080><c> me</c><00:03:02.239><c> paste</c><00:03:02.400><c> the</c>
+
+00:03:02.550 --> 00:03:02.560 align:start position:0%
+different CLI for that. Let me paste the
+ 
+
+00:03:02.560 --> 00:03:04.949 align:start position:0%
+different CLI for that. Let me paste the
+cloudd<00:03:03.280><c> file</c><00:03:03.440><c> that</c><00:03:03.599><c> I</c><00:03:03.760><c> found</c><00:03:03.920><c> on</c><00:03:04.080><c> Reddit</c><00:03:04.640><c> into</c>
+
+00:03:04.949 --> 00:03:04.959 align:start position:0%
+cloudd file that I found on Reddit into
+ 
+
+00:03:04.959 --> 00:03:07.030 align:start position:0%
+cloudd file that I found on Reddit into
+my<00:03:05.200><c> repo</c><00:03:05.680><c> and</c><00:03:06.000><c> let's</c><00:03:06.239><c> have</c><00:03:06.400><c> a</c><00:03:06.560><c> look</c><00:03:06.640><c> at</c><00:03:06.800><c> it</c>
+
+00:03:07.030 --> 00:03:07.040 align:start position:0%
+my repo and let's have a look at it
+ 
+
+00:03:07.040 --> 00:03:10.149 align:start position:0%
+my repo and let's have a look at it
+here.<00:03:07.680><c> So</c><00:03:08.000><c> basically</c><00:03:09.040><c> we</c><00:03:09.360><c> are</c><00:03:09.599><c> directing</c>
+
+00:03:10.149 --> 00:03:10.159 align:start position:0%
+here. So basically we are directing
+ 
+
+00:03:10.159 --> 00:03:13.430 align:start position:0%
+here. So basically we are directing
+cloud<00:03:10.560><c> to</c><00:03:10.800><c> use</c><00:03:11.360><c> Gemini</c><00:03:11.920><c> CLI</c><00:03:12.480><c> for</c><00:03:12.800><c> large</c><00:03:13.200><c> code</c>
+
+00:03:13.430 --> 00:03:13.440 align:start position:0%
+cloud to use Gemini CLI for large code
+ 
+
+00:03:13.440 --> 00:03:15.270 align:start position:0%
+cloud to use Gemini CLI for large code
+bases<00:03:13.840><c> and</c><00:03:14.080><c> multiple</c><00:03:14.480><c> files</c><00:03:14.720><c> that</c><00:03:15.040><c> might</c>
+
+00:03:15.270 --> 00:03:15.280 align:start position:0%
+bases and multiple files that might
+ 
+
+00:03:15.280 --> 00:03:18.229 align:start position:0%
+bases and multiple files that might
+exceed<00:03:16.000><c> context</c><00:03:16.560><c> limits.</c><00:03:17.519><c> It</c><00:03:17.760><c> includes</c>
+
+00:03:18.229 --> 00:03:18.239 align:start position:0%
+exceed context limits. It includes
+ 
+
+00:03:18.239 --> 00:03:21.190 align:start position:0%
+exceed context limits. It includes
+examples<00:03:19.040><c> how</c><00:03:19.280><c> to</c><00:03:19.519><c> analyze</c><00:03:20.000><c> a</c><00:03:20.239><c> specific</c><00:03:20.720><c> file,</c>
+
+00:03:21.190 --> 00:03:21.200 align:start position:0%
+examples how to analyze a specific file,
+ 
+
+00:03:21.200 --> 00:03:23.670 align:start position:0%
+examples how to analyze a specific file,
+multiple<00:03:21.680><c> files,</c><00:03:22.159><c> entire</c><00:03:22.640><c> directory,</c>
+
+00:03:23.670 --> 00:03:23.680 align:start position:0%
+multiple files, entire directory,
+ 
+
+00:03:23.680 --> 00:03:25.670 align:start position:0%
+multiple files, entire directory,
+multiple<00:03:24.159><c> directories,</c><00:03:24.800><c> current</c><00:03:25.120><c> directory</c>
+
+00:03:25.670 --> 00:03:25.680 align:start position:0%
+multiple directories, current directory
+ 
+
+00:03:25.680 --> 00:03:29.190 align:start position:0%
+multiple directories, current directory
+or<00:03:25.920><c> use</c><00:03:26.080><c> the</c><00:03:26.319><c> d-all</c><00:03:27.360><c> files</c><00:03:27.840><c> flag.</c><00:03:28.720><c> Then</c><00:03:28.959><c> it</c>
+
+00:03:29.190 --> 00:03:29.200 align:start position:0%
+or use the d-all files flag. Then it
+ 
+
+00:03:29.200 --> 00:03:31.830 align:start position:0%
+or use the d-all files flag. Then it
+also<00:03:29.519><c> directs</c><00:03:29.920><c> Claude</c><00:03:30.239><c> to</c><00:03:30.400><c> use</c><00:03:30.560><c> Gemini</c><00:03:31.519><c> to</c>
+
+00:03:31.830 --> 00:03:31.840 align:start position:0%
+also directs Claude to use Gemini to
+ 
+
+00:03:31.840 --> 00:03:33.910 align:start position:0%
+also directs Claude to use Gemini to
+verify<00:03:32.239><c> if</c><00:03:32.400><c> a</c><00:03:32.640><c> feature</c><00:03:32.879><c> is</c><00:03:33.120><c> implemented</c><00:03:33.680><c> which</c>
+
+00:03:33.910 --> 00:03:33.920 align:start position:0%
+verify if a feature is implemented which
+ 
+
+00:03:33.920 --> 00:03:36.470 align:start position:0%
+verify if a feature is implemented which
+is<00:03:34.080><c> incredibly</c><00:03:34.640><c> useful.</c><00:03:35.440><c> Ah,</c><00:03:35.840><c> and</c><00:03:36.080><c> here</c><00:03:36.239><c> we</c>
+
+00:03:36.470 --> 00:03:36.480 align:start position:0%
+is incredibly useful. Ah, and here we
+ 
+
+00:03:36.480 --> 00:03:39.190 align:start position:0%
+is incredibly useful. Ah, and here we
+go.<00:03:36.799><c> When</c><00:03:37.040><c> to</c><00:03:37.200><c> use</c><00:03:37.360><c> Gemini</c><00:03:37.920><c> CLI?</c><00:03:38.879><c> Use</c>
+
+00:03:39.190 --> 00:03:39.200 align:start position:0%
+go. When to use Gemini CLI? Use
+ 
+
+00:03:39.200 --> 00:03:40.869 align:start position:0%
+go. When to use Gemini CLI? Use
+Gemini-P1.
+
+00:03:40.869 --> 00:03:40.879 align:start position:0%
+Gemini-P1.
+ 
+
+00:03:40.879 --> 00:03:43.430 align:start position:0%
+Gemini-P1.
+Analyzing<00:03:41.440><c> entire</c><00:03:41.840><c> code</c><00:03:42.080><c> bases</c><00:03:42.799><c> or</c><00:03:43.040><c> large</c>
+
+00:03:43.430 --> 00:03:43.440 align:start position:0%
+Analyzing entire code bases or large
+ 
+
+00:03:43.440 --> 00:03:45.430 align:start position:0%
+Analyzing entire code bases or large
+directories.<00:03:44.080><c> Comparing</c><00:03:44.640><c> multiple</c><00:03:45.120><c> large</c>
+
+00:03:45.430 --> 00:03:45.440 align:start position:0%
+directories. Comparing multiple large
+ 
+
+00:03:45.440 --> 00:03:47.990 align:start position:0%
+directories. Comparing multiple large
+files.<00:03:46.239><c> Need</c><00:03:46.480><c> to</c><00:03:46.640><c> understand</c><00:03:47.200><c> projectwide</c>
+
+00:03:47.990 --> 00:03:48.000 align:start position:0%
+files. Need to understand projectwide
+ 
+
+00:03:48.000 --> 00:03:50.309 align:start position:0%
+files. Need to understand projectwide
+patterns<00:03:48.400><c> or</c><00:03:48.640><c> architecture.</c>
+
+00:03:50.309 --> 00:03:50.319 align:start position:0%
+patterns or architecture.
+ 
+
+00:03:50.319 --> 00:03:52.710 align:start position:0%
+patterns or architecture.
+Current<00:03:50.720><c> context</c><00:03:51.200><c> window</c><00:03:51.680><c> is</c><00:03:52.000><c> insufficient</c>
+
+00:03:52.710 --> 00:03:52.720 align:start position:0%
+Current context window is insufficient
+ 
+
+00:03:52.720 --> 00:03:55.830 align:start position:0%
+Current context window is insufficient
+for<00:03:52.959><c> the</c><00:03:53.200><c> task.</c><00:03:54.319><c> Working</c><00:03:54.640><c> with</c><00:03:54.879><c> files</c><00:03:55.360><c> totally</c>
+
+00:03:55.830 --> 00:03:55.840 align:start position:0%
+for the task. Working with files totally
+ 
+
+00:03:55.840 --> 00:03:58.470 align:start position:0%
+for the task. Working with files totally
+more<00:03:56.159><c> than</c><00:03:56.720><c> 100</c><00:03:57.040><c> kilobytes,</c><00:03:57.680><c> which</c><00:03:58.000><c> honestly</c>
+
+00:03:58.470 --> 00:03:58.480 align:start position:0%
+more than 100 kilobytes, which honestly
+ 
+
+00:03:58.480 --> 00:04:01.190 align:start position:0%
+more than 100 kilobytes, which honestly
+isn't<00:03:58.799><c> that</c><00:03:59.040><c> much.</c><00:03:59.920><c> Okay,</c><00:04:00.319><c> important</c><00:04:00.720><c> notes.</c>
+
+00:04:01.190 --> 00:04:01.200 align:start position:0%
+isn't that much. Okay, important notes.
+ 
+
+00:04:01.200 --> 00:04:03.589 align:start position:0%
+isn't that much. Okay, important notes.
+I<00:04:01.360><c> really</c><00:04:01.599><c> like</c><00:04:01.840><c> this</c><00:04:02.000><c> one.</c><00:04:02.480><c> Gemini's</c><00:04:03.120><c> context</c>
+
+00:04:03.589 --> 00:04:03.599 align:start position:0%
+I really like this one. Gemini's context
+ 
+
+00:04:03.599 --> 00:04:05.910 align:start position:0%
+I really like this one. Gemini's context
+window<00:04:04.000><c> can</c><00:04:04.239><c> handle</c><00:04:04.640><c> entire</c><00:04:05.040><c> code</c><00:04:05.280><c> bases</c><00:04:05.680><c> that</c>
+
+00:04:05.910 --> 00:04:05.920 align:start position:0%
+window can handle entire code bases that
+ 
+
+00:04:05.920 --> 00:04:08.309 align:start position:0%
+window can handle entire code bases that
+would<00:04:06.080><c> overflow</c><00:04:06.640><c> Claude's</c><00:04:07.200><c> context.</c><00:04:08.159><c> So,</c>
+
+00:04:08.309 --> 00:04:08.319 align:start position:0%
+would overflow Claude's context. So,
+ 
+
+00:04:08.319 --> 00:04:10.390 align:start position:0%
+would overflow Claude's context. So,
+it's<00:04:08.560><c> really</c><00:04:08.799><c> interesting</c><00:04:09.519><c> that</c><00:04:09.920><c> we</c><00:04:10.159><c> are</c>
+
+00:04:10.390 --> 00:04:10.400 align:start position:0%
+it's really interesting that we are
+ 
+
+00:04:10.400 --> 00:04:12.550 align:start position:0%
+it's really interesting that we are
+telling<00:04:10.720><c> Claude</c><00:04:11.120><c> this</c><00:04:11.360><c> directly.</c><00:04:12.159><c> Now</c><00:04:12.319><c> that</c>
+
+00:04:12.550 --> 00:04:12.560 align:start position:0%
+telling Claude this directly. Now that
+ 
+
+00:04:12.560 --> 00:04:16.229 align:start position:0%
+telling Claude this directly. Now that
+we<00:04:12.799><c> have</c><00:04:13.280><c> both</c><00:04:13.760><c> the</c><00:04:14.239><c> generated</c><00:04:14.959><c> claude.md</c><00:04:16.000><c> for</c>
+
+00:04:16.229 --> 00:04:16.239 align:start position:0%
+we have both the generated claude.md for
+ 
+
+00:04:16.239 --> 00:04:19.110 align:start position:0%
+we have both the generated claude.md for
+the<00:04:16.400><c> specific</c><00:04:16.880><c> repository</c><00:04:17.840><c> and</c><00:04:18.160><c> the</c><00:04:18.720><c> custom</c>
+
+00:04:19.110 --> 00:04:19.120 align:start position:0%
+the specific repository and the custom
+ 
+
+00:04:19.120 --> 00:04:21.749 align:start position:0%
+the specific repository and the custom
+one,<00:04:19.440><c> let's</c><00:04:19.680><c> see</c><00:04:19.919><c> how</c><00:04:20.160><c> we</c><00:04:20.400><c> can</c><00:04:20.959><c> mish</c><00:04:21.280><c> mash</c><00:04:21.600><c> them</c>
+
+00:04:21.749 --> 00:04:21.759 align:start position:0%
+one, let's see how we can mish mash them
+ 
+
+00:04:21.759 --> 00:04:26.070 align:start position:0%
+one, let's see how we can mish mash them
+together.<00:04:22.639><c> Let's</c><00:04:22.960><c> say</c><00:04:23.919><c> read</c><00:04:24.800><c> our</c><00:04:25.280><c> custom</c>
+
+00:04:26.070 --> 00:04:26.080 align:start position:0%
+together. Let's say read our custom
+ 
+
+00:04:26.080 --> 00:04:30.950 align:start position:0%
+together. Let's say read our custom
+Reddit<00:04:26.960><c> CloudMD</c><00:04:27.680><c> file</c>
+
+00:04:30.950 --> 00:04:30.960 align:start position:0%
+ 
+ 
+
+00:04:30.960 --> 00:04:35.430 align:start position:0%
+ 
+and<00:04:31.759><c> update</c><00:04:33.040><c> the</c><00:04:33.440><c> generated</c><00:04:34.080><c> CloudMD</c><00:04:34.800><c> file</c>
+
+00:04:35.430 --> 00:04:35.440 align:start position:0%
+and update the generated CloudMD file
+ 
+
+00:04:35.440 --> 00:04:40.870 align:start position:0%
+and update the generated CloudMD file
+with<00:04:36.400><c> the</c><00:04:37.120><c> Gemini</c><00:04:38.160><c> specific</c><00:04:39.280><c> commands.</c><00:04:40.479><c> Make</c>
+
+00:04:40.870 --> 00:04:40.880 align:start position:0%
+with the Gemini specific commands. Make
+ 
+
+00:04:40.880 --> 00:04:45.830 align:start position:0%
+with the Gemini specific commands. Make
+no<00:04:41.360><c> other</c><00:04:42.080><c> code</c><00:04:42.639><c> changes.</c><00:04:43.600><c> I</c><00:04:43.840><c> love</c><00:04:44.000><c> these.</c>
+
+00:04:45.830 --> 00:04:45.840 align:start position:0%
+no other code changes. I love these.
+ 
+
+00:04:45.840 --> 00:04:48.230 align:start position:0%
+no other code changes. I love these.
+It's<00:04:46.160><c> taking</c><00:04:46.479><c> a</c><00:04:46.639><c> while.</c><00:04:47.280><c> All</c><00:04:47.360><c> right,</c><00:04:47.840><c> here</c><00:04:48.000><c> we</c>
+
+00:04:48.230 --> 00:04:48.240 align:start position:0%
+It's taking a while. All right, here we
+ 
+
+00:04:48.240 --> 00:04:49.990 align:start position:0%
+It's taking a while. All right, here we
+go.<00:04:48.560><c> I've</c><00:04:48.880><c> successfully</c><00:04:49.440><c> updated</c><00:04:49.759><c> the</c>
+
+00:04:49.990 --> 00:04:50.000 align:start position:0%
+go. I've successfully updated the
+ 
+
+00:04:50.000 --> 00:04:52.390 align:start position:0%
+go. I've successfully updated the
+cloudmomd<00:04:50.639><c> file</c><00:04:50.880><c> by</c><00:04:51.120><c> adding</c><00:04:51.280><c> the</c><00:04:51.520><c> gem</c><00:04:52.000><c> cla</c>
+
+00:04:52.390 --> 00:04:52.400 align:start position:0%
+cloudmomd file by adding the gem cla
+ 
+
+00:04:52.400 --> 00:04:55.830 align:start position:0%
+cloudmomd file by adding the gem cla
+section<00:04:52.800><c> from</c><00:04:53.520><c> the</c><00:04:53.840><c> reddit</c><00:04:54.320><c> file.</c><00:04:55.120><c> The</c><00:04:55.440><c> update</c>
+
+00:04:55.830 --> 00:04:55.840 align:start position:0%
+section from the reddit file. The update
+ 
+
+00:04:55.840 --> 00:04:58.310 align:start position:0%
+section from the reddit file. The update
+includes<00:04:57.199><c> all</c><00:04:57.360><c> the</c><00:04:57.600><c> things</c><00:04:57.759><c> that</c><00:04:57.919><c> we</c><00:04:58.080><c> talked</c>
+
+00:04:58.310 --> 00:04:58.320 align:start position:0%
+includes all the things that we talked
+ 
+
+00:04:58.320 --> 00:05:01.030 align:start position:0%
+includes all the things that we talked
+about.<00:04:58.639><c> Let's</c><00:04:58.880><c> take</c><00:04:59.040><c> a</c><00:04:59.199><c> look.</c><00:05:00.479><c> I</c><00:05:00.639><c> should</c><00:05:00.880><c> have</c>
+
+00:05:01.030 --> 00:05:01.040 align:start position:0%
+about. Let's take a look. I should have
+ 
+
+00:05:01.040 --> 00:05:02.950 align:start position:0%
+about. Let's take a look. I should have
+probably<00:05:01.360><c> committed</c><00:05:01.840><c> this</c><00:05:02.080><c> the</c><00:05:02.320><c> first.</c>
+
+00:05:02.950 --> 00:05:02.960 align:start position:0%
+probably committed this the first.
+ 
+
+00:05:02.960 --> 00:05:05.990 align:start position:0%
+probably committed this the first.
+That's<00:05:03.280><c> okay.</c><00:05:04.000><c> Ah,</c><00:05:04.560><c> here</c><00:05:04.720><c> we</c><00:05:04.880><c> go.</c><00:05:05.199><c> Here</c><00:05:05.360><c> it</c><00:05:05.520><c> is.</c>
+
+00:05:05.990 --> 00:05:06.000 align:start position:0%
+That's okay. Ah, here we go. Here it is.
+ 
+
+00:05:06.000 --> 00:05:08.790 align:start position:0%
+That's okay. Ah, here we go. Here it is.
+Using<00:05:06.320><c> Gemini</c><00:05:06.880><c> CLI</c><00:05:07.360><c> for</c><00:05:07.680><c> large</c><00:05:08.160><c> codebase</c>
+
+00:05:08.790 --> 00:05:08.800 align:start position:0%
+Using Gemini CLI for large codebase
+ 
+
+00:05:08.800 --> 00:05:11.029 align:start position:0%
+Using Gemini CLI for large codebase
+analysis.<00:05:09.840><c> Okay.</c><00:05:10.080><c> And</c><00:05:10.240><c> now</c><00:05:10.400><c> that</c><00:05:10.560><c> we've</c><00:05:10.800><c> added</c>
+
+00:05:11.029 --> 00:05:11.039 align:start position:0%
+analysis. Okay. And now that we've added
+ 
+
+00:05:11.039 --> 00:05:14.230 align:start position:0%
+analysis. Okay. And now that we've added
+the<00:05:11.199><c> Gemini</c><00:05:11.680><c> CLI</c><00:05:12.080><c> to</c><00:05:12.240><c> CloudMD,</c><00:05:13.360><c> it</c><00:05:13.600><c> will</c>
+
+00:05:14.230 --> 00:05:14.240 align:start position:0%
+the Gemini CLI to CloudMD, it will
+ 
+
+00:05:14.240 --> 00:05:16.390 align:start position:0%
+the Gemini CLI to CloudMD, it will
+usually<00:05:14.800><c> use</c><00:05:15.039><c> it,</c><00:05:15.360><c> but</c><00:05:15.600><c> sometimes</c><00:05:15.919><c> it</c><00:05:16.240><c> does</c>
+
+00:05:16.390 --> 00:05:16.400 align:start position:0%
+usually use it, but sometimes it does
+ 
+
+00:05:16.400 --> 00:05:18.469 align:start position:0%
+usually use it, but sometimes it does
+forget,<00:05:16.880><c> I</c><00:05:17.120><c> noticed.</c><00:05:17.440><c> So</c><00:05:17.600><c> what</c><00:05:17.840><c> I</c><00:05:18.000><c> like</c><00:05:18.160><c> to</c><00:05:18.320><c> do</c>
+
+00:05:18.469 --> 00:05:18.479 align:start position:0%
+forget, I noticed. So what I like to do
+ 
+
+00:05:18.479 --> 00:05:21.189 align:start position:0%
+forget, I noticed. So what I like to do
+is<00:05:18.800><c> just</c><00:05:19.280><c> prefix</c><00:05:19.840><c> my</c><00:05:20.160><c> commands</c><00:05:20.560><c> with</c><00:05:20.880><c> use</c>
+
+00:05:21.189 --> 00:05:21.199 align:start position:0%
+is just prefix my commands with use
+ 
+
+00:05:21.199 --> 00:05:24.310 align:start position:0%
+is just prefix my commands with use
+Gemini<00:05:21.840><c> 2.</c><00:05:22.479><c> Especially</c><00:05:23.120><c> if</c><00:05:23.360><c> I'm</c><00:05:23.759><c> implementing</c>
+
+00:05:24.310 --> 00:05:24.320 align:start position:0%
+Gemini 2. Especially if I'm implementing
+ 
+
+00:05:24.320 --> 00:05:26.230 align:start position:0%
+Gemini 2. Especially if I'm implementing
+a<00:05:24.560><c> bigger</c><00:05:24.880><c> feature</c><00:05:25.280><c> that</c><00:05:25.520><c> would</c><00:05:25.680><c> affect</c><00:05:26.000><c> the</c>
+
+00:05:26.230 --> 00:05:26.240 align:start position:0%
+a bigger feature that would affect the
+ 
+
+00:05:26.240 --> 00:05:28.230 align:start position:0%
+a bigger feature that would affect the
+whole<00:05:26.400><c> codebase.</c><00:05:27.039><c> Let's</c><00:05:27.199><c> say</c><00:05:27.680><c> I</c><00:05:27.919><c> want</c><00:05:28.080><c> to</c>
+
+00:05:28.230 --> 00:05:28.240 align:start position:0%
+whole codebase. Let's say I want to
+ 
+
+00:05:28.240 --> 00:05:30.390 align:start position:0%
+whole codebase. Let's say I want to
+implement<00:05:28.800><c> authentication.</c><00:05:29.840><c> So</c><00:05:30.000><c> I</c><00:05:30.240><c> would</c>
+
+00:05:30.390 --> 00:05:30.400 align:start position:0%
+implement authentication. So I would
+ 
+
+00:05:30.400 --> 00:05:31.990 align:start position:0%
+implement authentication. So I would
+need<00:05:30.560><c> to</c><00:05:30.720><c> protect</c><00:05:31.120><c> routes</c><00:05:31.440><c> and</c><00:05:31.680><c> current</c>
+
+00:05:31.990 --> 00:05:32.000 align:start position:0%
+need to protect routes and current
+ 
+
+00:05:32.000 --> 00:05:33.990 align:start position:0%
+need to protect routes and current
+components<00:05:32.400><c> and</c><00:05:32.639><c> all</c><00:05:32.800><c> of</c><00:05:32.880><c> that.</c><00:05:33.440><c> I</c><00:05:33.680><c> would</c><00:05:33.840><c> say</c>
+
+00:05:33.990 --> 00:05:34.000 align:start position:0%
+components and all of that. I would say
+ 
+
+00:05:34.000 --> 00:05:36.870 align:start position:0%
+components and all of that. I would say
+something<00:05:34.320><c> like</c><00:05:34.880><c> use</c><00:05:35.199><c> Gemini</c><00:05:35.759><c> to</c><00:05:36.080><c> analyze</c><00:05:36.560><c> the</c>
+
+00:05:36.870 --> 00:05:36.880 align:start position:0%
+something like use Gemini to analyze the
+ 
+
+00:05:36.880 --> 00:05:40.469 align:start position:0%
+something like use Gemini to analyze the
+current<00:05:37.120><c> architecture</c><00:05:38.560><c> and</c><00:05:39.039><c> plan</c><00:05:39.600><c> how</c><00:05:40.000><c> to</c>
+
+00:05:40.469 --> 00:05:40.479 align:start position:0%
+current architecture and plan how to
+ 
+
+00:05:40.479 --> 00:05:43.270 align:start position:0%
+current architecture and plan how to
+implement<00:05:41.440><c> applicationwide</c><00:05:42.479><c> authentication</c>
+
+00:05:43.270 --> 00:05:43.280 align:start position:0%
+implement applicationwide authentication
+ 
+
+00:05:43.280 --> 00:05:46.710 align:start position:0%
+implement applicationwide authentication
+to<00:05:43.600><c> protect</c><00:05:44.000><c> all</c><00:05:44.240><c> routes</c><00:05:44.800><c> except</c><00:05:45.120><c> for/lo.</c>
+
+00:05:46.710 --> 00:05:46.720 align:start position:0%
+to protect all routes except for/lo.
+ 
+
+00:05:46.720 --> 00:05:48.629 align:start position:0%
+to protect all routes except for/lo.
+And<00:05:46.880><c> then</c><00:05:47.039><c> I</c><00:05:47.280><c> usually</c><00:05:47.600><c> say,</c><00:05:47.759><c> "Put</c><00:05:48.160><c> this</c><00:05:48.320><c> plan</c>
+
+00:05:48.629 --> 00:05:48.639 align:start position:0%
+And then I usually say, "Put this plan
+ 
+
+00:05:48.639 --> 00:05:50.950 align:start position:0%
+And then I usually say, "Put this plan
+into<00:05:48.800><c> a</c><00:05:48.960><c> markdown</c><00:05:49.520><c> file</c><00:05:49.919><c> and</c><00:05:50.160><c> pause</c><00:05:50.479><c> for</c><00:05:50.720><c> my</c>
+
+00:05:50.950 --> 00:05:50.960 align:start position:0%
+into a markdown file and pause for my
+ 
+
+00:05:50.960 --> 00:05:53.430 align:start position:0%
+into a markdown file and pause for my
+feedback."<00:05:51.759><c> Learn</c><00:05:52.000><c> more</c><00:05:52.240><c> about</c><00:05:52.639><c> how</c><00:05:52.800><c> to</c><00:05:53.039><c> plan</c>
+
+00:05:53.430 --> 00:05:53.440 align:start position:0%
+feedback." Learn more about how to plan
+ 
+
+00:05:53.440 --> 00:05:55.350 align:start position:0%
+feedback." Learn more about how to plan
+better<00:05:53.680><c> with</c><00:05:54.000><c> cloud</c><00:05:54.400><c> code</c><00:05:54.720><c> and</c><00:05:54.880><c> markdown</c>
+
+00:05:55.350 --> 00:05:55.360 align:start position:0%
+better with cloud code and markdown
+ 
+
+00:05:55.360 --> 00:06:01.260 align:start position:0%
+better with cloud code and markdown
+files.<00:05:56.320><c> Watch</c><00:05:56.639><c> this</c><00:05:56.960><c> next</c><00:05:57.280><c> video.</c>
+
+00:06:01.260 --> 00:06:01.270 align:start position:0%
+ 
+ 
+
+00:06:01.270 --> 00:06:08.240 align:start position:0%
+ 
+[Music]
+
+00:06:08.240 --> 00:06:08.250 align:start position:0%
+ 
+ 
+
+00:06:08.250 --> 00:06:13.259 align:start position:0%
+ 
+[Music]
+

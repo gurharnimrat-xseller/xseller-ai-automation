@@ -6,7 +6,6 @@ import json
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
-# import feedparser
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from openai import AsyncOpenAI
@@ -14,26 +13,15 @@ from sqlmodel import Session, select
 
 from app.database import engine
 from app.models import Post
+from app import video_generator
+from app import content_scraper
+from app import script_generator
 
 
 # -----------------------------
 # Scheduler setup
 # -----------------------------
 _scheduler: Optional[AsyncIOScheduler] = None
-
-
-NEWS_SOURCES: List[Tuple[str, str]] = [
-    ("OpenAI Blog", "https://openai.com/blog/rss.xml"),
-    ("Google AI", "https://blog.google/technology/ai/rss"),
-    ("DeepMind", "https://deepmind.google/blog/rss.xml"),
-    ("TechCrunch AI", "https://techcrunch.com/category/artificial-intelligence/feed/"),
-    ("The Verge AI", "https://www.theverge.com/ai-artificial-intelligence/rss/index.xml"),
-    ("MIT Tech Review", "https://www.technologyreview.com/topic/artificial-intelligence/feed"),
-]
-
-AUTHORITATIVE_SOURCES = {"OpenAI", "Google AI", "DeepMind"}
-KEYWORDS = {"ai", "llm", "genai",
-            "artificial intelligence", "machine learning"}
 
 
 def start_scheduler() -> None:
@@ -61,8 +49,20 @@ def start_scheduler() -> None:
             name="fetch_generate_2100",
             replace_existing=True,
         )
+        
+        # Process video generation queue every 2 minutes (async job)
+        async def process_queue():
+            await video_generator.process_video_generation_queue()
+        
+        _scheduler.add_job(
+            process_queue,
+            CronTrigger(minute="*/2"),  # Every 2 minutes
+            name="process_video_queue",
+            replace_existing=True,
+        )
+        
         _scheduler.start()
-        print("[scheduler] Started AsyncIOScheduler with NZDT cron jobs")
+        print("[scheduler] Started AsyncIOScheduler with NZDT cron jobs and video processing")
     else:
         if not _scheduler.running:
             _scheduler.start()
@@ -81,39 +81,8 @@ def is_running() -> bool:
 
 
 # -----------------------------
-# RSS fetching and ranking
+# Content fetching (now using content_scraper module)
 # -----------------------------
-def fetch_rss_feed(url: str, source_name: str) -> List[Dict[str, Any]]:
-    """Temporary stub - RSS disabled due to Python 3.13 compatibility"""
-    print(f"[rss] Skipping fetch (RSS temporarily disabled): {source_name}")
-    return []
-
-
-def rank_articles(articles: List[Dict[str, Any]]) -> List[Tuple[Dict[str, Any], int]]:
-    ranked: List[Tuple[Dict[str, Any], int]] = []
-    now = datetime.now(timezone.utc)
-    for a in articles:
-        score = 0
-        # Freshness: last 24h
-        published: Optional[datetime] = a.get("published")
-        if published and (now - published) <= timedelta(hours=24):
-            score += 50
-
-        # Authority
-        source = str(a.get("source") or "").strip()
-        if any(auth in source for auth in AUTHORITATIVE_SOURCES):
-            score += 30
-
-        # Keywords in title/summary
-        haystack = f"{a.get('title', '')}\n{a.get('summary', '')}".lower()
-        for kw in KEYWORDS:
-            if kw in haystack:
-                score += 5
-
-        ranked.append((a, score))
-
-    ranked.sort(key=lambda t: t[1], reverse=True)
-    return ranked
 
 
 def check_duplicate(url: str, title: str, body: str) -> bool:
@@ -143,95 +112,72 @@ def _get_openai_client() -> AsyncOpenAI:
 
 
 async def generate_text_post(article: Dict[str, Any]) -> List[Dict[str, Any]]:
-    client = _get_openai_client()
-    prompt = (
-        "You are a social copywriter. Create 5 short text posts (120-200 chars).\n"
-        "Target platforms: X, LinkedIn, Instagram, Facebook.\n"
-        "Use different angles and include 1-2 relevant hashtags each.\n"
-        f"Article title: {article.get('title', '')}\n"
-        f"Summary: {article.get('summary', '')}\n"
-        f"Source: {article.get('source', '')} -> {article.get('url', '')}\n"
-        "Return a JSON array of objects with fields: platform (one of X, LinkedIn, Instagram, Facebook), text."
-    )
-    resp = await client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "Return only valid JSON."},
-            {"role": "user", "content": prompt},
-        ],
-        temperature=0.9,
-    )
-    content = resp.choices[0].message.content or "[]"
+    """Generate viral text posts using enhanced script generator."""
     try:
-        data = json.loads(content)
-    except Exception:
-        print("[openai] JSON parse failed for text posts; returning empty list")
-        return []
+        # Use the new enhanced script generator
+        posts = await script_generator.generate_viral_text_posts(
+            article=article,
+            num_variants=5,
+            platforms=["LinkedIn", "Twitter", "Instagram", "Facebook"]
+        )
 
-    results: List[Dict[str, Any]] = []
-    for item in data:
-        platform = str(item.get("platform", "")).strip() or "General"
-        text = str(item.get("text", "")).strip()
-        if not text:
-            continue
-        results.append({"platform": platform, "text": text})
-    return results
+        # Convert to expected format
+        results: List[Dict[str, Any]] = []
+        for post in posts:
+            results.append({
+                "platform": post.get("platform", "General"),
+                "text": post.get("text", ""),
+                "hook_type": post.get("hook_type", "unknown"),
+            })
+
+        return results
+    except Exception as e:
+        print(f"[scheduler] Error generating text posts: {str(e)}")
+        return []
 
 
 async def generate_video_script(article: Dict[str, Any]) -> List[str]:
-    client = _get_openai_client()
-    prompt = (
-        "Create 2-3 short video scripts (15-20 seconds).\n"
-        "Format each with labeled sections: Hook (0-1.5s), Main (2-8s), Why (9-15s), CTA (16-20s).\n"
-        f"Article title: {article.get('title', '')}\n"
-        f"Summary: {article.get('summary', '')}\n"
-        f"Source: {article.get('source', '')} -> {article.get('url', '')}\n"
-        "Return a JSON array of strings, each string is one script."
-    )
-    resp = await client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "Return only valid JSON."},
-            {"role": "user", "content": prompt},
-        ],
-        temperature=0.9,
-    )
-    content = resp.choices[0].message.content or "[]"
+    """Generate viral video scripts using enhanced script generator."""
     try:
-        scripts = json.loads(content)
-    except Exception:
-        print("[openai] JSON parse failed for video scripts; returning empty list")
-        return []
+        # Use the new enhanced script generator
+        scripts = await script_generator.generate_viral_video_scripts(
+            article=article,
+            num_variants=3,
+            duration=20
+        )
 
-    results: List[str] = []
-    for s in scripts:
-        text = str(s).strip()
-        if text:
-            results.append(text)
-    return results
+        # Convert to expected format (list of script strings)
+        results: List[str] = []
+        for script_data in scripts:
+            script_text = script_data.get("script", "")
+            if script_text:
+                results.append(script_text)
+
+        return results
+    except Exception as e:
+        print(f"[scheduler] Error generating video scripts: {str(e)}")
+        return []
 
 
 # -----------------------------
 # Main pipeline
 # -----------------------------
 async def fetch_and_generate_content() -> None:
-    print("[job] fetch_and_generate_content started")
-    # 1) Fetch
-    all_articles: List[Dict[str, Any]] = []
-    for source_name, url in NEWS_SOURCES:
-        try:
-            articles = fetch_rss_feed(url, source_name)
-            all_articles.extend(articles)
-        except Exception as e:
-            print(f"[rss] Error fetching {source_name}: {e}")
+    print("[job] 🚀 fetch_and_generate_content started")
 
-    if not all_articles:
-        print("[job] No articles fetched")
+    # 1) Fetch content from all sources using the new scraper
+    try:
+        top_articles = await content_scraper.fetch_all_content()
+        print(f"[job] ✅ Fetched {len(top_articles)} top-ranked articles")
+    except Exception as e:
+        print(f"[job] ❌ Error fetching content: {e}")
+        import traceback
+        traceback.print_exc()
         return
 
-    # 2) Rank and take top N
-    ranked = rank_articles(all_articles)
-    top_articles = [a for a, _ in ranked[:12]]  # process up to 12 top articles
+    if not top_articles:
+        print("[job] No articles fetched")
+        return
 
     # 3) Process each article
     for article in top_articles:
