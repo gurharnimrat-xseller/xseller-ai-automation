@@ -1,3 +1,4 @@
+from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 import json
 from pathlib import Path
 

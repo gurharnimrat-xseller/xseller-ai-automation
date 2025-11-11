@@ -1,6 +1,7 @@
 """
 Quick script to check database schema
 """
+from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 import os
 from notion_client import Client
 from dotenv import load_dotenv

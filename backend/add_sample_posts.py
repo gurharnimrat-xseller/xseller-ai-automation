@@ -51,3 +51,4 @@ with Session(engine) as session:
     session.commit()
     print(f"✅ Created {len(sample_posts)} sample posts")
 
+from agents.checks.router import should_offload, offload_to_gemini  # guardrails

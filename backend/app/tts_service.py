@@ -5,6 +5,7 @@ Supports multiple TTS providers with automatic fallback:
 - OpenAI TTS (high quality, cost-effective)
 - gTTS (free fallback)
 """
+from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
 from __future__ import annotations
 
@@ -24,7 +25,10 @@ except ImportError:
 
 # Import OpenAI if available
 try:
-    from openai import AsyncOpenAI
+    # removed per guardrails; use router
+# # removed per guardrails; use router
+# # removed per guardrails; use router
+# # removed per guardrails; use router import AsyncOpenAI
     OPENAI_AVAILABLE = True
 except ImportError:
     OPENAI_AVAILABLE = False

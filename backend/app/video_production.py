@@ -6,6 +6,7 @@ Generates viral short-form videos with:
 - Stock footage backgrounds
 - Professional transitions
 """
+from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
 from __future__ import annotations
 

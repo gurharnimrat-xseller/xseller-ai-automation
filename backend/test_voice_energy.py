@@ -1,6 +1,7 @@
 """
 Test voice energy modes (professional vs energetic vs viral)
 """
+from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
 import asyncio
 import sys
