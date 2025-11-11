@@ -112,8 +112,8 @@ jobs:
                   with: { python-version: '3.x' }
                 - name: Run monitor
                   env:
-                    GITHUB_TOKEN: ${{ github.token }}
-                    MONITOR_NZT_WINDOW: ${{ vars.MONITOR_NZT_WINDOW }}
+  GITHUB_TOKEN: ${{ github.token }}
+
                     MONITOR_ISSUE_LABEL: ${{ vars.MONITOR_ISSUE_LABEL }}
                     BUDGET_NZD_MONTHLY: ${{ vars.BUDGET_NZD_MONTHLY }}
                   run: |
