@@ -1,0 +1,295 @@
+name: Bootstrap Architect
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+  issues: write
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Write directories
+        run: |
+          mkdir -p agents/checks agents/offload .github/workflows docs
+
+      - name: Add router.py
+        run: |
+          cat > agents/checks/router.py << 'PY'
+          import base64, os, sys, uuid, shutil, subprocess
+          MAX_TOKENS = int(os.getenv("MAX_TOKENS", "12000"))
+          HEAVY_TIMEOUT_SEC = int(os.getenv("HEAVY_TIMEOUT_SEC", "90"))
+          def _estimate_tokens(text: str) -> int:
+              return max(1, len(text) // 4)
+          def should_offload(prompt: str, est_sec: int | None = None) -> bool:
+              return _estimate_tokens(prompt) >= MAX_TOKENS or (est_sec or 0) >= HEAVY_TIMEOUT_SEC
+          def offload_to_gemini(prompt: str, model: str | None = None) -> str:
+              rid = str(uuid.uuid4())[:8]
+              b64 = base64.b64encode(prompt.encode("utf-8")).decode("ascii")
+              model = model or os.getenv("OFFLOAD_MODEL", "gemini-1.5-pro-latest")
+              if shutil.which("gh"):
+                  cmd = ["gh","workflow","run","offload_gemini.yml","-f",f"prompt_b64={b64}","-f",f"request_id={rid}","-f",f"model={model}"]
+                  subprocess.run(cmd, check=False)
+                  print(f"Offloaded to Gemini (request_id={rid}). Exiting locally.")
+              else:
+                  print("Heavy task detected. Run this in your terminal:")
+                  print(f'gh workflow run offload_gemini.yml -f prompt_b64="{b64}" -f request_id="{rid}" -f model="{model}"')
+              return rid
+          if __name__ == "__main__":
+              prompt = sys.stdin.read()
+              if should_offload(prompt, None):
+                  offload_to_gemini(prompt)
+                  sys.exit(0)
+              else:
+                  print("Not heavy; proceed locally.")
+          PY
+
+      - name: Add guardrails workflow
+        run: |
+          cat > .github/workflows/guardrails.yml << 'YML'
+          name: Guardrails
+          on: [pull_request]
+          jobs:
+            scan:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: actions/checkout@v4
+                - uses: actions/setup-python@v5
+                  with: { python-version: '3.x' }
+                - run: python agents/checks/verify_guardrails.py
+          YML
+
+      - name: Add verify_guardrails.py
+        run: |
+          cat > agents/checks/verify_guardrails.py << 'PY'
+          import os, sys, re
+          INCLUDE = ("runners/", "agents/", "backend/", "scripts/")
+          EXCLUDE = ("/tests/", "/node_modules/", "/vendor/", "/.venv/", "/docs/")
+          DENY_IMPORTS = (r"\\bimport\\s+openai\\b", r"\\bimport\\s+anthropic\\b", r"\\bimport\\s+google\\.generativeai\\b")
+          REQUIRE_ROUTER_HINT = r"agents\\.checks\\.router"
+          offenders = []
+          for root, _, files in os.walk("."):
+              path = root.replace("\\\\","/") + "/"
+              if any(x in path for x in EXCLUDE): continue
+              if not any(path.startswith(f"./{inc}") for inc in INCLUDE): continue
+              for f in files:
+                  if not f.endswith(".py"): continue
+                  p = os.path.join(root, f)
+                  try:
+                      txt = open(p, "r", encoding="utf-8", errors="ignore").read()
+                  except Exception:
+                      continue
+                  if any(re.search(pat, txt) for pat in DENY_IMPORTS):
+                      offenders.append((p, "Direct AI client import"))
+                  if re.search(r"\\bcomplete|generate|llm|client", txt, re.I):
+                      if REQUIRE_ROUTER_HINT not in txt:
+                          offenders.append((p, "Missing router import"))
+          if offenders:
+              for p, why in offenders:
+                  print(f"GUARDRAILS FAIL: {p} -> {why}")
+              sys.exit(1)
+          print("Guardrails OK.")
+          PY
+
+      - name: Add monitor workflow
+        run: |
+          cat > .github/workflows/monitor.yml << 'YML'
+          name: Monitor
+          on:
+            schedule:
+              - cron: "0 * * * *"
+            workflow_dispatch:
+          permissions:
+            contents: read
+            issues: write
+          jobs:
+            post:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: actions/checkout@v4
+                - uses: actions/setup-python@v5
+                  with: { python-version: '3.x' }
+                - run: python agents/checks/monitor.py
+                  env:
+                    GH_TOKEN: ${{ github.token }}
+                    MONITOR_NZT_WINDOW: ${{ vars.MONITOR_NZT_WINDOW }}
+                    MONITOR_ISSUE_LABEL: ${{ vars.MONITOR_ISSUE_LABEL }}
+                    BUDGET_NZD_MONTHLY: ${{ vars.BUDGET_NZD_MONTHLY }}
+          YML
+
+      - name: Add monitor.py
+        run: |
+          cat > agents/checks/monitor.py << 'PY'
+          import os, json, subprocess, datetime
+          from zoneinfo import ZoneInfo
+          label = os.getenv("MONITOR_ISSUE_LABEL","report:daily")
+          win = os.getenv("MONITOR_NZT_WINDOW","05:00-10:00")
+          tz = ZoneInfo("Pacific/Auckland")
+          now = datetime.datetime.now(tz)
+          start,end = [datetime.time.fromisoformat(t) for t in win.replace(" ","").split("-")]
+          in_window = start <= now.time() <= end
+          state_path = "docs/MONITOR_STATE.json"
+          last = {}
+          if os.path.exists(state_path):
+              try: last = json.load(open(state_path))
+              except Exception: last = {}
+          today_key = now.date().isoformat()
+          if not in_window or last.get("posted_day")==today_key:
+              print("Skipping (outside window or already posted)."); exit(0)
+          def sh(cmd): 
+              try: return subprocess.check_output(cmd, shell=True, text=True).strip()
+              except Exception: return ""
+          open_prs = sh("gh pr list --json number,title,url,state --jq '.[] | \"- [#\\(.number)](\\(.url))  \\(.title)\"'")
+          failing = sh("gh run list --status failure --json databaseId,name,url --limit 5 --jq '.[] | \"- [\\(.name)](\\(.url))\"'")
+          budget = os.getenv("BUDGET_NZD_MONTHLY","20")
+          last_offload = "(none)"
+          try:
+              meta = json.load(open("docs/LAST_OFFLOAD.json"))
+              last_offload = f"{meta.get('timestamp_utc','?')} — `{meta.get('request_id','?')}`"
+          except Exception: pass
+          body = f"""Daily Summary — {today_key} (NZT)
+
+          **Open PRs**
+          {open_prs or "- none"}
+
+          **Failing checks**
+          {failing or "- none"}
+
+          **Last offload**
+          {last_offload}
+
+          **Budget (NZD/mo)**
+          Cap: {budget} — Action on breach: Pause offloads
+
+          **Next 3 priorities**
+          1) Land offload/guardrails PR
+          2) Wire router into all generators
+          3) Monitor budget & Codespace hours
+          """
+          q = sh(f'gh issue list --label "{label}" --search "Daily Summary — {today_key}" --json number --jq ".[0].number"')
+          if q:
+              subprocess.run(["gh","issue","comment",q,"-b",body], check=False)
+          else:
+              subprocess.run(["gh","issue","create","-t",f"Daily Summary — {today_key} (NZT)","-b",body,"-l",label], check=False)
+          os.makedirs("docs", exist_ok=True)
+          json.dump({"posted_day": today_key}, open(state_path,"w"))
+          print("Monitor posted.")
+          PY
+
+      - name: Add offload workflow
+        run: |
+          cat > .github/workflows/offload_gemini.yml << 'YML'
+          name: Offload Gemini
+          on:
+            workflow_dispatch:
+              inputs:
+                prompt_b64: { description: "Base64 prompt", required: true }
+                request_id: { description: "Request ID", required: true }
+                model: { description: "Model override", required: false }
+          permissions:
+            contents: write
+            issues: write
+          jobs:
+            run:
+              runs-on: ubuntu-latest
+              env:
+                OFFLOAD_MODEL: ${{ inputs.model || vars.OFFLOAD_MODEL }}
+              steps:
+                - uses: actions/checkout@v4
+                - uses: actions/setup-python@v5
+                  with: { python-version: '3.x' }
+                - run: pip install requests
+                - name: Call Gemini and write proof
+                  env:
+                    GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+                    PROMPT_B64: ${{ inputs.prompt_b64 }}
+                    REQUEST_ID: ${{ inputs.request_id }}
+                    MODEL: ${{ env.OFFLOAD_MODEL }}
+                  run: |
+                    python - << 'PY'
+                    import os, json, base64, hashlib, datetime, pathlib, requests
+                    key = os.environ["GEMINI_API_KEY"]
+                    prompt = base64.b64decode(os.environ["PROMPT_B64"]).decode("utf-8")
+                    rid = os.environ["REQUEST_ID"]
+                    model = os.environ.get("MODEL") or "gemini-1.5-pro-latest"
+                    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+                    headers = {"x-goog-api-key": key, "Content-Type": "application/json"}
+                    body = {"contents":[{"parts":[{"text": prompt[:48000]}]}]}
+                    r = requests.post(url, headers=headers, json=body, timeout=120)
+                    r.raise_for_status()
+                    data = r.json()
+                    summary = ""
+                    try:
+                        summary = data["candidates"][0]["content"]["parts"][0].get("text","")[:400]
+                    except Exception:
+                        summary = str(data)[:400]
+                    ts = datetime.datetime.utcnow().isoformat()+"Z"
+                    p_hash = hashlib.sha256(prompt.encode()).hexdigest()[:16]
+                    out = {"request_id": rid, "model": model, "timestamp_utc": ts, "prompt_hash": p_hash, "response_preview": summary}
+                    pathlib.Path("docs").mkdir(exist_ok=True)
+                    with open("docs/LAST_OFFLOAD.json","w") as f: json.dump(out, f, indent=2)
+                    with open(f"last-offload-{rid}.json","w") as f: json.dump({"request": body, "response": data}, f)
+                    print(json.dumps(out, indent=2))
+                    PY
+                - name: Commit proof
+                  run: |
+                    git config user.name "github-actions"
+                    git config user.email "actions@users.noreply.github.com"
+                    git add docs/LAST_OFFLOAD.json
+                    git commit -m "chore(offload): update LAST_OFFLOAD.json (${{ inputs.request_id }})" || echo "No changes"
+                    git push
+                - uses: actions/upload-artifact@v4
+                  with:
+                    name: last-offload-${{ inputs.request_id }}
+                    path: last-offload-${{ inputs.request_id }}.json
+          YML
+
+      - name: Add patterns.yaml (reserved for future)
+        run: |
+          cat > agents/checks/patterns.yaml << 'YML'
+          allow: []
+          deny_imports:
+            - openai
+            - anthropic
+            - google.generativeai
+          YML
+
+      - name: Add docs and CODEOWNERS
+        run: |
+          echo "{}" > docs/LAST_OFFLOAD.json
+          cat > docs/USAGE.md << 'MD'
+          # USAGE
+          - Heavy tasks: pipe prompt to router -> offloads to Gemini action.
+          - Monitor posts daily summary in NZT window.
+          - Guardrails block direct AI clients and missing router imports.
+          MD
+          cat > docs/RUNBOOKS.md << 'MD'
+          # RUNBOOKS
+          - Rotate `GEMINI_API_KEY` monthly.
+          - If budget is hit, monitor keeps posting but offloads should pause.
+          MD
+          cat > CODEOWNERS << 'TXT'
+          * @gurharnimrat-xseller
+          TXT
+
+      - name: Update README badges (idempotent)
+        run: |
+          touch README.md
+          if ! grep -q "Offload-Gemini" README.md; then
+            sed -i '1i [![Offload Gemini](https://img.shields.io/badge/Offload-Gemini-green)](#)' README.md
+          fi
+          if ! grep -q "Guardrails-enforced" README.md; then
+            sed -i '1i [![Guardrails](https://img.shields.io/badge/Guardrails-enforced-blue)](#)' README.md
+          fi
+          if ! grep -q "Daily%20Summary-NZT%205--10%20AM" README.md; then
+            sed -i '1i [![Monitor](https://img.shields.io/badge/Daily%20Summary-NZT%205--10%20AM-purple)](#)\n' README.md
+          fi
+
+      - name: Commit files
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@users.noreply.github.com"
+          git add .
+          git commit -m "chore(bootstrap): architect router+guardrails+monitor+offload"
+          git push
