@@ -1,3 +1,4 @@
+from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 from __future__ import annotations
 
 import json
@@ -256,7 +257,9 @@ async def approve_post(
         if post.kind == "text":
             # Generate video script from the text post
             try:
-                from openai import AsyncOpenAI
+                # removed per guardrails; use router
+# # removed per guardrails; use router
+# from openai import AsyncOpenAI
                 client = AsyncOpenAI()
 
                 prompt = (
@@ -734,7 +737,9 @@ async def regenerate_text(
 
         # Import OpenAI client
         try:
-            from openai import AsyncOpenAI
+            # removed per guardrails; use router
+# # removed per guardrails; use router
+# from openai import AsyncOpenAI
             client = AsyncOpenAI()
         except ImportError:
             raise HTTPException(
@@ -847,7 +852,9 @@ async def regenerate_video(
 
         # Import OpenAI client
         try:
-            from openai import AsyncOpenAI
+            # removed per guardrails; use router
+# # removed per guardrails; use router
+# from openai import AsyncOpenAI
             client = AsyncOpenAI()
         except ImportError:
             raise HTTPException(

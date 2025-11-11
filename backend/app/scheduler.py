@@ -1,3 +1,4 @@
+from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 from __future__ import annotations
 
 import asyncio
@@ -8,7 +9,9 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
-from openai import AsyncOpenAI
+# removed per guardrails; use router
+# # removed per guardrails; use router
+# from openai import AsyncOpenAI
 from sqlmodel import Session, select
 
 from app.database import engine

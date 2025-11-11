@@ -9,6 +9,7 @@ Structure:
 18-24s: Impact (Transformation message)
 24-30s: CTA (Link in bio)
 """
+from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
 from __future__ import annotations
 
