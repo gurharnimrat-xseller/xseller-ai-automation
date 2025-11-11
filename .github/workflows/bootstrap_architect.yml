@@ -92,7 +92,7 @@ jobs:
           print("Guardrails OK.")
           PY
 
-      - name: Add monitor workflow
+            - name: Add monitor workflow
         run: |
           cat > .github/workflows/monitor.yml << 'YML'
           name: Monitor
@@ -110,12 +110,14 @@ jobs:
                 - uses: actions/checkout@v4
                 - uses: actions/setup-python@v5
                   with: { python-version: '3.x' }
-                - run: python agents/checks/monitor.py
+                - name: Run monitor
                   env:
-                    GH_TOKEN: ${{ github.token }}
+                    GITHUB_TOKEN: ${{ github.token }}
                     MONITOR_NZT_WINDOW: ${{ vars.MONITOR_NZT_WINDOW }}
                     MONITOR_ISSUE_LABEL: ${{ vars.MONITOR_ISSUE_LABEL }}
                     BUDGET_NZD_MONTHLY: ${{ vars.BUDGET_NZD_MONTHLY }}
+                  run: |
+                    python agents/checks/monitor.py
           YML
 
       - name: Add monitor.py
