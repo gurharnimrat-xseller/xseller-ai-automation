@@ -1,0 +1,70 @@
+name: Offload Gemini
+on:
+  workflow_dispatch:
+    inputs:
+      prompt_b64:
+        description: "Base64 prompt"
+        required: true
+      request_id:
+        description: "Request ID"
+        required: true
+      model:
+        description: "Model override"
+        required: false
+permissions:
+  contents: write
+  issues: write
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env:
+      OFFLOAD_MODEL: ${{ inputs.model || vars.OFFLOAD_MODEL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - run: pip install requests
+      - name: Call Gemini and write proof
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          PROMPT_B64: ${{ inputs.prompt_b64 }}
+          REQUEST_ID: ${{ inputs.request_id }}
+          MODEL: ${{ env.OFFLOAD_MODEL }}
+        run: |
+          python - << 'PY'
+          import os, json, base64, hashlib, datetime, pathlib, requests
+          key = os.environ["GEMINI_API_KEY"]
+          prompt = base64.b64decode(os.environ["PROMPT_B64"]).decode("utf-8")
+          rid = os.environ["REQUEST_ID"]
+          model = os.environ.get("MODEL") or "gemini-1.5-pro-latest"
+          url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+          headers = {"x-goog-api-key": key, "Content-Type": "application/json"}
+          body = {"contents":[{"parts":[{"text": prompt[:48000]}]}]}
+          r = requests.post(url, headers=headers, json=body, timeout=120)
+          r.raise_for_status()
+          data = r.json()
+          summary = ""
+          try:
+              summary = data["candidates"][0]["content"]["parts"][0].get("text","")[:400]
+          except Exception:
+              summary = str(data)[:400]
+          ts = datetime.datetime.utcnow().isoformat()+"Z"
+          p_hash = hashlib.sha256(prompt.encode()).hexdigest()[:16]
+          out = {"request_id": rid, "model": model, "timestamp_utc": ts, "prompt_hash": p_hash, "response_preview": summary}
+          pathlib.Path("docs").mkdir(exist_ok=True)
+          with open("docs/LAST_OFFLOAD.json","w") as f: json.dump(out, f, indent=2)
+          with open(f"last-offload-{rid}.json","w") as f: json.dump({"request": body, "response": data}, f)
+          print(json.dumps(out, indent=2))
+          PY
+      - name: Commit proof
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs/LAST_OFFLOAD.json
+          git commit -m "chore(offload): update LAST_OFFLOAD.json (${{ inputs.request_id }})" || echo "No changes"
+          git push
+      - uses: actions/upload-artifact@v4
+        with:
+          name: last-offload-${{ inputs.request_id }}
+          path: last-offload-${{ inputs.request_id }}.json

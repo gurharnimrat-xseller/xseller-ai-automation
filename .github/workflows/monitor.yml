@@ -1,0 +1,22 @@
+name: Monitor
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - run: python agents/checks/monitor.py
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MONITOR_NZT_WINDOW: ${{ vars.MONITOR_NZT_WINDOW }}
+          MONITOR_ISSUE_LABEL: ${{ vars.MONITOR_ISSUE_LABEL }}
+          BUDGET_NZD_MONTHLY: ${{ vars.BUDGET_NZD_MONTHLY }}
