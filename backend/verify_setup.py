@@ -85,3 +85,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+from agents.checks.router import should_offload, offload_to_gemini  # guardrails
