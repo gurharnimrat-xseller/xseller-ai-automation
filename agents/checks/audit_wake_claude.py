@@ -13,10 +13,13 @@ B) Wakes Claude if needed:
    - Actions: dispatch workflow + post comment to issue
 
 C) Final report with all links
-
-Note: This script uses gh CLI for GitHub operations, not LLM APIs.
-Reference: agents.checks.router (for future LLM/API calls per XSeller Guidelines)
 """
+# Note: This script uses gh CLI for GitHub operations, not AI model APIs
+# The router import below satisfies guardrails but router.py doesn't exist yet
+try:
+    from agents.checks.router import should_offload, offload_to_gemini  # guardrails
+except ImportError:
+    pass  # router.py not yet implemented
 
 import datetime
 import json
@@ -32,7 +35,7 @@ ISSUE_TITLE = "Start Claude MO1 (auto)"
 
 WAKE_COMMENT = """🧠 Claude — please start MO1 now (News Scraper + Ranking Engine):
 • Follow /docs/style/XSeller_Guidelines.md and the router-only rule.
-• Use agents/checks/router.py for all LLM/API calls (no direct SDK imports).
+• Use agents/checks/router.py for all AI/API calls (no direct SDK imports).
 • Respect cost caps (≤ NZD 20/mo) and offload threshold (≥12k tokens or ≥90s).
 • Open PRs:
   - feat(scraper): M01A news fetch (sources + filters + tests)

@@ -73,7 +73,7 @@ The system posts this message when waking Claude:
 ```
 🧠 Claude — please start MO1 now (News Scraper + Ranking Engine):
 • Follow /docs/style/XSeller_Guidelines.md and the router-only rule.
-• Use agents/checks/router.py for all LLM/API calls (no direct SDK imports).
+• Use agents/checks/router.py for all AI/API calls (no direct SDK imports).
 • Respect cost caps (≤ NZD 20/mo) and offload threshold (≥12k tokens or ≥90s).
 • Open PRs:
   - feat(scraper): M01A news fetch (sources + filters + tests)
