@@ -36,23 +36,32 @@ jobs:
           echo "Changed files:"
           echo "$files"
 
-          # Check if ANY code/workflow file changed
-          if echo "$files" | grep -E -q '^[^#]*\.(py|ts|tsx|js|jsx|json)$|^(backend|frontend|agents|src|app|server)/'; then
-            echo "docs_only=false" >> "$GITHUB_OUTPUT"
-            echo "Code changes detected"
-          else
-            echo "docs_only=true" >> "$GITHUB_OUTPUT"
-            echo "Only docs changes detected"
-          fi
+          # docs_only: true when ALL changed files are under docs/** ending in .md or .agent.md
+          docs_only="true"
+          while IFS= read -r file; do
+            if [[ -n "$file" && ! "$file" =~ ^docs/.*\.(md|agent\.md)$ ]]; then
+              docs_only="false"
+              break
+            fi
+          done <<< "$files"
+          echo "docs_only=$docs_only" >> "$GITHUB_OUTPUT"
+          echo "docs_only=$docs_only"
 
-          # Check if ALL changes are in .github/workflows or docs
-          if echo "$files" | grep -E -v -q '^(\.github/workflows/|docs/|.*\.md$|.*\.agent\.md$)'; then
-            echo "infra_only=false" >> "$GITHUB_OUTPUT"
-            echo "Non-infra changes detected"
-          else
-            echo "infra_only=true" >> "$GITHUB_OUTPUT"
-            echo "Only infra/docs changes detected"
-          fi
+          # infra_only: true when ALL changed files are either:
+          # - under .github/workflows/** OR
+          # - docs-only as defined above (docs/** ending in .md or .agent.md)
+          infra_only="true"
+          while IFS= read -r file; do
+            if [[ -n "$file" ]]; then
+              # Check if file is under .github/workflows/ OR is a docs markdown file
+              if [[ ! "$file" =~ ^\.github/workflows/ && ! "$file" =~ ^docs/.*\.(md|agent\.md)$ ]]; then
+                infra_only="false"
+                break
+              fi
+            fi
+          done <<< "$files"
+          echo "infra_only=$infra_only" >> "$GITHUB_OUTPUT"
+          echo "infra_only=$infra_only"
 
   guardrails:
     name: Guardrails / scan
