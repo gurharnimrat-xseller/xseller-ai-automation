@@ -24,12 +24,31 @@ The `run_claude_start.py` script performs the following tasks:
 
 ## Usage
 
-### Prerequisites
+### Method 1: Via GitHub Actions (Recommended)
+
+The easiest way to run the automation is via the GitHub Actions workflow:
+
+1. Go to the repository's **Actions** tab
+2. Select **"Run Claude Start Automation"** workflow
+3. Click **"Run workflow"** button
+4. Select the branch (usually `main`)
+5. Click **"Run workflow"**
+
+The workflow will:
+- Automatically trigger the `claude_start.yml` workflow
+- Execute the Python automation script with proper authentication
+- Display all results in the workflow logs
+
+### Method 2: Running the script locally
+
+For local execution or testing:
+
+#### Prerequisites
 
 - GitHub CLI (`gh`) must be installed and authenticated
 - Must have permissions to trigger workflows and manage issues
 
-### Running the script
+#### Running the script
 
 ```bash
 # From the repository root
@@ -92,12 +111,24 @@ Please review the current status...
 ✅ Done!
 ```
 
-## Workflow File
+## Workflow Files
 
-The workflow file `.github/workflows/claude_start.yml` is a simple workflow that:
+### `.github/workflows/claude_start.yml`
+
+The main workflow file that represents the "Claude Start" action:
 - Can be triggered manually via `workflow_dispatch`
 - Logs the start time and run URL
 - Has permissions to read contents and write to issues
+- Minimal workflow that serves as the trigger point
+
+### `.github/workflows/run_claude_start.yml`
+
+The automation orchestration workflow:
+- Triggers the `claude_start.yml` workflow
+- Runs the Python automation script
+- Has proper authentication via `GITHUB_TOKEN`
+- Performs all the required checks and actions
+- **This is the workflow you should run** to execute the full automation
 
 ## Integration with Claude
 
