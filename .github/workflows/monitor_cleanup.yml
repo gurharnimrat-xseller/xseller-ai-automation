@@ -1,0 +1,27 @@
+name: Monitor Cleanup
+on:
+  schedule:
+    - cron: '15 20 * * 5'   # Fri 09:15 NZT
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+  issues: write
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.x' }
+      - name: Ensure scripts/monitor_agent.py exists
+        run: |
+          test -f scripts/monitor_agent.py || echo 'print("no monitor_agent.py; skipping")' > scripts/monitor_agent.py
+      - name: Run monitor agent
+        run: |
+          python scripts/monitor_agent.py || true
+      - name: Upload cleanup report
+        uses: actions/upload-artifact@v4
+        with:
+          name: cleanup_report
+          path: docs/style/cleanup_report.md

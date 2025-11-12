@@ -1,0 +1,23 @@
+name: Monitor
+on:
+  schedule:
+    - cron: '0 20 * * *'   # 09:00 NZT H 20:00 UTC (handles DST roughly)
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.x' }
+      - name: Run monitor
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          MONITOR_NZT_WINDOW: '05:00-10:00'
+          MONITOR_ISSUE_LABEL: 'report:daily'
+          BUDGET_NZD_MONTHLY: '20'
+        run: |
+          python agents/checks/monitor.py
