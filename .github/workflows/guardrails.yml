@@ -1,11 +1,12 @@
 name: Guardrails (manual/nightly)
 on:
+  push:
+    branches: [ main ]
   workflow_dispatch:
-  schedule:
-    - cron: '0 20 * * *'   # nightly at 8 PM UTC
 
 jobs:
-  scan:
+  guardrails_standalone:
+    name: Guardrails (standalone)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
