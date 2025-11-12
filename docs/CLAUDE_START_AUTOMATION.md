@@ -8,7 +8,7 @@ The Claude Start automation system provides a complete solution for:
 
 1. **Triggering workflows** - Run the `claude_start.yml` workflow via `workflow_dispatch`
 2. **Monitoring execution** - Wait for workflow completion and retrieve status
-3. **Issue management** - Automatically create/find the tracking issue "Start Claude MO1 (auto)"
+3. **Issue management** - Automatically create/find the tracking issue "Start Claude M01 (auto)"
 4. **PR detection** - Check for new pull requests with specific feature tags
 5. **Automated notifications** - Post wake comments when no recent work is detected
 
@@ -65,7 +65,7 @@ The automation will:
 1. ✅ Trigger the `claude_start.yml` workflow
 2. ✅ Wait for it to complete (up to 5 minutes)
 3. ✅ Display the workflow run URL
-4. ✅ Find or create the "Start Claude MO1 (auto)" issue
+4. ✅ Find or create the "Start Claude M01 (auto)" issue
 5. ✅ Display the issue URL
 6. ✅ Show the latest comment from the issue (if any)
 7. ✅ Search for PRs created today with titles containing:
@@ -88,7 +88,7 @@ Claude Start Workflow Automation
 ⏳ Waiting for workflow 123456789 to complete...
 ✅ Workflow completed with conclusion: success
 
-🔍 Looking for issue: 'Start Claude MO1 (auto)'
+🔍 Looking for issue: 'Start Claude M01 (auto)'
 ✅ Found existing issue #42 (state: open)
 
 💬 Fetching latest comment from issue #42...
@@ -110,7 +110,7 @@ Claude Start Workflow Automation
 🔗 Workflow Run URL:
    https://github.com/owner/repo/actions/runs/123456789
 
-🔗 Issue URL (Start Claude MO1 (auto)):
+🔗 Issue URL (Start Claude M01 (auto)):
    https://github.com/owner/repo/issues/42
 
 💬 Latest Comment Body:
@@ -157,7 +157,7 @@ This comment:
 This automation integrates with the Claude collaboration system described in `.claude/claude.md`:
 
 - **Daily workflow**: Run this automation each morning to check for work
-- **Task tracking**: Uses the "Start Claude MO1 (auto)" issue for coordination
+- **Task tracking**: Uses the "Start Claude M01 (auto)" issue for coordination
 - **PR detection**: Monitors for feature work on scraper and ranking systems
 - **Wake mechanism**: Automatically prompts Claude when no recent activity detected
 

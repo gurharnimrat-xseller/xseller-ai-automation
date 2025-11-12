@@ -5,18 +5,18 @@ Script to run claude_start.yml workflow and perform required checks.
 This script:
 1. Triggers the claude_start.yml workflow via workflow_dispatch
 2. Waits for the workflow to complete
-3. Finds or creates the "Start Claude MO1 (auto)" issue
+3. Finds or creates the "Start Claude M01 (auto)" issue
 4. Returns workflow run URL and latest comment from the issue
 5. Checks for new PRs today with feat(scraper) or feat(rank) in titles
 6. Posts wake comment to the issue if no PRs exist
 """
+from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
-import os
 import sys
 import time
 import json
 import subprocess
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 from typing import Optional, Dict, List, Any
 
 
@@ -101,8 +101,8 @@ def wait_for_workflow(run_id: str, timeout: int = 300) -> Dict[str, Any]:
 
 
 def find_or_create_issue() -> int:
-    """Find or create the 'Start Claude MO1 (auto)' issue and return its number."""
-    issue_title = "Start Claude MO1 (auto)"
+    """Find or create the 'Start Claude M01 (auto)' issue and return its number."""
+    issue_title = "Start Claude M01 (auto)"
     
     print(f"\n🔍 Looking for issue: '{issue_title}'")
     
@@ -131,8 +131,10 @@ def find_or_create_issue() -> int:
         cmd = [
             "gh", "issue", "create",
             "--title", issue_title,
-            "--body", "This issue is used to track Claude MO1 automation tasks.\n\n"
-                     "The automation system will post wake comments here to start Claude when needed."
+            "--body", (
+                "This issue is used to track Claude M01 automation tasks.\n\n"
+                "The automation system will post wake comments here to start Claude when needed."
+            )
         ]
         
         output = run_command(cmd)
@@ -282,7 +284,7 @@ def main():
     print("=" * 60)
     print(f"\n🔗 Workflow Run URL:")
     print(f"   {workflow_url}")
-    print(f"\n🔗 Issue URL (Start Claude MO1 (auto)):")
+    print(f"\n🔗 Issue URL (Start Claude M01 (auto)):")
     print(f"   {issue_url}")
     
     if latest_comment:

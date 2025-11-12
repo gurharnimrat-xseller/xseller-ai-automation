@@ -5,7 +5,7 @@
 Automates the entire Claude Start workflow process:
 - ✅ Triggers `claude_start.yml` workflow on main
 - ✅ Returns workflow run URL
-- ✅ Finds/creates "Start Claude MO1 (auto)" issue
+- ✅ Finds/creates "Start Claude M01 (auto)" issue
 - ✅ Returns issue link and latest comment
 - ✅ Checks for PRs today with `feat(scraper)` or `feat(rank)`
 - ✅ Posts wake comment if no PRs exist
@@ -25,7 +25,7 @@ The workflow will output:
 🔗 Workflow Run URL:
    https://github.com/[owner]/[repo]/actions/runs/[id]
 
-🔗 Issue URL (Start Claude MO1 (auto)):
+🔗 Issue URL (Start Claude M01 (auto)):
    https://github.com/[owner]/[repo]/issues/[number]
 
 💬 Latest Comment Body:

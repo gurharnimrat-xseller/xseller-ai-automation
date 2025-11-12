@@ -7,7 +7,6 @@ name: Run Claude Start Automation
 permissions:
   contents: read
   issues: write
-  actions: read
 
 jobs:
   run-automation:

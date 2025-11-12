@@ -12,10 +12,10 @@ The `run_claude_start.py` script performs the following tasks:
 
 1. **Triggers the workflow**: Runs `.github/workflows/claude_start.yml` on the main branch via `workflow_dispatch`
 2. **Waits for completion**: Monitors the workflow until it completes
-3. **Manages the tracking issue**: Finds or creates the issue titled "Start Claude MO1 (auto)"
+3. **Manages the tracking issue**: Finds or creates the issue titled "Start Claude M01 (auto)"
 4. **Reports status**: Returns:
    - Workflow run URL
-   - Link to the "Start Claude MO1 (auto)" issue
+   - Link to the "Start Claude M01 (auto)" issue
    - The latest comment body posted on that issue
 5. **Checks for PRs**: Searches for any PRs created today with titles containing:
    - `feat(scraper)`
@@ -76,7 +76,7 @@ Claude Start Workflow Automation
    Status: in_progress... (waiting)
 ✅ Workflow completed with conclusion: success
 
-🔍 Looking for issue: 'Start Claude MO1 (auto)'
+🔍 Looking for issue: 'Start Claude M01 (auto)'
 ✅ Found existing issue #42 (state: open)
 
 💬 Fetching latest comment from issue #42...
@@ -96,7 +96,7 @@ Claude Start Workflow Automation
 🔗 Workflow Run URL:
    https://github.com/owner/repo/actions/runs/12345678
 
-🔗 Issue URL (Start Claude MO1 (auto)):
+🔗 Issue URL (Start Claude M01 (auto)):
    https://github.com/owner/repo/issues/42
 
 💬 Latest Comment Body:
