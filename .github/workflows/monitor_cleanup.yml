@@ -1,0 +1,22 @@
+name: Monitor Cleanup
+on:
+  schedule:
+    - cron: "0 20 * * 5"  # Fridays ~09:00 NZT
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Monitor Agent
+        run: python scripts/monitor_agent.py
+      - name: Upload Cleanup Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: cleanup_report
+          path: docs/style/cleanup_report.md
