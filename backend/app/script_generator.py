@@ -11,8 +11,7 @@ import random
 from typing import Any, Dict, List, Optional
 # removed per guardrails; use router
 # # removed per guardrails; use router
-# # removed per guardrails; use router
-# # removed per guardrails; use router import AsyncOpenAI
+# from openai import AsyncOpenAI
 import os
 
 

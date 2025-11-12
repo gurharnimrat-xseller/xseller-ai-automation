@@ -38,7 +38,7 @@ def strip_direct_clients(txt: str) -> tuple[str, int]:
     """Comment out direct SDK imports (don’t break the file)."""
     changed = 0
     for pat in DENY_PATTERNS:
-        new_txt, n = re.subn(pat, "# removed per guardrails; use router", txt)
+        new_txt, n = re.subn(pat, r"# removed per guardrails; use router\n# \g<0>", txt)
         if n:
             changed += n
             txt = new_txt

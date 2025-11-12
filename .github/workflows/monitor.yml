@@ -1,7 +1,7 @@
 name: Monitor
 on:
   schedule:
-    - cron: "0 * * * *"
+    - cron: "0 0 1 1 *"  # Paused during setup (once a year)
   workflow_dispatch:
 permissions:
   contents: read

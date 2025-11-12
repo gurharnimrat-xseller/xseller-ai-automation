@@ -11,8 +11,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 # removed per guardrails; use router
 # # removed per guardrails; use router
-# # removed per guardrails; use router
-# # removed per guardrails; use router import AsyncOpenAI
+# from openai import AsyncOpenAI
 from sqlmodel import Session, select
 
 from app.database import engine

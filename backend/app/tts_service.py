@@ -27,8 +27,7 @@ except ImportError:
 try:
     # removed per guardrails; use router
 # # removed per guardrails; use router
-# # removed per guardrails; use router
-# # removed per guardrails; use router import AsyncOpenAI
+# from openai import AsyncOpenAI
     OPENAI_AVAILABLE = True
 except ImportError:
     OPENAI_AVAILABLE = False
