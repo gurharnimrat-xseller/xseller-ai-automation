@@ -9,25 +9,28 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   guardrails:
     name: Guardrails / scan
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
-      - run: python agents/checks/verify_guardrails.py
+          python-version: '3.11'
+      - name: Run Guardrails
+        run: python -u agents/checks/verify_guardrails.py
 
   lint_python:
     name: Lint (Python)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [guardrails]
     steps:
       - uses: actions/checkout@v4
@@ -50,6 +53,7 @@ jobs:
   lint_node:
     name: Lint (Node)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [guardrails]
     steps:
       - uses: actions/checkout@v4
@@ -72,6 +76,7 @@ jobs:
   tests_python:
     name: Tests (Python)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [lint_python]
     steps:
       - uses: actions/checkout@v4
@@ -87,6 +92,7 @@ jobs:
   tests_node:
     name: Tests (Node)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [lint_node]
     steps:
       - uses: actions/checkout@v4

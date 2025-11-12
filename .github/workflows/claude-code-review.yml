@@ -12,13 +12,8 @@ on:
 
 jobs:
   claude-review:
-    # Optional: Filter by PR author
-    # if: |
-    #   github.event.pull_request.user.login == 'external-contributor' ||
-    #   github.event.pull_request.user.login == 'new-developer' ||
-    #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
-
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
       pull-requests: read
@@ -26,12 +21,24 @@ jobs:
       id-token: write
 
     steps:
+      - name: Check if secret is available
+        id: check-secret
+        run: |
+          if [ -z "${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}" ]; then
+            echo "has_secret=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Skipping Claude review: CLAUDE_CODE_OAUTH_TOKEN not set."
+          else
+            echo "has_secret=true" >> $GITHUB_OUTPUT
+          fi
+
       - name: Checkout repository
+        if: steps.check-secret.outputs.has_secret == 'true'
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
       - name: Run Claude Code Review
+        if: steps.check-secret.outputs.has_secret == 'true'
         id: claude-review
         uses: anthropics/claude-code-action@v1
         with:
