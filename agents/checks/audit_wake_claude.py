@@ -13,6 +13,9 @@ B) Wakes Claude if needed:
    - Actions: dispatch workflow + post comment to issue
 
 C) Final report with all links
+
+Note: This script uses gh CLI for GitHub operations, not LLM APIs.
+Reference: agents.checks.router (for future LLM/API calls per XSeller Guidelines)
 """
 
 import datetime
