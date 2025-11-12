@@ -1,0 +1,20 @@
+name: Claude Start
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  start-claude:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log workflow start
+        run: |
+          echo "Claude Start workflow triggered at $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          echo "Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
