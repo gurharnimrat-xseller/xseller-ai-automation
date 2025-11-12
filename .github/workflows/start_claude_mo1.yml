@@ -1,0 +1,20 @@
+name: Start Claude MO1
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 12 * * *"  # Daily at midnight NZT (12:00 UTC = 00:00 NZT in summer)
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Post to Issue
+        run: |
+          echo "Workflow triggered at $(date -u)"
+          echo "This workflow signals Claude to start MO1 work"
+        env:
+          GH_TOKEN: ${{ github.token }}
