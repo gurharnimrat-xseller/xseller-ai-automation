@@ -229,3 +229,4 @@ See `/docs/style/`:
 - `actions_least_privilege.md`
 
 **Diagram**: `docs/style/xseller_architecture.png`
+
