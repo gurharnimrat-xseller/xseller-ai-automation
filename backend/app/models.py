@@ -142,3 +142,62 @@ class LearningLog(SQLModel, table=True):
     )
 
     # post: Optional["Post"] = Relationship(back_populates="learning_logs")
+
+
+# ==================== News Ingestion Models (M01A) ====================
+
+
+class Article(SQLModel, table=True):
+    """News article from external sources."""
+    __tablename__ = "articles"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    source_name: str = Field(index=True)  # newsapi, mock, etc.
+    external_id: str = Field(index=True, unique=True)  # Unique ID from source
+    title: str
+    description: Optional[str] = None
+    content: Optional[str] = None
+    url: str
+    image_url: Optional[str] = None
+    published_at: datetime = Field(sa_column=Column(DateTime(timezone=True)))
+    fetched_at: datetime = Field(
+        default_factory=datetime.utcnow,
+        sa_column=Column(DateTime(timezone=True), server_default=func.now()),
+    )
+    # pending, ranked, scripted, published, rejected
+    status: str = Field(default="pending", index=True)
+
+
+class RankingScore(SQLModel, table=True):
+    """AI ranking scores for articles."""
+    __tablename__ = "ranking_scores"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    article_id: int = Field(foreign_key="articles.id", index=True)
+    score: float = Field(ge=0.0, le=1.0)  # Viral potential score 0-1
+    reasoning: Optional[str] = None  # Why this score
+    category: Optional[str] = Field(default=None, index=True)  # tech, business, etc.
+    model_used: str = Field(default="gemini-1.5-flash")
+    ranked_at: datetime = Field(
+        default_factory=datetime.utcnow,
+        sa_column=Column(DateTime(timezone=True), server_default=func.now()),
+    )
+
+
+class IngestionJob(SQLModel, table=True):
+    """Track ingestion runs."""
+    __tablename__ = "ingestion_jobs"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    started_at: datetime = Field(
+        default_factory=datetime.utcnow,
+        sa_column=Column(DateTime(timezone=True), server_default=func.now()),
+    )
+    completed_at: Optional[datetime] = Field(
+        default=None, sa_column=Column(DateTime(timezone=True))
+    )
+    # running, completed, failed, partial_failure
+    status: str = Field(default="running", index=True)
+    articles_fetched: int = Field(default=0, sa_column=Column(Integer))
+    articles_ranked: int = Field(default=0, sa_column=Column(Integer))
+    errors: Optional[dict] = Field(default=None, sa_column=Column(JSON))

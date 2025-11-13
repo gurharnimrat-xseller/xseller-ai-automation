@@ -2088,3 +2088,263 @@ async def get_energy_modes() -> Dict[str, Any]:
 
 
 # ==================== END VOICE SELECTION SYSTEM ====================
+
+
+# ==================== NEWS INGESTION & RANKING (M01A) ====================
+
+@router.post("/api/news/ingest")
+async def ingest_news(
+    request: "schemas_news.IngestRequest",
+    session: Session = Depends(get_session)
+) -> "schemas_news.IngestResponse":
+    """
+    Trigger news ingestion from specified sources.
+
+    Args:
+        request: Ingestion configuration (sources, limits)
+        session: Database session
+
+    Returns:
+        Ingestion job status and results
+    """
+    from app import service_news_ingest, schemas_news
+
+    try:
+        service = service_news_ingest.NewsIngestService(session)
+        job = service.run_ingestion(
+            sources=request.sources,
+            limit_per_source=request.limit_per_source
+        )
+
+        return schemas_news.IngestResponse(
+            job_id=job.id,
+            status=job.status,
+            started_at=job.started_at,
+            articles_fetched=job.articles_fetched,
+            message=f"Ingestion {job.status}: fetched {job.articles_fetched} articles"
+        )
+
+    except Exception as e:
+        print(f"[API] Ingestion error: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Ingestion failed: {str(e)}")
+
+
+@router.post("/api/news/rank")
+async def rank_articles(
+    request: "schemas_news.RankRequest",
+    session: Session = Depends(get_session)
+) -> "schemas_news.RankResponse":
+    """
+    Rank articles by viral potential using AI.
+
+    Args:
+        request: List of article IDs to rank and options
+        session: Database session
+
+    Returns:
+        Ranking results with scores
+    """
+    from app import service_news_ranking, schemas_news
+
+    try:
+        service = service_news_ranking.NewsRankingService(session)
+        results = service.rank_articles(
+            article_ids=request.article_ids,
+            force_rerank=request.force_rerank
+        )
+
+        scores = []
+        for article_id, score in results.items():
+            scores.append(schemas_news.RankingScoreResponse(
+                id=score.id,
+                article_id=score.article_id,
+                score=score.score,
+                reasoning=score.reasoning,
+                category=score.category,
+                model_used=score.model_used,
+                ranked_at=score.ranked_at
+            ))
+
+        ranked_count = len([s for s in scores if s.article_id in request.article_ids])
+        skipped_count = len(request.article_ids) - ranked_count
+
+        return schemas_news.RankResponse(
+            ranked_count=ranked_count,
+            skipped_count=skipped_count,
+            scores=scores
+        )
+
+    except Exception as e:
+        print(f"[API] Ranking error: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Ranking failed: {str(e)}")
+
+
+@router.get("/api/news/articles/pending")
+async def get_pending_articles(
+    limit: int = Query(default=20, ge=1, le=100),
+    session: Session = Depends(get_session)
+) -> List["schemas_news.ArticleResponse"]:
+    """
+    Get articles that haven't been ranked yet.
+
+    Args:
+        limit: Max number of articles to return
+        session: Database session
+
+    Returns:
+        List of pending articles
+    """
+    from app import service_news_ingest, schemas_news
+
+    try:
+        service = service_news_ingest.NewsIngestService(session)
+        articles = service.get_pending_articles(limit=limit)
+
+        return [
+            schemas_news.ArticleResponse(
+                id=a.id,
+                source_name=a.source_name,
+                external_id=a.external_id,
+                title=a.title,
+                description=a.description,
+                content=a.content,
+                url=a.url,
+                image_url=a.image_url,
+                published_at=a.published_at,
+                status=a.status,
+                fetched_at=a.fetched_at
+            )
+            for a in articles
+        ]
+
+    except Exception as e:
+        print(f"[API] Get pending articles error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get articles: {str(e)}")
+
+
+@router.get("/api/news/articles/top-ranked")
+async def get_top_ranked_articles(
+    limit: int = Query(default=10, ge=1, le=50),
+    min_score: float = Query(default=0.6, ge=0.0, le=1.0),
+    session: Session = Depends(get_session)
+) -> List["schemas_news.ArticleWithScore"]:
+    """
+    Get top-ranked articles ready for script generation.
+
+    Args:
+        limit: Max number of articles to return
+        min_score: Minimum viral potential score (0-1)
+        session: Database session
+
+    Returns:
+        List of articles with their ranking scores
+    """
+    from app import service_news_ranking, schemas_news
+
+    try:
+        service = service_news_ranking.NewsRankingService(session)
+        results = service.get_top_ranked_articles(limit=limit, min_score=min_score)
+
+        return [
+            schemas_news.ArticleWithScore(
+                article=schemas_news.ArticleResponse(
+                    id=article.id,
+                    source_name=article.source_name,
+                    external_id=article.external_id,
+                    title=article.title,
+                    description=article.description,
+                    content=article.content,
+                    url=article.url,
+                    image_url=article.image_url,
+                    published_at=article.published_at,
+                    status=article.status,
+                    fetched_at=article.fetched_at
+                ),
+                score=schemas_news.RankingScoreResponse(
+                    id=score.id,
+                    article_id=score.article_id,
+                    score=score.score,
+                    reasoning=score.reasoning,
+                    category=score.category,
+                    model_used=score.model_used,
+                    ranked_at=score.ranked_at
+                )
+            )
+            for article, score in results
+        ]
+
+    except Exception as e:
+        print(f"[API] Get top ranked articles error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get articles: {str(e)}")
+
+
+@router.get("/api/news/articles/{article_id}")
+async def get_article_with_score(
+    article_id: int,
+    session: Session = Depends(get_session)
+) -> "schemas_news.ArticleWithScore":
+    """
+    Get a single article with its latest ranking score.
+
+    Args:
+        article_id: Article ID
+        session: Database session
+
+    Returns:
+        Article with ranking score (if available)
+    """
+    from app import service_news_ingest, service_news_ranking, schemas_news
+
+    try:
+        ingest_service = service_news_ingest.NewsIngestService(session)
+        ranking_service = service_news_ranking.NewsRankingService(session)
+
+        article = ingest_service.get_article_by_id(article_id)
+        if not article:
+            raise HTTPException(status_code=404, detail=f"Article {article_id} not found")
+
+        score = ranking_service.get_latest_score_for_article(article_id)
+
+        article_response = schemas_news.ArticleResponse(
+            id=article.id,
+            source_name=article.source_name,
+            external_id=article.external_id,
+            title=article.title,
+            description=article.description,
+            content=article.content,
+            url=article.url,
+            image_url=article.image_url,
+            published_at=article.published_at,
+            status=article.status,
+            fetched_at=article.fetched_at
+        )
+
+        score_response = None
+        if score:
+            score_response = schemas_news.RankingScoreResponse(
+                id=score.id,
+                article_id=score.article_id,
+                score=score.score,
+                reasoning=score.reasoning,
+                category=score.category,
+                model_used=score.model_used,
+                ranked_at=score.ranked_at
+            )
+
+        return schemas_news.ArticleWithScore(
+            article=article_response,
+            score=score_response
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[API] Get article error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get article: {str(e)}")
+
+
+# ==================== END NEWS INGESTION & RANKING ====================
