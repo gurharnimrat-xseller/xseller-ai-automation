@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Enhanced Text-to-Speech (TTS) Service
 Supports multiple TTS providers with automatic fallback:
@@ -5,12 +7,9 @@ Supports multiple TTS providers with automatic fallback:
 - OpenAI TTS (high quality, cost-effective)
 - gTTS (free fallback)
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
-
-from __future__ import annotations
+from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401
 
 import os
-import tempfile
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Literal

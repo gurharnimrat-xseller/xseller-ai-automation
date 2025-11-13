@@ -1,8 +1,6 @@
 """
 Quick test script to verify content scraping works
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
-
 import asyncio
 import sys
 import os
@@ -10,7 +8,8 @@ import os
 # Add parent directory to path so we can import app modules
 sys.path.insert(0, os.path.dirname(__file__))
 
-from app import content_scraper
+from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401, E402
+from app import content_scraper  # noqa: E402
 
 
 async def main():

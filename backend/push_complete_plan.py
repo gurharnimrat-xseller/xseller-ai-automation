@@ -2,7 +2,7 @@
 Push the COMPLETE development plan to Notion with full details
 This creates a comprehensive structure matching the full plan document
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
+from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401
 import os
 from datetime import datetime, timedelta
 from notion_client import Client

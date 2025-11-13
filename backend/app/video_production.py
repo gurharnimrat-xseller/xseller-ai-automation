@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Competitor-Style Video Production Module
 Generates viral short-form videos with:
@@ -6,9 +8,7 @@ Generates viral short-form videos with:
 - Stock footage backgrounds
 - Professional transitions
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
-
-from __future__ import annotations
+from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401
 
 import os
 import re
@@ -23,7 +23,6 @@ try:
         VideoFileClip, ColorClip, CompositeVideoClip,
         concatenate_videoclips, AudioFileClip, ImageClip
     )
-    from moviepy.video.fx.all import fadein, fadeout
     import numpy as np
     MOVIEPY_AVAILABLE = True
 except ImportError:

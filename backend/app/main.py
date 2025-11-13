@@ -1,4 +1,3 @@
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 from __future__ import annotations
 
 # CRITICAL: Load .env file FIRST before any other imports that might use environment variables
@@ -11,18 +10,19 @@ env_path = Path(__file__).parent.parent / ".env"
 load_dotenv(env_path)
 
 # Now import everything else (after .env is loaded)
-from contextlib import asynccontextmanager
-from typing import AsyncIterator
+from contextlib import asynccontextmanager  # noqa: E402
+from typing import AsyncIterator  # noqa: E402
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from sqlmodel import SQLModel
-from app.database import engine
+from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401, E402
+from fastapi import FastAPI  # noqa: E402
+from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
+from fastapi.staticfiles import StaticFiles  # noqa: E402
+from sqlmodel import SQLModel  # noqa: E402
+from app.database import engine  # noqa: E402
 
-from app.models import *  # noqa: F401,F403 - import models to register metadata
-from app import scheduler
-from app.routes import router
+from app.models import *  # noqa: F401,F403,E402 - import models to register metadata
+from app import scheduler  # noqa: E402
+from app.routes import router  # noqa: E402
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./xseller.db")
 

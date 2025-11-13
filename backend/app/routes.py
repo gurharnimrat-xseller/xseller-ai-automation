@@ -1,7 +1,6 @@
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 from __future__ import annotations
 
-import json
+from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
@@ -9,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from sqlmodel import Session, select, func
 
 from app.database import engine
-from app.models import Post, PublishLog
+from app.models import Post
 from app import publishing
 from app import video_generator
 from app import content_scraper
@@ -1165,9 +1164,9 @@ async def test_competitor_style_video(post_id: int):
         # Step 2: Check dependencies
         print(f"\n[STEP 2] Checking dependencies...")
         try:
-            from moviepy.editor import VideoFileClip, ColorClip, ImageClip, CompositeVideoClip, concatenate_videoclips, VideoClip
-            import numpy as np
-            from PIL import Image, ImageDraw, ImageFont
+            from moviepy.editor import VideoFileClip, ColorClip, ImageClip, CompositeVideoClip, concatenate_videoclips, VideoClip  # noqa: F401
+            import numpy as np  # noqa: F401
+            from PIL import Image, ImageDraw, ImageFont  # noqa: F401
             print("✅ MoviePy and PIL imported")
         except Exception as e:
             print(f"❌ Import failed: {e}")
@@ -1175,7 +1174,7 @@ async def test_competitor_style_video(post_id: int):
                 status_code=500, detail=f"Dependencies not installed: {e}")
 
         try:
-            import requests
+            import requests  # noqa: F401
             print("✅ Requests imported")
         except Exception as e:
             print(f"❌ Requests import failed: {e}")

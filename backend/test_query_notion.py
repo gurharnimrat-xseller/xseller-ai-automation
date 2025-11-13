@@ -1,7 +1,7 @@
 """
 Quick script to query recent entries from Notion
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
+from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401
 import os
 from notion_client import Client
 from dotenv import load_dotenv

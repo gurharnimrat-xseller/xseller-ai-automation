@@ -1,11 +1,11 @@
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 from __future__ import annotations
 
+from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401
 from datetime import datetime
 from typing import List, Optional
 
 from sqlalchemy import Column, DateTime, JSON, func, Integer
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, SQLModel
 
 try:
     from werkzeug.security import check_password_hash, generate_password_hash

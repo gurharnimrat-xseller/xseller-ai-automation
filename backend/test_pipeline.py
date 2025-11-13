@@ -4,8 +4,6 @@ Test the entire content generation pipeline:
 2. Generate viral text posts
 3. Generate viral video scripts
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
-
 import asyncio
 import sys
 import os
@@ -13,8 +11,9 @@ import os
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(__file__))
 
-from app import content_scraper
-from app import script_generator
+from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401, E402
+from app import content_scraper  # noqa: E402
+from app import script_generator  # noqa: E402
 
 
 async def main():

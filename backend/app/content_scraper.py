@@ -1,10 +1,10 @@
+from __future__ import annotations
+
 """
 Content Scraper Module
 Handles RSS feeds, web scraping, and content aggregation from multiple sources.
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
-
-from __future__ import annotations
+from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401
 
 import hashlib
 import re

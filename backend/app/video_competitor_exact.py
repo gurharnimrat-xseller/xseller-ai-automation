@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 EXACT COMPETITOR VIDEO REPLICATION
 30-second structure matching viral tech shorts
@@ -9,9 +11,7 @@ Structure:
 18-24s: Impact (Transformation message)
 24-30s: CTA (Link in bio)
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
-
-from __future__ import annotations
+from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401
 
 import os
 import tempfile
@@ -24,7 +24,6 @@ try:
         VideoFileClip, ColorClip, CompositeVideoClip,
         concatenate_videoclips, AudioFileClip, ImageClip
     )
-    from moviepy.video.fx.all import fadein, fadeout, resize
     import numpy as np
     MOVIEPY_AVAILABLE = True
 except ImportError:

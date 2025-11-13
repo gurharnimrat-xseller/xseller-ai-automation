@@ -2,15 +2,14 @@
 Test EXACT Competitor-Style Video Generation
 Matches viral tech shorts (30 seconds, 5-scene structure)
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
-
 import asyncio
 import sys
 import os
 
 sys.path.insert(0, os.path.dirname(__file__))
 
-from app import video_competitor_exact
+from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401, E402
+from app import video_competitor_exact  # noqa: E402
 
 
 async def main():

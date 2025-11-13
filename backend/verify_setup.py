@@ -84,5 +84,5 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401
     sys.exit(main())
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
