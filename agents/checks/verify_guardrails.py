@@ -3,11 +3,11 @@ import re
 import sys
 
 INCLUDE = ("runners/", "agents/", "backend/", "scripts/")
-EXCLUDE = ("/tests/", "/node_modules/", "/vendor/", "/.venv/", "/docs/")
+EXCLUDE = ("/tests/", "/node_modules/", "/vendor/", "/.venv/", "/venv/", "/docs/", "verify_guardrails.py")
 DENY_IMPORTS = (
-    r"\bimport\s+openai\b",
-    r"\bimport\s+anthropic\b",
-    r"\bimport\s+google\.generativeai\b",
+    r"^[^#]*\bimport\s+openai\b",
+    r"^[^#]*\bimport\s+anthropic\b",
+    r"^[^#]*\bimport\s+google\.generativeai\b",
 )
 REQUIRE_ROUTER_HINT = r"agents\.checks\.router"
 
@@ -15,7 +15,11 @@ REQUIRE_ROUTER_HINT = r"agents\.checks\.router"
 def should_scan(path: str) -> bool:
     if not path.startswith("./"):
         path = "./" + path.lstrip("./")
+    # Exclude specific patterns
     if any(part in path for part in EXCLUDE):
+        return False
+    # Exclude the verify_guardrails.py script itself
+    if path.endswith("verify_guardrails.py"):
         return False
     return any(path.startswith(f"./{inc}") for inc in INCLUDE)
 
@@ -30,14 +34,21 @@ def main() -> int:
             if not name.endswith(".py"):
                 continue
             path = os.path.join(root, name)
+            # Skip verify_guardrails.py itself
+            if path.endswith("verify_guardrails.py"):
+                continue
             try:
                 text = open(path, "r", encoding="utf-8", errors="ignore").read()
             except Exception:
                 continue
-            if any(re.search(pat, text) for pat in DENY_IMPORTS):
-                offenders.append((path, "Direct AI client import"))
+            # Check for direct imports (line by line to exclude comments)
+            for line in text.split('\n'):
+                if any(re.search(pat, line) for pat in DENY_IMPORTS):
+                    offenders.append((path, "Direct AI client import"))
+                    break
+            # Check for router import requirement
             if re.search(r"\bcomplete|generate|llm|client", text, re.I):
-                if REQUIRE_ROUTER_HINT not in text:
+                if not re.search(REQUIRE_ROUTER_HINT, text):
                     offenders.append((path, "Missing router import"))
 
     if offenders:
