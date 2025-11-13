@@ -1,14 +1,20 @@
 name: M01 Daily Batch
 
 on:
-  # Run once per day (about 9am NZT ≈ 20:00 UTC previous day)
+  # Run daily at 09:00 NZT (20:00 UTC previous day, 21:00 UTC during DST)
+  # NZT = UTC+12 (standard) or UTC+13 (daylight saving)
+  # Cron runs at 20:00 UTC year-round → ~09:00 NZT Nov-Mar, ~08:00 NZT Apr-Oct
   schedule:
     - cron: "0 20 * * *"
-  # Allow manual runs from the GitHub UI
+  # Allow manual runs from the GitHub UI for testing
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: m01-batch-${{ github.workflow }}
+  cancel-in-progress: false  # Let daily batch complete
 
 jobs:
   m01_daily_batch:
@@ -30,6 +36,13 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-${{ hashFiles('backend/requirements*.txt') }}
+          restore-keys: pip-${{ runner.os }}-
 
       - name: Install backend dependencies
         working-directory: backend
