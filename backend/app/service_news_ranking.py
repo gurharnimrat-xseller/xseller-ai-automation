@@ -1,10 +1,11 @@
+from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 """
 News ranking service (M01A).
 
 Uses LLM (via router) to rank articles by viral potential.
 """
 
-from agents.checks.router import route_request  # guardrails - use router for LLM calls
+from agents.checks.router import route_request  # Additional import for LLM calls
 
 import json
 import re
