@@ -173,7 +173,7 @@ from agents.checks.router import should_offload, offload_to_gemini
 - Keep current layout:
   - `agents/checks/router.py`, `agents/checks/verify_guardrails.py`, `agents/checks/monitor.py`
   - `docs/*` (no moves/renames)
-  - Workflows: `.github/workflows/guardrails.yml`, `offload_gemini.yml`, `monitor.yml`
+  - Workflows: `.github/workflows/ci.yml` (includes guardrails), `m01_daily_batch.yml`, `offload_gemini.yml`, `monitor.yml`
 
 **Commits/PRs**
 
