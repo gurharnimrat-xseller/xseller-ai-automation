@@ -1,7 +1,11 @@
 """
 Quick script to query recent entries from Notion
 """
-from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401
+
+from agents.checks.router import (
+    should_offload,
+    offload_to_gemini,
+)  # noqa: F401
 import os
 from notion_client import Client
 from dotenv import load_dotenv
@@ -15,21 +19,33 @@ try:
     # Query recent entries
     results = client.databases.query(
         database_id=db_id,
-        sorts=[
-            {
-                "property": "EOD Date",
-                "direction": "descending"
-            }
-        ],
-        page_size=5
+        sorts=[{"property": "EOD Date", "direction": "descending"}],
+        page_size=5,
     )
 
     print(f"✅ Recent entries in database:\n")
-    for page in results.get('results', []):
-        title = page.get('properties', {}).get('Item', {}).get('title', [{}])[0].get('plain_text', 'No title')
-        eod_date = page.get('properties', {}).get('EOD Date', {}).get('date', {})
-        status = page.get('properties', {}).get('Status', {}).get('status', {}).get('name', 'Unknown')
-        owner = page.get('properties', {}).get('Owner', {}).get('rich_text', [{}])[0].get('plain_text', 'Unknown')
+    for page in results.get("results", []):
+        title = (
+            page.get("properties", {})
+            .get("Item", {})
+            .get("title", [{}])[0]
+            .get("plain_text", "No title")
+        )
+        eod_date = (
+            page.get("properties", {}).get("EOD Date", {}).get("date", {})
+        )
+        status = (
+            page.get("properties", {})
+            .get("Status", {})
+            .get("status", {})
+            .get("name", "Unknown")
+        )
+        owner = (
+            page.get("properties", {})
+            .get("Owner", {})
+            .get("rich_text", [{}])[0]
+            .get("plain_text", "Unknown")
+        )
 
         print(f"  📝 {title}")
         print(f"     Status: {status}")

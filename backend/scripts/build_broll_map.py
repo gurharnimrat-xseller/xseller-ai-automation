@@ -1,4 +1,7 @@
-from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401
+from agents.checks.router import (
+    should_offload,
+    offload_to_gemini,
+)  # noqa: F401
 import csv
 import re
 from pathlib import Path
@@ -30,7 +33,9 @@ def build_rows(scene_times):
             {
                 "timestamp_s": timestamp,
                 "frame_file": frame_path.name,
-                "is_scene_change": any(abs(timestamp - t) < 0.5 for t in scene_times),
+                "is_scene_change": any(
+                    abs(timestamp - t) < 0.5 for t in scene_times
+                ),
                 "notes": "",
             }
         )
@@ -42,7 +47,15 @@ def main():
     rows = build_rows(scene_times)
     OUTPUT_CSV.parent.mkdir(parents=True, exist_ok=True)
     with OUTPUT_CSV.open("w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=["timestamp_s", "frame_file", "is_scene_change", "notes"])
+        writer = csv.DictWriter(
+            f,
+            fieldnames=[
+                "timestamp_s",
+                "frame_file",
+                "is_scene_change",
+                "notes",
+            ],
+        )
         writer.writeheader()
         writer.writerows(rows)
     print(f"Wrote {len(rows)} entries to {OUTPUT_CSV}")

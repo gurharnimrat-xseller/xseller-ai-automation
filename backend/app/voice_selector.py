@@ -4,7 +4,10 @@ from __future__ import annotations
 Voice Selection System for TTS
 Allows users to preview and select voices from ElevenLabs
 """
-from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401
+from agents.checks.router import (
+    should_offload,
+    offload_to_gemini,
+)  # noqa: F401
 
 import os
 from typing import Dict, List, Optional
@@ -25,7 +28,7 @@ RECOMMENDED_VOICES = {
         "gender": "Male",
         "accent": "American",
         "style": "Deep, narrator",
-        "use_case": "News, documentaries"
+        "use_case": "News, documentaries",
     },
     "antoni": {
         "id": "ErXwobaYiN019PkySvjV",
@@ -33,7 +36,7 @@ RECOMMENDED_VOICES = {
         "gender": "Male",
         "accent": "American",
         "style": "Well-rounded, neutral",
-        "use_case": "General narration, news"
+        "use_case": "General narration, news",
     },
     "joseph": {
         "id": "Zlb1dXrM653N07WRdFW3",
@@ -41,7 +44,7 @@ RECOMMENDED_VOICES = {
         "gender": "Male",
         "accent": "British",
         "style": "Professional, news anchor",
-        "use_case": "News, professional content"
+        "use_case": "News, professional content",
     },
     "rachel": {
         "id": "21m00Tcm4TlvDq8ikWAM",
@@ -49,7 +52,7 @@ RECOMMENDED_VOICES = {
         "gender": "Female",
         "accent": "American",
         "style": "Professional, calm",
-        "use_case": "News, narration"
+        "use_case": "News, narration",
     },
     "charlotte": {
         "id": "XB0fDUnXU5powFXDhCwa",
@@ -57,7 +60,7 @@ RECOMMENDED_VOICES = {
         "gender": "Female",
         "accent": "British",
         "style": "Professional, clear",
-        "use_case": "News, educational"
+        "use_case": "News, educational",
     },
     "daniel": {
         "id": "onwK4e9ZLuTAKqWW03F9",
@@ -65,12 +68,13 @@ RECOMMENDED_VOICES = {
         "gender": "Male",
         "accent": "British",
         "style": "Deep, authoritative",
-        "use_case": "News, documentaries"
-    }
+        "use_case": "News, documentaries",
+    },
 }
 
 
 # ==================== VOICE ANALYSIS ====================
+
 
 def analyze_script_style(script: str) -> Dict[str, str]:
     """
@@ -82,9 +86,24 @@ def analyze_script_style(script: str) -> Dict[str, str]:
     script_lower = script.lower()
 
     # Detect content type
-    is_news = any(word in script_lower for word in ['breaking', 'news', 'reported', 'according to', 'announced'])
-    is_tech = any(word in script_lower for word in ['ai', 'technology', 'app', 'software', 'tech', 'digital'])
-    is_business = any(word in script_lower for word in ['company', 'market', 'business', 'revenue', 'ceo'])
+    is_news = any(
+        word in script_lower
+        for word in [
+            "breaking",
+            "news",
+            "reported",
+            "according to",
+            "announced",
+        ]
+    )
+    is_tech = any(
+        word in script_lower
+        for word in ["ai", "technology", "app", "software", "tech", "digital"]
+    )
+    is_business = any(
+        word in script_lower
+        for word in ["company", "market", "business", "revenue", "ceo"]
+    )
 
     # Determine style
     if is_news:
@@ -115,17 +134,18 @@ def analyze_script_style(script: str) -> Dict[str, str]:
         "recommended_accent": recommended_accent,
         "is_news": is_news,
         "is_tech": is_tech,
-        "is_business": is_business
+        "is_business": is_business,
     }
 
 
 # ==================== VOICE PREVIEW GENERATION ====================
 
+
 async def generate_voice_preview(
     voice_id: str,
     voice_name: str,
     sample_text: str,
-    output_dir: Optional[str] = None
+    output_dir: Optional[str] = None,
 ) -> Optional[str]:
     """
     Generate a preview audio file for a specific voice.
@@ -140,14 +160,16 @@ async def generate_voice_preview(
         Path to generated preview file or None on failure
     """
     if not ELEVENLABS_API_KEY:
-        print(f"[VoiceSelector] Cannot generate preview: ElevenLabs API key not configured")
+        print(
+            f"[VoiceSelector] Cannot generate preview: ElevenLabs API key not configured"
+        )
         return None
 
     try:
         async with httpx.AsyncClient() as client:
             headers = {
                 "xi-api-key": ELEVENLABS_API_KEY,
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
             }
 
             url = f"{ELEVENLABS_API_BASE}/text-to-speech/{voice_id}"
@@ -157,16 +179,22 @@ async def generate_voice_preview(
                 "voice_settings": {
                     "stability": 0.5,
                     "similarity_boost": 0.75,
-                }
+                },
             }
 
             print(f"[VoiceSelector] Generating preview for {voice_name}...")
-            response = await client.post(url, headers=headers, json=payload, timeout=30.0)
+            response = await client.post(
+                url, headers=headers, json=payload, timeout=30.0
+            )
 
             if response.status_code == 200:
                 # Save preview audio
                 if not output_dir:
-                    output_dir = Path(__file__).parent.parent / "output" / "voice_previews"
+                    output_dir = (
+                        Path(__file__).parent.parent
+                        / "output"
+                        / "voice_previews"
+                    )
                 else:
                     output_dir = Path(output_dir)
 
@@ -179,17 +207,20 @@ async def generate_voice_preview(
                 print(f"[VoiceSelector] ✅ Preview generated: {output_path}")
                 return str(output_path)
             else:
-                print(f"[VoiceSelector] API error for {voice_name}: {response.status_code}")
+                print(
+                    f"[VoiceSelector] API error for {voice_name}: {response.status_code}"
+                )
                 return None
 
     except Exception as e:
-        print(f"[VoiceSelector] Error generating preview for {voice_name}: {e}")
+        print(
+            f"[VoiceSelector] Error generating preview for {voice_name}: {e}"
+        )
         return None
 
 
 async def generate_all_previews(
-    script: str,
-    recommended_only: bool = True
+    script: str, recommended_only: bool = True
 ) -> Dict[str, str]:
     """
     Generate preview audio files for all recommended voices.
@@ -225,18 +256,26 @@ async def generate_all_previews(
 
     if recommended_only:
         # Filter by gender preference
-        if style_analysis['recommended_gender'] == 'male':
-            voices_to_preview = {k: v for k, v in voices_to_preview.items() if v['gender'] == 'Male'}
-        elif style_analysis['recommended_gender'] == 'female':
-            voices_to_preview = {k: v for k, v in voices_to_preview.items() if v['gender'] == 'Female'}
+        if style_analysis["recommended_gender"] == "male":
+            voices_to_preview = {
+                k: v
+                for k, v in voices_to_preview.items()
+                if v["gender"] == "Male"
+            }
+        elif style_analysis["recommended_gender"] == "female":
+            voices_to_preview = {
+                k: v
+                for k, v in voices_to_preview.items()
+                if v["gender"] == "Female"
+            }
 
     print(f"🎙️ Generating {len(voices_to_preview)} voice previews...\n")
 
     for voice_key, voice_info in voices_to_preview.items():
         preview_path = await generate_voice_preview(
-            voice_id=voice_info['id'],
-            voice_name=voice_info['name'],
-            sample_text=sample_text
+            voice_id=voice_info["id"],
+            voice_name=voice_info["name"],
+            sample_text=sample_text,
         )
 
         if preview_path:
@@ -246,6 +285,7 @@ async def generate_all_previews(
 
 
 # ==================== VOICE SELECTION ====================
+
 
 def get_voice_recommendations(script: str) -> List[Dict]:
     """
@@ -263,39 +303,57 @@ def get_voice_recommendations(script: str) -> List[Dict]:
         reasons = []
 
         # Gender match
-        if style_analysis['recommended_gender'] == 'either':
+        if style_analysis["recommended_gender"] == "either":
             score += 5
-        elif style_analysis['recommended_gender'].lower() == voice_info['gender'].lower():
+        elif (
+            style_analysis["recommended_gender"].lower()
+            == voice_info["gender"].lower()
+        ):
             score += 10
-            reasons.append(f"Matches recommended gender ({voice_info['gender']})")
+            reasons.append(
+                f"Matches recommended gender ({voice_info['gender']})"
+            )
 
         # Accent match
-        if voice_info['accent'] in style_analysis['recommended_accent']:
+        if voice_info["accent"] in style_analysis["recommended_accent"]:
             score += 8
-            reasons.append(f"Matches recommended accent ({voice_info['accent']})")
+            reasons.append(
+                f"Matches recommended accent ({voice_info['accent']})"
+            )
 
         # Style/use case match
-        if style_analysis['is_news'] and 'news' in voice_info['use_case'].lower():
+        if (
+            style_analysis["is_news"]
+            and "news" in voice_info["use_case"].lower()
+        ):
             score += 10
             reasons.append("Perfect for news content")
 
-        if style_analysis['is_tech'] and any(word in voice_info['style'].lower() for word in ['clear', 'engaging']):
+        if style_analysis["is_tech"] and any(
+            word in voice_info["style"].lower()
+            for word in ["clear", "engaging"]
+        ):
             score += 8
             reasons.append("Great for tech content")
 
-        if style_analysis['is_business'] and 'professional' in voice_info['style'].lower():
+        if (
+            style_analysis["is_business"]
+            and "professional" in voice_info["style"].lower()
+        ):
             score += 10
             reasons.append("Professional tone for business")
 
-        recommendations.append({
-            **voice_info,
-            "key": voice_key,
-            "score": score,
-            "reasons": reasons
-        })
+        recommendations.append(
+            {
+                **voice_info,
+                "key": voice_key,
+                "score": score,
+                "reasons": reasons,
+            }
+        )
 
     # Sort by score (highest first)
-    recommendations.sort(key=lambda x: x['score'], reverse=True)
+    recommendations.sort(key=lambda x: x["score"], reverse=True)
 
     return recommendations
 
@@ -311,12 +369,13 @@ def display_recommendations(recommendations: List[Dict]) -> None:
         print(f"   Style: {voice['style']}")
         print(f"   Best for: {voice['use_case']}")
         print(f"   Score: {voice['score']}/30")
-        if voice['reasons']:
+        if voice["reasons"]:
             print(f"   Why: {', '.join(voice['reasons'])}")
         print()
 
 
 # ==================== TESTING ====================
+
 
 async def test_voice_selector(script: str):
     """Test the voice selector with a sample script."""
@@ -338,19 +397,19 @@ async def test_voice_selector(script: str):
 
     for voice in top_3:
         preview_path = await generate_voice_preview(
-            voice_id=voice['id'],
-            voice_name=voice['name'],
-            sample_text=script[:200]
+            voice_id=voice["id"],
+            voice_name=voice["name"],
+            sample_text=script[:200],
         )
         if preview_path:
-            previews[voice['key']] = preview_path
+            previews[voice["key"]] = preview_path
 
     print(f"\n{'='*80}")
     print(f"✅ PREVIEW GENERATION COMPLETE")
     print(f"{'='*80}")
     print(f"\nGenerated {len(previews)} preview files:")
     for voice_key, path in previews.items():
-        voice_name = RECOMMENDED_VOICES[voice_key]['name']
+        voice_name = RECOMMENDED_VOICES[voice_key]["name"]
         print(f"  • {voice_name}: {path}")
     print()
 

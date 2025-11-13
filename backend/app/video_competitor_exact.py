@@ -11,7 +11,10 @@ Structure:
 18-24s: Impact (Transformation message)
 24-30s: CTA (Link in bio)
 """
-from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401
+from agents.checks.router import (
+    should_offload,
+    offload_to_gemini,
+)  # noqa: F401
 
 import os
 import tempfile
@@ -21,10 +24,15 @@ from pathlib import Path
 
 try:
     from moviepy.editor import (
-        VideoFileClip, ColorClip, CompositeVideoClip,
-        concatenate_videoclips, AudioFileClip, ImageClip
+        VideoFileClip,
+        ColorClip,
+        CompositeVideoClip,
+        concatenate_videoclips,
+        AudioFileClip,
+        ImageClip,
     )
     import numpy as np
+
     MOVIEPY_AVAILABLE = True
 except ImportError:
     MOVIEPY_AVAILABLE = False
@@ -85,7 +93,7 @@ TEXT_STYLES = {
         "stroke_color": "black",
         "stroke_width": 2,
         "position": "bottom",  # Lower third
-    }
+    },
 }
 
 # Color schemes
@@ -97,6 +105,7 @@ COLORS = {
 
 
 # ==================== SCRIPT PARSING ====================
+
 
 def parse_30s_structure(script: str, title: str) -> List[Dict[str, Any]]:
     """
@@ -120,7 +129,7 @@ def parse_30s_structure(script: str, title: str) -> List[Dict[str, Any]]:
     }
 
     # Parse script sections
-    lines = script.split('\n')
+    lines = script.split("\n")
     current_section = None
 
     for line in lines:
@@ -130,65 +139,91 @@ def parse_30s_structure(script: str, title: str) -> List[Dict[str, Any]]:
 
         line_lower = line.lower()
 
-        if 'hook' in line_lower or line_lower.startswith('0'):
-            current_section = 'hook'
+        if "hook" in line_lower or line_lower.startswith("0"):
+            current_section = "hook"
             # Extract text after colon
-            if ':' in line:
-                scenes_data['hook']['text'] = line.split(':', 1)[1].strip()
-        elif 'demo' in line_lower or line_lower.startswith('3') or 'tool' in line_lower:
-            current_section = 'demo'
-            if ':' in line:
-                scenes_data['demo']['text'] = line.split(':', 1)[1].strip()
-        elif 'proof' in line_lower or line_lower.startswith('9') or 'before' in line_lower or 'after' in line_lower:
-            current_section = 'proof'
-            if ':' in line:
-                scenes_data['proof']['text'] = line.split(':', 1)[1].strip()
-        elif 'impact' in line_lower or line_lower.startswith('18') or 'changes' in line_lower or 'why' in line_lower:
-            current_section = 'impact'
-            if ':' in line:
-                scenes_data['impact']['text'] = line.split(':', 1)[1].strip()
-        elif 'cta' in line_lower or line_lower.startswith('24') or 'link' in line_lower or 'follow' in line_lower:
-            current_section = 'cta'
-            if ':' in line:
-                scenes_data['cta']['text'] = line.split(':', 1)[1].strip()
-        elif current_section and ':' not in line:
+            if ":" in line:
+                scenes_data["hook"]["text"] = line.split(":", 1)[1].strip()
+        elif (
+            "demo" in line_lower
+            or line_lower.startswith("3")
+            or "tool" in line_lower
+        ):
+            current_section = "demo"
+            if ":" in line:
+                scenes_data["demo"]["text"] = line.split(":", 1)[1].strip()
+        elif (
+            "proof" in line_lower
+            or line_lower.startswith("9")
+            or "before" in line_lower
+            or "after" in line_lower
+        ):
+            current_section = "proof"
+            if ":" in line:
+                scenes_data["proof"]["text"] = line.split(":", 1)[1].strip()
+        elif (
+            "impact" in line_lower
+            or line_lower.startswith("18")
+            or "changes" in line_lower
+            or "why" in line_lower
+        ):
+            current_section = "impact"
+            if ":" in line:
+                scenes_data["impact"]["text"] = line.split(":", 1)[1].strip()
+        elif (
+            "cta" in line_lower
+            or line_lower.startswith("24")
+            or "link" in line_lower
+            or "follow" in line_lower
+        ):
+            current_section = "cta"
+            if ":" in line:
+                scenes_data["cta"]["text"] = line.split(":", 1)[1].strip()
+        elif current_section and ":" not in line:
             # Continuation of current section
-            if scenes_data[current_section]['text']:
-                scenes_data[current_section]['text'] += ' ' + line
+            if scenes_data[current_section]["text"]:
+                scenes_data[current_section]["text"] += " " + line
             else:
-                scenes_data[current_section]['text'] = line
+                scenes_data[current_section]["text"] = line
 
     # Fallback defaults if sections are empty
-    if not scenes_data['hook']['text']:
-        scenes_data['hook']['text'] = f"CAN AI DO THIS? {title}"
-    if not scenes_data['demo']['text']:
-        scenes_data['demo']['text'] = f"Meet {title}"
-    if not scenes_data['proof']['text']:
-        scenes_data['proof']['text'] = "10X faster results. Zero coding needed."
-    if not scenes_data['impact']['text']:
-        scenes_data['impact']['text'] = "THIS CHANGES EVERYTHING"
-    if not scenes_data['cta']['text']:
-        scenes_data['cta']['text'] = "LINK IN BIO 👇 Follow for more AI tips"
+    if not scenes_data["hook"]["text"]:
+        scenes_data["hook"]["text"] = f"CAN AI DO THIS? {title}"
+    if not scenes_data["demo"]["text"]:
+        scenes_data["demo"]["text"] = f"Meet {title}"
+    if not scenes_data["proof"]["text"]:
+        scenes_data["proof"][
+            "text"
+        ] = "10X faster results. Zero coding needed."
+    if not scenes_data["impact"]["text"]:
+        scenes_data["impact"]["text"] = "THIS CHANGES EVERYTHING"
+    if not scenes_data["cta"]["text"]:
+        scenes_data["cta"]["text"] = "LINK IN BIO 👇 Follow for more AI tips"
 
     # Convert to scene list
     scenes = []
     for scene_type, data in scenes_data.items():
-        scenes.append({
-            "type": scene_type,
-            "text": data["text"],
-            "duration": data["duration"],
-            "start_time": data["start"],
-            "end_time": data["start"] + data["duration"],
-        })
+        scenes.append(
+            {
+                "type": scene_type,
+                "text": data["text"],
+                "duration": data["duration"],
+                "start_time": data["start"],
+                "end_time": data["start"] + data["duration"],
+            }
+        )
 
     print(f"[competitor] Parsed 30s structure with {len(scenes)} scenes")
     for scene in scenes:
-        print(f"  {scene['type']}: {scene['start_time']}-{scene['end_time']}s - {scene['text'][:50]}...")
+        print(
+            f"  {scene['type']}: {scene['start_time']}-{scene['end_time']}s - {scene['text'][:50]}..."
+        )
 
     return scenes
 
 
 # ==================== TEXT CREATION ====================
+
 
 def _load_bold_font(fontsize: int) -> ImageFont.FreeTypeFont:
     """
@@ -225,7 +260,7 @@ def create_text_image_pil(
     stroke_color: str = "black",
     stroke_width: int = 3,
     size: Tuple[int, int] = (VIDEO_WIDTH, VIDEO_HEIGHT),
-    max_width: int = None
+    max_width: int = None,
 ) -> Image.Image:
     """
     Create text image using PIL (no ImageMagick required).
@@ -234,7 +269,7 @@ def create_text_image_pil(
         max_width = size[0] - 100  # Default padding
 
     # Create transparent image
-    img = Image.new('RGBA', size, (0, 0, 0, 0))
+    img = Image.new("RGBA", size, (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
 
     # Load font
@@ -282,7 +317,12 @@ def create_text_image_pil(
         if stroke_width > 0:
             for adj_x in range(-stroke_width, stroke_width + 1):
                 for adj_y in range(-stroke_width, stroke_width + 1):
-                    draw.text((x + adj_x, current_y + adj_y), line, font=font, fill=stroke_color)
+                    draw.text(
+                        (x + adj_x, current_y + adj_y),
+                        line,
+                        font=font,
+                        fill=stroke_color,
+                    )
 
         # Draw main text
         draw.text((x, current_y), line, font=font, fill=color)
@@ -291,7 +331,7 @@ def create_text_image_pil(
 
     # Convert RGBA to RGB for MoviePy compatibility
     # Create a black background and composite the RGBA image on it
-    rgb_img = Image.new('RGB', size, (0, 0, 0))
+    rgb_img = Image.new("RGB", size, (0, 0, 0))
     rgb_img.paste(img, (0, 0), img)  # Use img as mask for transparency
 
     return rgb_img
@@ -301,7 +341,7 @@ def create_text_exact_style(
     text: str,
     style_name: str,
     duration: float,
-    size: Tuple[int, int] = (VIDEO_WIDTH, VIDEO_HEIGHT)
+    size: Tuple[int, int] = (VIDEO_WIDTH, VIDEO_HEIGHT),
 ) -> ImageClip:
     """
     Create text with EXACT competitor styling using PIL (no ImageMagick required).
@@ -320,7 +360,7 @@ def create_text_exact_style(
             stroke_color=style["stroke_color"],
             stroke_width=style["stroke_width"],
             size=size,
-            max_width=size[0] - 100  # Padding
+            max_width=size[0] - 100,  # Padding
         )
 
         # Convert PIL image to ImageClip
@@ -329,12 +369,12 @@ def create_text_exact_style(
         # Position based on style
         position = style["position"]
         if position == "center":
-            txt = txt.set_position('center')
+            txt = txt.set_position("center")
         elif position == "top":
-            txt = txt.set_position(('center', 100))
+            txt = txt.set_position(("center", 100))
         elif position == "bottom":
             # Lower third
-            txt = txt.set_position(('center', size[1] - 250))
+            txt = txt.set_position(("center", size[1] - 250))
 
         # Animations
         txt = txt.crossfadein(0.2)
@@ -349,17 +389,18 @@ def create_text_exact_style(
         text_img = create_text_image_pil(
             text=text,
             fontsize=60,
-            color='white',
-            stroke_color='black',
+            color="white",
+            stroke_color="black",
             stroke_width=2,
-            size=size
+            size=size,
         )
         txt = ImageClip(np.array(text_img)).set_duration(duration)
-        txt = txt.set_position('center')
+        txt = txt.set_position("center")
         return txt
 
 
 # ==================== SMART VIDEO FETCHING ====================
+
 
 def extract_smart_keywords(text: str, title: str) -> List[str]:
     """
@@ -371,20 +412,47 @@ def extract_smart_keywords(text: str, title: str) -> List[str]:
     keywords = []
 
     # Extract company/product names (capitalized words)
-    proper_nouns = re.findall(r'\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b', text + " " + title)
+    proper_nouns = re.findall(
+        r"\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b", text + " " + title
+    )
     keywords.extend(proper_nouns[:3])
 
     # Extract key technical terms
-    tech_terms = ['GPT', 'Claude', 'Gemini', 'ChatGPT', 'Midjourney', 'DALL-E', 'Stable Diffusion',
-                  'API', 'model', 'robot', 'automation', 'coding', 'vision', 'voice', 'image']
+    tech_terms = [
+        "GPT",
+        "Claude",
+        "Gemini",
+        "ChatGPT",
+        "Midjourney",
+        "DALL-E",
+        "Stable Diffusion",
+        "API",
+        "model",
+        "robot",
+        "automation",
+        "coding",
+        "vision",
+        "voice",
+        "image",
+    ]
 
     for term in tech_terms:
         if term.lower() in text.lower() or term.lower() in title.lower():
             keywords.append(term)
 
     # Extract action words specific to the content
-    action_words = ['coding', 'writing', 'generating', 'creating', 'analyzing', 'processing',
-                    'designing', 'editing', 'translating', 'summarizing']
+    action_words = [
+        "coding",
+        "writing",
+        "generating",
+        "creating",
+        "analyzing",
+        "processing",
+        "designing",
+        "editing",
+        "translating",
+        "summarizing",
+    ]
 
     for action in action_words:
         if action in text.lower():
@@ -396,10 +464,12 @@ def extract_smart_keywords(text: str, title: str) -> List[str]:
 
     # Fallback to title words
     title_words = [w for w in title.split() if len(w) > 4]
-    return title_words[:2] if title_words else ['technology', 'innovation']
+    return title_words[:2] if title_words else ["technology", "innovation"]
 
 
-async def fetch_relevant_pexels_video(keywords: List[str], duration: int = 5) -> Optional[str]:
+async def fetch_relevant_pexels_video(
+    keywords: List[str], duration: int = 5
+) -> Optional[str]:
     """
     Fetch SPECIFIC video from Pexels based on script keywords.
     """
@@ -413,9 +483,11 @@ async def fetch_relevant_pexels_video(keywords: List[str], duration: int = 5) ->
 
             # Try each keyword combination
             search_queries = [
-                ' '.join(keywords),  # All keywords together
-                keywords[0] if keywords else 'technology',  # First keyword
-                f"{keywords[0]} demo" if keywords else 'tech demo',  # Keyword + demo
+                " ".join(keywords),  # All keywords together
+                keywords[0] if keywords else "technology",  # First keyword
+                (
+                    f"{keywords[0]} demo" if keywords else "tech demo"
+                ),  # Keyword + demo
             ]
 
             for query in search_queries:
@@ -429,7 +501,7 @@ async def fetch_relevant_pexels_video(keywords: List[str], duration: int = 5) ->
                         "per_page": 5,
                         "orientation": "portrait",
                     },
-                    timeout=15.0
+                    timeout=15.0,
                 )
 
                 if response.status_code == 200:
@@ -440,11 +512,18 @@ async def fetch_relevant_pexels_video(keywords: List[str], duration: int = 5) ->
                         if video.get("duration", 0) >= duration:
                             # Get HD video file
                             for file in video.get("video_files", []):
-                                if file.get("quality") == "hd" and file.get("width") == 1080:
-                                    print(f"[competitor] ✅ Found relevant video for '{query}'")
+                                if (
+                                    file.get("quality") == "hd"
+                                    and file.get("width") == 1080
+                                ):
+                                    print(
+                                        f"[competitor] ✅ Found relevant video for '{query}'"
+                                    )
                                     return file.get("link")
 
-            print(f"[competitor] No specific video found, using solid background")
+            print(
+                f"[competitor] No specific video found, using solid background"
+            )
             return None
 
     except Exception as e:
@@ -454,11 +533,12 @@ async def fetch_relevant_pexels_video(keywords: List[str], duration: int = 5) ->
 
 # ==================== SCENE CREATION ====================
 
+
 async def create_competitor_scene(
     scene: Dict[str, Any],
     title: str = "",
     size: Tuple[int, int] = (VIDEO_WIDTH, VIDEO_HEIGHT),
-    use_specific_footage: bool = True
+    use_specific_footage: bool = True,
 ) -> CompositeVideoClip:
     """
     Create scene matching exact competitor style.
@@ -494,7 +574,9 @@ async def create_competitor_scene(
         if video_url:
             try:
                 # Download video
-                temp_video = tempfile.NamedTemporaryFile(suffix='.mp4', delete=False)
+                temp_video = tempfile.NamedTemporaryFile(
+                    suffix=".mp4", delete=False
+                )
                 async with httpx.AsyncClient() as client:
                     response = await client.get(video_url, timeout=30.0)
                     temp_video.write(response.content)
@@ -511,13 +593,17 @@ async def create_competitor_scene(
                 video_clip = video_clip.resize(size)
 
                 # Add color overlay for brand consistency (30% opacity)
-                overlay = ColorClip(size=size, color=bg_color, duration=duration).set_opacity(0.3)
+                overlay = ColorClip(
+                    size=size, color=bg_color, duration=duration
+                ).set_opacity(0.3)
                 bg = CompositeVideoClip([video_clip, overlay])
 
                 # Clean up temp file
                 os.unlink(temp_video.name)
 
-                print(f"[competitor] ✅ Using relevant footage for {scene_type}")
+                print(
+                    f"[competitor] ✅ Using relevant footage for {scene_type}"
+                )
             except Exception as e:
                 print(f"[competitor] Could not load video: {e}")
                 bg = None
@@ -529,10 +615,7 @@ async def create_competitor_scene(
 
     # Create text with exact style
     text_clip = create_text_exact_style(
-        text=text,
-        style_name=scene_type,
-        duration=duration,
-        size=size
+        text=text, style_name=scene_type, duration=duration, size=size
     )
 
     # Composite
@@ -543,6 +626,7 @@ async def create_competitor_scene(
 
 # ==================== VOICEOVER ====================
 
+
 async def generate_voiceover(text: str) -> Optional[str]:
     """Generate voiceover with Eleven Labs."""
     if not ELEVENLABS_API_KEY:
@@ -552,7 +636,7 @@ async def generate_voiceover(text: str) -> Optional[str]:
         async with httpx.AsyncClient() as client:
             headers = {
                 "xi-api-key": ELEVENLABS_API_KEY,
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
             }
 
             voice_id = "21m00Tcm4TlvDq8ikWAM"  # Rachel - clear, professional
@@ -565,12 +649,14 @@ async def generate_voiceover(text: str) -> Optional[str]:
                     "stability": 0.6,  # Slightly more stable for clarity
                     "similarity_boost": 0.8,
                     "style": 0.2,  # Slight expressiveness
-                }
+                },
             }
 
             print("[competitor] Generating voiceover...")
 
-            response = await client.post(url, headers=headers, json=payload, timeout=60.0)
+            response = await client.post(
+                url, headers=headers, json=payload, timeout=60.0
+            )
 
             if response.status_code == 200:
                 audio_dir = Path(__file__).parent.parent / "output" / "audio"
@@ -584,7 +670,9 @@ async def generate_voiceover(text: str) -> Optional[str]:
                 print(f"[competitor] ✅ Voiceover saved: {output_path}")
                 return output_path
             else:
-                print(f"[competitor] Voiceover API error: {response.status_code}")
+                print(
+                    f"[competitor] Voiceover API error: {response.status_code}"
+                )
                 return None
 
     except Exception as e:
@@ -594,11 +682,12 @@ async def generate_voiceover(text: str) -> Optional[str]:
 
 # ==================== MAIN VIDEO GENERATION ====================
 
+
 async def generate_exact_competitor_video(
     script: str,
     title: str,
     output_path: Optional[str] = None,
-    add_voiceover: bool = True
+    add_voiceover: bool = True,
 ) -> Dict[str, Any]:
     """
     Generate EXACT 30-second competitor-style video.
@@ -620,17 +709,19 @@ async def generate_exact_competitor_video(
         # Step 2: Generate voiceover
         voiceover_path = None
         if add_voiceover:
-            full_text = ' '.join([s.get('text', '') for s in scenes])
+            full_text = " ".join([s.get("text", "") for s in scenes])
             voiceover_path = await generate_voiceover(full_text)
 
         # Step 3: Create all 5 scenes with RELEVANT footage
         scene_clips = []
         for i, scene in enumerate(scenes):
-            print(f"\n[competitor] Creating scene {i+1}/5: {scene['type'].upper()}")
+            print(
+                f"\n[competitor] Creating scene {i+1}/5: {scene['type'].upper()}"
+            )
             clip = await create_competitor_scene(
                 scene=scene,
                 title=title,  # Pass title for smart keyword extraction
-                use_specific_footage=True  # Enable relevant video matching
+                use_specific_footage=True,  # Enable relevant video matching
             )
             scene_clips.append(clip)
 
@@ -650,7 +741,9 @@ async def generate_exact_competitor_video(
                     # Speed up slightly if audio is too short
                     speed_factor = audio.duration / final_video.duration
                     if speed_factor > 0.9:  # Only if close
-                        audio = audio.fx(lambda clip: clip.speedx(1 / speed_factor))
+                        audio = audio.fx(
+                            lambda clip: clip.speedx(1 / speed_factor)
+                        )
 
                 final_video = final_video.set_audio(audio)
                 print("[competitor] ✅ Voiceover synced to video")
@@ -670,11 +763,11 @@ async def generate_exact_competitor_video(
         final_video.write_videofile(
             output_path,
             fps=VIDEO_FPS,
-            codec='libx264',
-            preset='medium',
+            codec="libx264",
+            preset="medium",
             threads=4,
-            logger='bar',
-            audio_codec='aac'
+            logger="bar",
+            audio_codec="aac",
         )
 
         # Cleanup
@@ -695,16 +788,14 @@ async def generate_exact_competitor_video(
             "video_path": output_path,
             "duration": 30,
             "scenes": 5,
-            "structure": "Hook/Demo/Proof/Impact/CTA"
+            "structure": "Hook/Demo/Proof/Impact/CTA",
         }
 
     except Exception as e:
         print(f"\n❌ VIDEO GENERATION FAILED")
         print(f"Error: {str(e)}")
         import traceback
+
         traceback.print_exc()
 
-        return {
-            "success": False,
-            "error": str(e)
-        }
+        return {"success": False, "error": str(e)}

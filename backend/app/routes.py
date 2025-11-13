@@ -1,6 +1,12 @@
 from __future__ import annotations
 
-from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401
+import os
+from pathlib import Path
+
+from agents.checks.router import (
+    should_offload,
+    offload_to_gemini,
+)  # noqa: F401
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
@@ -28,53 +34,59 @@ def get_session() -> Session:
 
 # ==================== Dashboard Stats ====================
 
+
 @router.get("/api/stats/dashboard")
-async def get_dashboard_stats(session: Session = Depends(get_session)) -> Dict[str, Any]:
+async def get_dashboard_stats(
+    session: Session = Depends(get_session),
+) -> Dict[str, Any]:
     """Get dashboard statistics and recent activity."""
     try:
         print("[api] GET /api/stats/dashboard called")
         # Count posts by status
         draft_count = session.exec(
-            select(func.count()).select_from(Post).where(
-                Post.status == "draft",
-                Post.deleted_at.is_(None)
-            )
+            select(func.count())
+            .select_from(Post)
+            .where(Post.status == "draft", Post.deleted_at.is_(None))
         ).one()
 
         approved_count = session.exec(
-            select(func.count()).select_from(Post).where(
-                Post.status == "approved",
-                Post.deleted_at.is_(None)
-            )
+            select(func.count())
+            .select_from(Post)
+            .where(Post.status == "approved", Post.deleted_at.is_(None))
         ).one()
 
         # Published today
-        today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+        today = datetime.utcnow().replace(
+            hour=0, minute=0, second=0, microsecond=0
+        )
         published_today_count = session.exec(
-            select(func.count()).select_from(Post).where(
+            select(func.count())
+            .select_from(Post)
+            .where(
                 Post.status == "published",
                 Post.published_at >= today,
-                Post.deleted_at.is_(None)
+                Post.deleted_at.is_(None),
             )
         ).one()
 
         # Overdue (approved but scheduled_at < now)
         now = datetime.utcnow()
         overdue_count = session.exec(
-            select(func.count()).select_from(Post).where(
+            select(func.count())
+            .select_from(Post)
+            .where(
                 Post.status == "approved",
                 Post.scheduled_at.isnot(None),
                 Post.scheduled_at < now,
-                Post.deleted_at.is_(None)
+                Post.deleted_at.is_(None),
             )
         ).one()
 
         # Failed
         failed_count = session.exec(
-            select(func.count()).select_from(Post).where(
-                Post.status == "failed",
-                Post.deleted_at.is_(None)
-            )
+            select(func.count())
+            .select_from(Post)
+            .where(Post.status == "failed", Post.deleted_at.is_(None))
         ).one()
 
         return {
@@ -90,10 +102,12 @@ async def get_dashboard_stats(session: Session = Depends(get_session)) -> Dict[s
     except Exception as e:
         print(f"[api] Error fetching dashboard stats: {str(e)}")
         raise HTTPException(
-            status_code=500, detail=f"Error fetching stats: {str(e)}")
+            status_code=500, detail=f"Error fetching stats: {str(e)}"
+        )
 
 
 # ==================== Content Queue ====================
+
 
 @router.get("/api/content/queue")
 async def get_queue(
@@ -101,12 +115,13 @@ async def get_queue(
     platform: Optional[str] = Query(None),
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
 ) -> Dict[str, Any]:
     """Get content queue with optional filters."""
     try:
         print(
-            f"[api] GET /api/content/queue called - status={status}, platform={platform}, limit={limit}, offset={offset}")
+            f"[api] GET /api/content/queue called - status={status}, platform={platform}, limit={limit}, offset={offset}"
+        )
         # Build query
         stmt = select(Post).where(Post.deleted_at.is_(None))
 
@@ -124,30 +139,33 @@ async def get_queue(
         total = session.exec(count_stmt).one()
 
         # Apply pagination
-        stmt = stmt.order_by(Post.created_at.desc()).limit(
-            limit).offset(offset)
+        stmt = (
+            stmt.order_by(Post.created_at.desc()).limit(limit).offset(offset)
+        )
 
         # Execute query
         posts = session.exec(stmt).all()
 
         # Get assets for video posts
         from app.models import Asset
+
         video_post_ids = [p.id for p in posts if p.kind == "video"]
         assets_map = {}
         if video_post_ids:
             assets_stmt = select(Asset).where(
-                Asset.post_id.in_(video_post_ids),
-                Asset.type == "video"
+                Asset.post_id.in_(video_post_ids), Asset.type == "video"
             )
             assets = session.exec(assets_stmt).all()
             for asset in assets:
                 if asset.post_id not in assets_map:
                     assets_map[asset.post_id] = []
-                assets_map[asset.post_id].append({
-                    "id": asset.id,
-                    "type": asset.type,
-                    "path": asset.path,
-                })
+                assets_map[asset.post_id].append(
+                    {
+                        "id": asset.id,
+                        "type": asset.type,
+                        "path": asset.path,
+                    }
+                )
 
         return {
             "posts": [
@@ -160,10 +178,26 @@ async def get_queue(
                     "tags": post.tags,
                     "platforms": post.platforms,
                     "status": post.status,
-                    "scheduled_at": post.scheduled_at.isoformat() if post.scheduled_at else None,
-                    "published_at": post.published_at.isoformat() if post.published_at else None,
-                    "created_at": post.created_at.isoformat() if post.created_at else None,
-                    "updated_at": post.updated_at.isoformat() if post.updated_at else None,
+                    "scheduled_at": (
+                        post.scheduled_at.isoformat()
+                        if post.scheduled_at
+                        else None
+                    ),
+                    "published_at": (
+                        post.published_at.isoformat()
+                        if post.published_at
+                        else None
+                    ),
+                    "created_at": (
+                        post.created_at.isoformat()
+                        if post.created_at
+                        else None
+                    ),
+                    "updated_at": (
+                        post.updated_at.isoformat()
+                        if post.updated_at
+                        else None
+                    ),
                     # Include video assets
                     "assets": assets_map.get(post.id, []),
                 }
@@ -174,16 +208,18 @@ async def get_queue(
     except Exception as e:
         print(f"[api] Error fetching queue: {str(e)}")
         raise HTTPException(
-            status_code=500, detail=f"Error fetching queue: {str(e)}")
+            status_code=500, detail=f"Error fetching queue: {str(e)}"
+        )
 
 
 # ==================== Update Post ====================
+
 
 @router.patch("/api/content/{post_id}")
 async def update_post(
     post_id: int,
     data: Dict[str, Any] = Body(...),
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
 ) -> Dict[str, Any]:
     """Update a post."""
     try:
@@ -215,24 +251,32 @@ async def update_post(
                 "body": post.body,
                 "status": post.status,
                 "platforms": post.platforms,
-                "scheduled_at": post.scheduled_at.isoformat() if post.scheduled_at else None,
-                "updated_at": post.updated_at.isoformat() if post.updated_at else None,
+                "scheduled_at": (
+                    post.scheduled_at.isoformat()
+                    if post.scheduled_at
+                    else None
+                ),
+                "updated_at": (
+                    post.updated_at.isoformat() if post.updated_at else None
+                ),
             },
         }
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Error updating post: {str(e)}")
+            status_code=500, detail=f"Error updating post: {str(e)}"
+        )
 
 
 # ==================== Approve Post ====================
+
 
 @router.post("/api/content/{post_id}/approve")
 async def approve_post(
     post_id: int,
     body_data: Dict[str, Any] = Body(...),
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
 ) -> Dict[str, Any]:
     """Approve a text post and create a video post for it."""
     try:
@@ -257,8 +301,8 @@ async def approve_post(
             # Generate video script from the text post
             try:
                 # removed per guardrails; use router
-# # removed per guardrails; use router
-# from openai import AsyncOpenAI
+                # # removed per guardrails; use router
+                # from openai import AsyncOpenAI
                 client = AsyncOpenAI()
 
                 prompt = (
@@ -281,15 +325,19 @@ async def approve_post(
                 response = await client.chat.completions.create(
                     model="gpt-4o-mini",
                     messages=[
-                        {"role": "system",
-                            "content": "You are an expert viral video script writer. You specialize in creating engaging, high-converting social media video scripts with powerful hooks. Always use the exact format: Hook (0-1.5s): ... Main (2-8s): ... Why (9-15s): ... CTA (16-20s): ..."},
+                        {
+                            "role": "system",
+                            "content": "You are an expert viral video script writer. You specialize in creating engaging, high-converting social media video scripts with powerful hooks. Always use the exact format: Hook (0-1.5s): ... Main (2-8s): ... Why (9-15s): ... CTA (16-20s): ...",
+                        },
                         {"role": "user", "content": prompt},
                     ],
                     temperature=0.8,  # Higher creativity for viral hooks
                 )
 
-                video_script = response.choices[
-                    0].message.content or f"Hook: {post.body[:50]}...\nMain: {post.body}\nWhy: Important update\nCTA: Share your thoughts!"
+                video_script = (
+                    response.choices[0].message.content
+                    or f"Hook: {post.body[:50]}...\nMain: {post.body}\nWhy: Important update\nCTA: Share your thoughts!"
+                )
 
                 # Create video post
                 video_post = Post(
@@ -298,8 +346,11 @@ async def approve_post(
                     body=video_script.strip(),
                     source_url=post.source_url,
                     tags=post.tags,
-                    platforms=[
-                        "Instagram", "TikTok", "YouTube Shorts"] if not post.platforms else post.platforms,
+                    platforms=(
+                        ["Instagram", "TikTok", "YouTube Shorts"]
+                        if not post.platforms
+                        else post.platforms
+                    ),
                     status="video_production",  # Start video generation
                 )
                 session.add(video_post)
@@ -308,24 +359,34 @@ async def approve_post(
 
                 video_post_id = video_post.id
                 print(
-                    f"[api] Created video post {video_post_id} for text post {post_id}")
+                    f"[api] Created video post {video_post_id} for text post {post_id}"
+                )
 
                 # Now trigger video generation IMMEDIATELY
                 print(
-                    f"[api] Starting video generation for post {video_post_id}...")
+                    f"[api] Starting video generation for post {video_post_id}..."
+                )
                 try:
-                    video_result = await video_generator.generate_video_for_post(video_post)
+                    video_result = (
+                        await video_generator.generate_video_for_post(
+                            video_post
+                        )
+                    )
                     print(
-                        f"[api] ✅ Video generated successfully: {video_result.get('video_url', 'No URL')}")
+                        f"[api] ✅ Video generated successfully: {video_result.get('video_url', 'No URL')}"
+                    )
                 except Exception as video_error:
                     print(
-                        f"[api] ❌ Video generation failed: {str(video_error)}")
+                        f"[api] ❌ Video generation failed: {str(video_error)}"
+                    )
                     import traceback
+
                     traceback.print_exc()
                     # Post stays in video_production status - will retry via scheduler
             except Exception as e:
                 print(f"[api] Error generating video script: {str(e)}")
                 import traceback
+
                 traceback.print_exc()
                 # Still approve the text post even if video generation fails
                 session.commit()
@@ -334,24 +395,31 @@ async def approve_post(
             session.refresh(post)
 
         return {
-            "message": "Post approved successfully. Video creation started." if post.kind == "text" and video_post_id else "Post approved successfully",
+            "message": (
+                "Post approved successfully. Video creation started."
+                if post.kind == "text" and video_post_id
+                else "Post approved successfully"
+            ),
             "video_post_id": video_post_id,
-            "scheduled_at": post.scheduled_at.isoformat() if post.scheduled_at else None,
+            "scheduled_at": (
+                post.scheduled_at.isoformat() if post.scheduled_at else None
+            ),
         }
     except HTTPException:
         raise
     except Exception as e:
         print(f"[api] Error approving post: {str(e)}")
         raise HTTPException(
-            status_code=500, detail=f"Error approving post: {str(e)}")
+            status_code=500, detail=f"Error approving post: {str(e)}"
+        )
 
 
 # ==================== Reject Post ====================
 
+
 @router.post("/api/content/{post_id}/reject")
 async def reject_post(
-    post_id: int,
-    session: Session = Depends(get_session)
+    post_id: int, session: Session = Depends(get_session)
 ) -> Dict[str, Any]:
     """Soft delete (reject) a post."""
     try:
@@ -374,10 +442,12 @@ async def reject_post(
         raise
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Error rejecting post: {str(e)}")
+            status_code=500, detail=f"Error rejecting post: {str(e)}"
+        )
 
 
 # ==================== Clear All (Testing) ====================
+
 
 @router.delete("/api/content/clear-all")
 async def clear_all_posts() -> Dict[str, Any]:
@@ -402,10 +472,10 @@ async def clear_all_posts() -> Dict[str, Any]:
 
 # ==================== Delete Post ====================
 
+
 @router.delete("/api/content/{post_id}")
 async def delete_post(
-    post_id: int,
-    session: Session = Depends(get_session)
+    post_id: int, session: Session = Depends(get_session)
 ) -> Dict[str, Any]:
     """Hard delete a post."""
     try:
@@ -421,15 +491,16 @@ async def delete_post(
         raise
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Error deleting post: {str(e)}")
+            status_code=500, detail=f"Error deleting post: {str(e)}"
+        )
 
 
 # ==================== Generate Content ====================
 
+
 @router.post("/api/content/generate")
 async def generate_content(
-    data: Dict[str, Any] = Body(...),
-    session: Session = Depends(get_session)
+    data: Dict[str, Any] = Body(...), session: Session = Depends(get_session)
 ) -> Dict[str, Any]:
     """Generate new content manually."""
     try:
@@ -444,7 +515,8 @@ async def generate_content(
 
         if not title and not body:
             raise HTTPException(
-                status_code=400, detail="title or body is required")
+                status_code=400, detail="title or body is required"
+            )
 
         # Create post
         post = Post(
@@ -471,7 +543,9 @@ async def generate_content(
                 "body": post.body,
                 "status": post.status,
                 "platforms": post.platforms,
-                "created_at": post.created_at.isoformat() if post.created_at else None,
+                "created_at": (
+                    post.created_at.isoformat() if post.created_at else None
+                ),
             },
         }
     except HTTPException:
@@ -479,12 +553,13 @@ async def generate_content(
     except Exception as e:
         print(f"[api] Error generating content: {str(e)}")
         raise HTTPException(
-            status_code=500, detail=f"Error generating content: {str(e)}")
+            status_code=500, detail=f"Error generating content: {str(e)}"
+        )
 
 
 @router.post("/api/content/generate-demo")
 async def generate_demo_content(
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
 ) -> Dict[str, Any]:
     """Generate 20 sample posts without calling external APIs."""
     try:
@@ -596,24 +671,26 @@ async def generate_demo_content(
                 source_url=f"https://example.com/video-{i+1}",
                 tags=[article["source"], "demo", "video"],
                 platforms=random.choice(
-                    [["Instagram", "TikTok"], ["YouTube Shorts"], ["TikTok"]]),
+                    [["Instagram", "TikTok"], ["YouTube Shorts"], ["TikTok"]]
+                ),
                 status="approved",  # Set to approved so they appear in Video Production tab
                 video_duration=random.randint(15, 20),
-                created_at=datetime.utcnow() - timedelta(hours=i+1),
+                created_at=datetime.utcnow() - timedelta(hours=i + 1),
                 regeneration_count=0,
-                total_cost=round(random.uniform(0.15, 0.40), 3)
+                total_cost=round(random.uniform(0.15, 0.40), 3),
             )
             session.add(post)
             session.flush()  # Flush to get the post ID
 
             # Add sample video asset for ALL video posts
             from app.models import Asset
+
             video_asset = Asset(
                 post_id=post.id,
                 type="video",
                 # Rotate through different videos
                 path=stock_videos[i % len(stock_videos)],
-                created_at=datetime.utcnow()
+                created_at=datetime.utcnow(),
             )
             session.add(video_asset)
 
@@ -644,18 +721,21 @@ async def generate_demo_content(
     except Exception as e:
         print(f"[api] Error generating demo content: {str(e)}")
         import traceback
+
         traceback.print_exc()
         raise HTTPException(
-            status_code=500, detail=f"Error generating demo content: {str(e)}")
+            status_code=500, detail=f"Error generating demo content: {str(e)}"
+        )
 
 
 # ==================== Approve Video ====================
+
 
 @router.post("/api/content/{post_id}/approve-video")
 async def approve_video(
     post_id: int,
     body_data: Dict[str, Any] = Body(...),
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
 ) -> Dict[str, Any]:
     """Approve a video post and trigger video generation."""
     try:
@@ -670,7 +750,8 @@ async def approve_video(
 
         if post.kind != "video":
             raise HTTPException(
-                status_code=400, detail="Post must be a video post")
+                status_code=400, detail="Post must be a video post"
+            )
 
         schedule_immediately = body_data.get("schedule_immediately", False)
 
@@ -694,23 +775,27 @@ async def approve_video(
         return {
             "message": "Video post approved and queued for production",
             "status": post.status,
-            "scheduled_at": post.scheduled_at.isoformat() if post.scheduled_at else None,
+            "scheduled_at": (
+                post.scheduled_at.isoformat() if post.scheduled_at else None
+            ),
         }
     except HTTPException:
         raise
     except Exception as e:
         print(f"[api] Error approving video: {str(e)}")
         raise HTTPException(
-            status_code=500, detail=f"Error approving video: {str(e)}")
+            status_code=500, detail=f"Error approving video: {str(e)}"
+        )
 
 
 # ==================== Regenerate Content ====================
+
 
 @router.post("/api/content/{post_id}/regenerate-text")
 async def regenerate_text(
     post_id: int,
     body_data: Dict[str, Any] = Body(default={}),
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
 ) -> Dict[str, Any]:
     """Regenerate text variants for a post."""
     try:
@@ -725,38 +810,46 @@ async def regenerate_text(
             raise HTTPException(status_code=400, detail="Post is deleted")
 
         # Extract options - handle both camelCase and snake_case
-        num_variants = body_data.get(
-            "variantCount") or body_data.get("num_variants", 3)
+        num_variants = body_data.get("variantCount") or body_data.get(
+            "num_variants", 3
+        )
         custom_instructions = body_data.get(
-            "customInstructions") or body_data.get("custom_instructions", "")
-        change_hook_style = body_data.get(
-            "changeHookStyle") or body_data.get("change_hook_style", False)
-        change_tone = body_data.get(
-            "changeTone") or body_data.get("change_tone", False)
+            "customInstructions"
+        ) or body_data.get("custom_instructions", "")
+        change_hook_style = body_data.get("changeHookStyle") or body_data.get(
+            "change_hook_style", False
+        )
+        change_tone = body_data.get("changeTone") or body_data.get(
+            "change_tone", False
+        )
 
         # Import OpenAI client
         try:
             # removed per guardrails; use router
-# # removed per guardrails; use router
-# from openai import AsyncOpenAI
+            # # removed per guardrails; use router
+            # from openai import AsyncOpenAI
             client = AsyncOpenAI()
         except ImportError:
             raise HTTPException(
-                status_code=500, detail="OpenAI client not available")
+                status_code=500, detail="OpenAI client not available"
+            )
 
         # Build prompt based on options
         instructions = []
         if change_hook_style:
             instructions.append(
-                "try a different hook style (question, statement, story, etc.)")
+                "try a different hook style (question, statement, story, etc.)"
+            )
         if change_tone:
             instructions.append(
-                "change the tone (more casual, formal, enthusiastic, etc.)")
+                "change the tone (more casual, formal, enthusiastic, etc.)"
+            )
         if custom_instructions:
             instructions.append(custom_instructions)
 
-        instruction_text = ". ".join(
-            instructions) if instructions else "improve the content"
+        instruction_text = (
+            ". ".join(instructions) if instructions else "improve the content"
+        )
 
         prompt = (
             f"Generate {num_variants} improved variants of this social media post.\n"
@@ -771,7 +864,10 @@ async def regenerate_text(
             response = await client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
-                    {"role": "system", "content": "You are a social media copywriter. Return only valid JSON arrays."},
+                    {
+                        "role": "system",
+                        "content": "You are a social media copywriter. Return only valid JSON arrays.",
+                    },
                     {"role": "user", "content": prompt},
                 ],
                 temperature=0.8,
@@ -779,6 +875,7 @@ async def regenerate_text(
 
             content = response.choices[0].message.content or "[]"
             import json
+
             variants = json.loads(content)
 
             if not isinstance(variants, list) or len(variants) == 0:
@@ -792,7 +889,8 @@ async def regenerate_text(
             session.refresh(post)
 
             print(
-                f"[api] Generated {len(variants)} text variants for post {post_id}, updated post")
+                f"[api] Generated {len(variants)} text variants for post {post_id}, updated post"
+            )
 
             return {
                 "message": f"Generated {len(variants)} text variants and updated post",
@@ -802,26 +900,29 @@ async def regenerate_text(
                     "id": post.id,
                     "body": post.body,
                     "status": post.status,
-                }
+                },
             }
         except Exception as e:
             print(f"[api] OpenAI error: {str(e)}")
             raise HTTPException(
-                status_code=500, detail=f"Failed to generate variants: {str(e)}")
+                status_code=500,
+                detail=f"Failed to generate variants: {str(e)}",
+            )
 
     except HTTPException:
         raise
     except Exception as e:
         print(f"[api] Error regenerating text: {str(e)}")
         raise HTTPException(
-            status_code=500, detail=f"Error regenerating text: {str(e)}")
+            status_code=500, detail=f"Error regenerating text: {str(e)}"
+        )
 
 
 @router.post("/api/content/{post_id}/regenerate-video")
 async def regenerate_video(
     post_id: int,
     body_data: Dict[str, Any] = Body(default={}),
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
 ) -> Dict[str, Any]:
     """Regenerate video script for a post, preserving context."""
     try:
@@ -837,27 +938,33 @@ async def regenerate_video(
 
         if post.kind != "video":
             raise HTTPException(
-                status_code=400, detail="Post must be a video post")
+                status_code=400, detail="Post must be a video post"
+            )
 
         # Extract options - handle both camelCase and snake_case
-        num_variants = body_data.get(
-            "variantCount") or body_data.get("num_variants", 1)
+        num_variants = body_data.get("variantCount") or body_data.get(
+            "num_variants", 1
+        )
         custom_instructions = body_data.get(
-            "customInstructions") or body_data.get("custom_instructions", "")
-        change_hook_style = body_data.get(
-            "changeHookStyle") or body_data.get("change_hook_style", False)
-        change_tone = body_data.get(
-            "changeTone") or body_data.get("change_tone", False)
+            "customInstructions"
+        ) or body_data.get("custom_instructions", "")
+        change_hook_style = body_data.get("changeHookStyle") or body_data.get(
+            "change_hook_style", False
+        )
+        change_tone = body_data.get("changeTone") or body_data.get(
+            "change_tone", False
+        )
 
         # Import OpenAI client
         try:
             # removed per guardrails; use router
-# # removed per guardrails; use router
-# from openai import AsyncOpenAI
+            # # removed per guardrails; use router
+            # from openai import AsyncOpenAI
             client = AsyncOpenAI()
         except ImportError:
             raise HTTPException(
-                status_code=500, detail="OpenAI client not available")
+                status_code=500, detail="OpenAI client not available"
+            )
 
         # Build prompt that preserves script context
         instructions = []
@@ -868,8 +975,9 @@ async def regenerate_video(
         if custom_instructions:
             instructions.append(custom_instructions)
 
-        instruction_text = ". ".join(
-            instructions) if instructions else "improve the script"
+        instruction_text = (
+            ". ".join(instructions) if instructions else "improve the script"
+        )
 
         # Preserve the script structure and context
         prompt = (
@@ -887,7 +995,10 @@ async def regenerate_video(
             response = await client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
-                    {"role": "system", "content": "You are a video script writer. Return only the improved script text, maintaining the same structure and context."},
+                    {
+                        "role": "system",
+                        "content": "You are a video script writer. Return only the improved script text, maintaining the same structure and context.",
+                    },
                     {"role": "user", "content": prompt},
                 ],
                 temperature=0.7,  # Lower temperature to maintain context better
@@ -905,10 +1016,12 @@ async def regenerate_video(
 
             # Video regeneration will be processed by scheduler
             print(
-                f"[api] Video regeneration queued for post {post_id} (status: video_production)")
+                f"[api] Video regeneration queued for post {post_id} (status: video_production)"
+            )
 
             print(
-                f"[api] Regenerated video script for post {post_id}, preserved context")
+                f"[api] Regenerated video script for post {post_id}, preserved context"
+            )
 
             return {
                 "message": "Video script regenerated successfully, video generation started",
@@ -919,27 +1032,30 @@ async def regenerate_video(
                     "body": post.body,
                     "title": post.title,
                     "status": post.status,
-                }
+                },
             }
         except Exception as e:
             print(f"[api] OpenAI error: {str(e)}")
             raise HTTPException(
-                status_code=500, detail=f"Failed to regenerate script: {str(e)}")
+                status_code=500,
+                detail=f"Failed to regenerate script: {str(e)}",
+            )
 
     except HTTPException:
         raise
     except Exception as e:
         print(f"[api] Error regenerating video: {str(e)}")
         raise HTTPException(
-            status_code=500, detail=f"Error regenerating video: {str(e)}")
+            status_code=500, detail=f"Error regenerating video: {str(e)}"
+        )
 
 
 # ==================== Get Versions ====================
 
+
 @router.get("/api/content/{post_id}/versions")
 async def get_versions(
-    post_id: int,
-    session: Session = Depends(get_session)
+    post_id: int, session: Session = Depends(get_session)
 ) -> Dict[str, Any]:
     """Get regeneration history for a post."""
     try:
@@ -958,8 +1074,12 @@ async def get_versions(
             {
                 "version": 1,
                 "body": post.body,
-                "created_at": post.created_at.isoformat() if post.created_at else None,
-                "updated_at": post.updated_at.isoformat() if post.updated_at else None,
+                "created_at": (
+                    post.created_at.isoformat() if post.created_at else None
+                ),
+                "updated_at": (
+                    post.updated_at.isoformat() if post.updated_at else None
+                ),
             }
         ]
 
@@ -975,15 +1095,16 @@ async def get_versions(
     except Exception as e:
         print(f"[api] Error fetching versions: {str(e)}")
         raise HTTPException(
-            status_code=500, detail=f"Error fetching versions: {str(e)}")
+            status_code=500, detail=f"Error fetching versions: {str(e)}"
+        )
 
 
 # ==================== Video Generation ====================
 
+
 @router.get("/api/content/{post_id}/video-status")
 async def get_video_status(
-    post_id: int,
-    session: Session = Depends(get_session)
+    post_id: int, session: Session = Depends(get_session)
 ) -> Dict[str, Any]:
     """Get video generation status for a post."""
     try:
@@ -995,12 +1116,15 @@ async def get_video_status(
 
         if post.kind != "video":
             raise HTTPException(
-                status_code=400, detail="Post must be a video post")
+                status_code=400, detail="Post must be a video post"
+            )
 
         # Get video assets
         from app.models import Asset
-        stmt = select(Asset).where(Asset.post_id ==
-                                   post_id, Asset.type == "video")
+
+        stmt = select(Asset).where(
+            Asset.post_id == post_id, Asset.type == "video"
+        )
         assets = session.exec(stmt).all()
 
         return {
@@ -1015,13 +1139,13 @@ async def get_video_status(
     except Exception as e:
         print(f"[api] Error fetching video status: {str(e)}")
         raise HTTPException(
-            status_code=500, detail=f"Error fetching video status: {str(e)}")
+            status_code=500, detail=f"Error fetching video status: {str(e)}"
+        )
 
 
 @router.post("/api/content/{post_id}/generate-video")
 async def trigger_video_generation(
-    post_id: int,
-    session: Session = Depends(get_session)
+    post_id: int, session: Session = Depends(get_session)
 ) -> Dict[str, Any]:
     """Manually trigger video generation for a post."""
     try:
@@ -1033,7 +1157,8 @@ async def trigger_video_generation(
 
         if post.kind != "video":
             raise HTTPException(
-                status_code=400, detail="Post must be a video post")
+                status_code=400, detail="Post must be a video post"
+            )
 
         # Update status to video_production
         post.status = "video_production"
@@ -1044,7 +1169,8 @@ async def trigger_video_generation(
         # Video generation will be processed by scheduler automatically
         # Status is set to video_production, scheduler will process it
         print(
-            f"[api] Video generation queued for post {post_id} (status: video_production)")
+            f"[api] Video generation queued for post {post_id} (status: video_production)"
+        )
 
         return {
             "message": "Video generation started",
@@ -1056,15 +1182,17 @@ async def trigger_video_generation(
     except Exception as e:
         print(f"[api] Error triggering video generation: {str(e)}")
         raise HTTPException(
-            status_code=500, detail=f"Error triggering video generation: {str(e)}")
+            status_code=500,
+            detail=f"Error triggering video generation: {str(e)}",
+        )
 
 
 # ==================== Publish Post ====================
 
+
 @router.post("/api/publish/{post_id}")
 async def publish_post_endpoint(
-    post_id: int,
-    session: Session = Depends(get_session)
+    post_id: int, session: Session = Depends(get_session)
 ) -> Dict[str, Any]:
     """Publish a post immediately."""
     try:
@@ -1079,7 +1207,8 @@ async def publish_post_endpoint(
 
         if post.status != "approved":
             raise HTTPException(
-                status_code=400, detail=f"Post status must be 'approved', got '{post.status}'"
+                status_code=400,
+                detail=f"Post status must be 'approved', got '{post.status}'",
             )
 
         # Call publishing function
@@ -1096,10 +1225,12 @@ async def publish_post_endpoint(
     except Exception as e:
         print(f"[api] Error publishing post: {str(e)}")
         raise HTTPException(
-            status_code=500, detail=f"Error publishing post: {str(e)}")
+            status_code=500, detail=f"Error publishing post: {str(e)}"
+        )
 
 
 # ==================== Debug Endpoint ====================
+
 
 @router.get("/api/debug/posts")
 async def debug_posts() -> Dict[str, Any]:
@@ -1115,27 +1246,24 @@ async def debug_posts() -> Dict[str, Any]:
                 select(Asset).where(Asset.post_id == post.id)
             ).all()
 
-            result.append({
-                "id": post.id,
-                "title": post.title,
-                "kind": post.kind,
-                "status": post.status,
-                "has_assets": len(assets) > 0,
-                "assets": [
-                    {
-                        "type": a.type,
-                        "path": a.path
-                    } for a in assets
-                ]
-            })
+            result.append(
+                {
+                    "id": post.id,
+                    "title": post.title,
+                    "kind": post.kind,
+                    "status": post.status,
+                    "has_assets": len(assets) > 0,
+                    "assets": [
+                        {"type": a.type, "path": a.path} for a in assets
+                    ],
+                }
+            )
 
-        return {
-            "total_posts": len(posts),
-            "posts": result
-        }
+        return {"total_posts": len(posts), "posts": result}
 
 
 # ==================== TEST VIDEO GENERATION (COMPETITOR STYLE) ====================
+
 
 @router.post("/api/video/competitor-test/{post_id}")
 async def test_competitor_style_video(post_id: int):
@@ -1144,9 +1272,9 @@ async def test_competitor_style_video(post_id: int):
     from app.models import Post
     from app.database import engine
 
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print(f"🎬 COMPETITOR VIDEO TEST STARTED - Post ID: {post_id}")
-    print("="*80)
+    print("=" * 80)
 
     try:
         # Step 1: Get post
@@ -1164,22 +1292,33 @@ async def test_competitor_style_video(post_id: int):
         # Step 2: Check dependencies
         print(f"\n[STEP 2] Checking dependencies...")
         try:
-            from moviepy.editor import VideoFileClip, ColorClip, ImageClip, CompositeVideoClip, concatenate_videoclips, VideoClip  # noqa: F401
+            from moviepy.editor import (
+                VideoFileClip,
+                ColorClip,
+                ImageClip,
+                CompositeVideoClip,
+                concatenate_videoclips,
+                VideoClip,
+            )  # noqa: F401
             import numpy as np  # noqa: F401
             from PIL import Image, ImageDraw, ImageFont  # noqa: F401
+
             print("✅ MoviePy and PIL imported")
         except Exception as e:
             print(f"❌ Import failed: {e}")
             raise HTTPException(
-                status_code=500, detail=f"Dependencies not installed: {e}")
+                status_code=500, detail=f"Dependencies not installed: {e}"
+            )
 
         try:
             import requests  # noqa: F401
+
             print("✅ Requests imported")
         except Exception as e:
             print(f"❌ Requests import failed: {e}")
             raise HTTPException(
-                status_code=500, detail=f"Requests not installed: {e}")
+                status_code=500, detail=f"Requests not installed: {e}"
+            )
 
         # Step 3: Check Pexels API key
         print(f"\n[STEP 3] Checking Pexels API key...")
@@ -1211,10 +1350,18 @@ async def test_competitor_style_video(post_id: int):
             except Exception:
                 return ImageFont.load_default()
 
-        def create_text_image_pil(text: str, fontsize: int, color: str, stroke_color: str, stroke_width: int, size=(1080, 1920), max_width=900):
+        def create_text_image_pil(
+            text: str,
+            fontsize: int,
+            color: str,
+            stroke_color: str,
+            stroke_width: int,
+            size=(1080, 1920),
+            max_width=900,
+        ):
             """Create text image using PIL (no ImageMagick required)."""
             print(f"    DEBUG: Creating text image with size {size}")
-            img = Image.new('RGBA', size, (0, 0, 0, 0))
+            img = Image.new("RGBA", size, (0, 0, 0, 0))
             draw = ImageDraw.Draw(img)
             font = _load_bold_font(fontsize)
             print(f"    DEBUG: Font loaded: {type(font)}")
@@ -1249,12 +1396,19 @@ async def test_competitor_style_video(post_id: int):
 
             # Draw each line
             current_y = start_y
-            for line, line_width, line_height in zip(lines, line_widths, line_heights):
+            for line, line_width, line_height in zip(
+                lines, line_widths, line_heights
+            ):
                 x = (size[0] - line_width) // 2
                 if stroke_width > 0:
                     for adj_x in range(-stroke_width, stroke_width + 1):
                         for adj_y in range(-stroke_width, stroke_width + 1):
-                            draw.text((x + adj_x, current_y + adj_y), line, font=font, fill=stroke_color)
+                            draw.text(
+                                (x + adj_x, current_y + adj_y),
+                                line,
+                                font=font,
+                                fill=stroke_color,
+                            )
                 draw.text((x, current_y), line, font=font, fill=color)
                 current_y += line_height + 20
 
@@ -1265,16 +1419,41 @@ async def test_competitor_style_video(post_id: int):
         # Step 5: Create scenes
         print(f"\n[STEP 4] Creating scene structure...")
         SCENES = [
-            {"duration": 6, "text": "🚨 BREAKING NEWS", "color": "#000000",
-                "size": 100, "keywords": ["ai", "technology"]},  # Black text on yellow bg
-            {"duration": 6, "text": post.title[:50], "color": "#FFFFFF", "size": 60, "keywords": [
-                "developer", "coding"]},  # White text on blue bg
-            {"duration": 6, "text": "KEY DETAILS", "color": "#000000",
-                "size": 90, "keywords": ["artificial intelligence"]},  # Black text on green bg
-            {"duration": 6, "text": "WHY THIS MATTERS", "color": "#FFFFFF",
-                "size": 70, "keywords": ["business tech"]},  # White text on red bg
-            {"duration": 6, "text": "FOLLOW @XSELLER.AI",
-                "color": "#000000", "size": 65, "keywords": ["social media"]}  # Black text on white bg
+            {
+                "duration": 6,
+                "text": "🚨 BREAKING NEWS",
+                "color": "#000000",
+                "size": 100,
+                "keywords": ["ai", "technology"],
+            },  # Black text on yellow bg
+            {
+                "duration": 6,
+                "text": post.title[:50],
+                "color": "#FFFFFF",
+                "size": 60,
+                "keywords": ["developer", "coding"],
+            },  # White text on blue bg
+            {
+                "duration": 6,
+                "text": "KEY DETAILS",
+                "color": "#000000",
+                "size": 90,
+                "keywords": ["artificial intelligence"],
+            },  # Black text on green bg
+            {
+                "duration": 6,
+                "text": "WHY THIS MATTERS",
+                "color": "#FFFFFF",
+                "size": 70,
+                "keywords": ["business tech"],
+            },  # White text on red bg
+            {
+                "duration": 6,
+                "text": "FOLLOW @XSELLER.AI",
+                "color": "#000000",
+                "size": 65,
+                "keywords": ["social media"],
+            },  # Black text on white bg
         ]
         print(f"✅ Created {len(SCENES)} scenes")
 
@@ -1282,7 +1461,13 @@ async def test_competitor_style_video(post_id: int):
         print(f"\n[STEP 5] Generating video clips...")
         clips = []
         # Vibrant colors matching competitor videos (bright, eye-catching)
-        colors = ['#FFFF00', '#0066FF', '#00FF00', '#FF0000', '#FFFFFF']  # Yellow, Blue, Green, Red, White
+        colors = [
+            "#FFFF00",
+            "#0066FF",
+            "#00FF00",
+            "#FF0000",
+            "#FFFFFF",
+        ]  # Yellow, Blue, Green, Red, White
 
         for i, scene in enumerate(SCENES):
             print(f"\n  Scene {i+1}/{len(SCENES)}: {scene['text']}")
@@ -1294,39 +1479,58 @@ async def test_competitor_style_video(post_id: int):
                     text=scene["text"],
                     fontsize=scene["size"],
                     color=scene["color"],
-                    stroke_color='black',
+                    stroke_color="black",
                     stroke_width=5,
                     size=(1080, 1920),  # PIL format: (width, height)
-                    max_width=900
+                    max_width=900,
                 )
 
                 # Convert RGBA text image to RGB by compositing over the background color
                 text_array = np.array(text_img)
-                print(f"    DEBUG: PIL image size: {text_img.size}, numpy array shape: {text_array.shape}")
+                print(
+                    f"    DEBUG: PIL image size: {text_img.size}, numpy array shape: {text_array.shape}"
+                )
 
                 # Create RGB image by compositing RGBA text over the colored background
                 if text_array.shape[2] == 4:  # RGBA
                     # Get background color for this scene
-                    hex_color = colors[i].lstrip('#')
-                    bg_color = tuple(int(hex_color[j:j+2], 16) for j in (0, 2, 4))
+                    hex_color = colors[i].lstrip("#")
+                    bg_color = tuple(
+                        int(hex_color[j : j + 2], 16) for j in (0, 2, 4)
+                    )
                     print(f"    DEBUG: Hex {colors[i]} -> RGB {bg_color}")
 
                     # Create RGB background
-                    rgb_img = np.ones((text_array.shape[0], text_array.shape[1], 3), dtype=np.uint8)
+                    rgb_img = np.ones(
+                        (text_array.shape[0], text_array.shape[1], 3),
+                        dtype=np.uint8,
+                    )
                     rgb_img[:, :] = bg_color
 
                     # Alpha composite: result = foreground * alpha + background * (1 - alpha)
-                    alpha = text_array[:, :, 3:4] / 255.0  # Normalize alpha to 0-1
+                    alpha = (
+                        text_array[:, :, 3:4] / 255.0
+                    )  # Normalize alpha to 0-1
                     foreground = text_array[:, :, :3]
-                    rgb_img = (foreground * alpha + rgb_img * (1 - alpha)).astype(np.uint8)
+                    rgb_img = (
+                        foreground * alpha + rgb_img * (1 - alpha)
+                    ).astype(np.uint8)
 
-                    scene_clip = ImageClip(rgb_img).set_duration(scene["duration"])
-                    print(f"    ✅ Scene created: text composited onto {colors[i]} background")
+                    scene_clip = ImageClip(rgb_img).set_duration(
+                        scene["duration"]
+                    )
+                    print(
+                        f"    ✅ Scene created: text composited onto {colors[i]} background"
+                    )
                 else:
-                    scene_clip = ImageClip(text_array).set_duration(scene["duration"])
+                    scene_clip = ImageClip(text_array).set_duration(
+                        scene["duration"]
+                    )
 
                 clips.append(scene_clip)
-                print(f"    ✅ Scene {i+1} complete: {scene_clip.size}, {scene_clip.duration}s")
+                print(
+                    f"    ✅ Scene {i+1} complete: {scene_clip.size}, {scene_clip.duration}s"
+                )
 
             except Exception as e:
                 print(f"    ❌ Scene {i+1} FAILED: {e}")
@@ -1338,7 +1542,9 @@ async def test_competitor_style_video(post_id: int):
         for i, clip in enumerate(clips):
             try:
                 frame = clip.get_frame(0)
-                print(f"   Clip {i+1}: size={clip.size}, duration={clip.duration}s, frame shape={frame.shape}")
+                print(
+                    f"   Clip {i+1}: size={clip.size}, duration={clip.duration}s, frame shape={frame.shape}"
+                )
             except Exception as e:
                 print(f"   Clip {i+1}: ERROR getting frame - {e}")
         try:
@@ -1360,7 +1566,9 @@ async def test_competitor_style_video(post_id: int):
             print(f"   Generating voiceover for: {narration_text[:100]}...")
 
             # Check if user has selected a voice and energy mode
-            selected_voice = "charlotte"  # Default: British female professional voice
+            selected_voice = (
+                "charlotte"  # Default: British female professional voice
+            )
             selected_energy = "professional"  # Default energy mode
 
             if post.extra_data and "selected_voice" in post.extra_data:
@@ -1379,7 +1587,7 @@ async def test_competitor_style_video(post_id: int):
                 text=narration_text,
                 provider="auto",  # Will try ElevenLabs -> OpenAI -> gTTS
                 voice=selected_voice,
-                energy=selected_energy
+                energy=selected_energy,
             )
 
             if audio_path:
@@ -1389,6 +1597,7 @@ async def test_competitor_style_video(post_id: int):
         except Exception as e:
             print(f"⚠️ Warning: Voiceover generation failed: {e}")
             import traceback
+
             traceback.print_exc()
             audio_path = None
 
@@ -1397,14 +1606,19 @@ async def test_competitor_style_video(post_id: int):
             print(f"\n[STEP 8] Adding audio to video...")
             try:
                 from moviepy.editor import AudioFileClip
+
                 audio_clip = AudioFileClip(audio_path)
 
                 # Match audio duration to video or vice versa
                 if audio_clip.duration > final.duration:
-                    print(f"   Trimming audio from {audio_clip.duration}s to {final.duration}s")
+                    print(
+                        f"   Trimming audio from {audio_clip.duration}s to {final.duration}s"
+                    )
                     audio_clip = audio_clip.subclip(0, final.duration)
                 elif audio_clip.duration < final.duration:
-                    print(f"   Video duration ({final.duration}s) > audio duration ({audio_clip.duration}s)")
+                    print(
+                        f"   Video duration ({final.duration}s) > audio duration ({audio_clip.duration}s)"
+                    )
                     print(f"   Trimming video to match audio")
                     final = final.subclip(0, audio_clip.duration)
 
@@ -1413,17 +1627,22 @@ async def test_competitor_style_video(post_id: int):
             except Exception as e:
                 print(f"⚠️ Warning: Could not add audio: {e}")
                 import traceback
+
                 traceback.print_exc()
 
         # Step 9: Export
         print(f"\n[STEP 9] Exporting video...")
         try:
             # Create output directory relative to backend root
-            output_dir = os.path.join(os.path.dirname(
-                os.path.dirname(__file__)), "output", "test_videos")
+            output_dir = os.path.join(
+                os.path.dirname(os.path.dirname(__file__)),
+                "output",
+                "test_videos",
+            )
             os.makedirs(output_dir, exist_ok=True)
             output_path = os.path.join(
-                output_dir, f"competitor_test_{post_id}.mp4")
+                output_dir, f"competitor_test_{post_id}.mp4"
+            )
             print(f"   Output directory: {output_dir}")
             print(f"   Output path: {output_path}")
             print(f"   Has audio: {final.audio is not None}")
@@ -1431,17 +1650,21 @@ async def test_competitor_style_video(post_id: int):
             final.write_videofile(
                 output_path,
                 fps=30,
-                codec='libx264',
+                codec="libx264",
                 audio=True if final.audio is not None else False,
-                preset='medium',
+                preset="medium",
                 threads=2,
-                logger='bar',
+                logger="bar",
                 ffmpeg_params=[
-                    '-pix_fmt', 'yuv420p',  # Browser-compatible pixel format
-                    '-profile:v', 'baseline',  # H.264 baseline profile (most compatible)
-                    '-level', '3.0',  # H.264 level 3.0
-                    '-movflags', '+faststart'  # Enable streaming (move moov atom to beginning)
-                ]
+                    "-pix_fmt",
+                    "yuv420p",  # Browser-compatible pixel format
+                    "-profile:v",
+                    "baseline",  # H.264 baseline profile (most compatible)
+                    "-level",
+                    "3.0",  # H.264 level 3.0
+                    "-movflags",
+                    "+faststart",  # Enable streaming (move moov atom to beginning)
+                ],
             )
             print(f"✅ Export complete!")
         except Exception as e:
@@ -1449,37 +1672,39 @@ async def test_competitor_style_video(post_id: int):
             print(f"Traceback: {traceback.format_exc()}")
             raise
 
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("🎉 SUCCESS - Video generated!")
-        print("="*80 + "\n")
+        print("=" * 80 + "\n")
 
         # Step 10: Update database with video path
         print(f"\n[STEP 10] Updating database with video asset...")
         try:
             # Store relative path from output directory for serving via /output route
             relative_video_path = f"test_videos/competitor_test_{post_id}.mp4"
-            print(f"   Relative video path for database: {relative_video_path}")
+            print(
+                f"   Relative video path for database: {relative_video_path}"
+            )
 
             from app.models import Asset
+
             with Session(engine) as session:
                 # Check if video asset already exists for this post
                 existing_asset = session.exec(
                     select(Asset).where(
-                        Asset.post_id == post_id,
-                        Asset.type == "video"
+                        Asset.post_id == post_id, Asset.type == "video"
                     )
                 ).first()
 
                 if existing_asset:
-                    print(f"   Found existing video asset (id={existing_asset.id}), updating path...")
+                    print(
+                        f"   Found existing video asset (id={existing_asset.id}), updating path..."
+                    )
                     existing_asset.path = relative_video_path
                     session.add(existing_asset)
                 else:
                     print(f"   No existing video asset, creating new one...")
                     new_asset = Asset(
-                        post_id=post_id,
-                        type="video",
-                        path=relative_video_path
+                        post_id=post_id, type="video", path=relative_video_path
                     )
                     session.add(new_asset)
 
@@ -1494,7 +1719,7 @@ async def test_competitor_style_video(post_id: int):
             "video_path": output_path,
             "post_id": post_id,
             "duration": 30,
-            "message": "Test video generated successfully and database updated"
+            "message": "Test video generated successfully and database updated",
         }
 
     except HTTPException:
@@ -1511,20 +1736,23 @@ async def test_competitor_style_video(post_id: int):
         print(f"{'='*80}\n")
 
         raise HTTPException(
-            status_code=500, detail=f"Video generation failed: {str(e)}")
+            status_code=500, detail=f"Video generation failed: {str(e)}"
+        )
+
 
 # ==================== END TEST CODE ====================
 
 
 # ==================== CONTENT SCRAPING TEST ====================
 
+
 @router.get("/api/test/scrape")
 async def test_scraping() -> Dict[str, Any]:
     """Test endpoint to manually trigger content scraping and see results."""
     try:
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("🧪 TESTING CONTENT SCRAPING")
-        print("="*80)
+        print("=" * 80)
 
         # Fetch content
         articles = await content_scraper.fetch_all_content()
@@ -1540,36 +1768,45 @@ async def test_scraping() -> Dict[str, Any]:
                     "source": a.get("source", ""),
                     "url": a.get("url", ""),
                     "summary": a.get("summary", "")[:200] + "...",
-                    "published": a.get("published").isoformat() if a.get("published") else None,
+                    "published": (
+                        a.get("published").isoformat()
+                        if a.get("published")
+                        else None
+                    ),
                 }
                 for a in articles[:10]  # Return top 10 for preview
-            ]
+            ],
         }
     except Exception as e:
         print(f"❌ Scraping test failed: {str(e)}")
         import traceback
+
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Scraping failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Scraping failed: {str(e)}"
+        )
 
 
 @router.post("/api/test/generate-from-scraping")
 async def test_generate_from_scraping(
-    limit: int = Query(3, ge=1, le=10),
-    session: Session = Depends(get_session)
+    limit: int = Query(3, ge=1, le=10), session: Session = Depends(get_session)
 ) -> Dict[str, Any]:
     """Test endpoint to scrape content and generate posts."""
     try:
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("🧪 TESTING FULL CONTENT GENERATION PIPELINE")
-        print("="*80)
+        print("=" * 80)
 
         # Trigger the scheduler function manually
         await scheduler.fetch_and_generate_content()
 
         # Get recently created posts
-        stmt = select(Post).where(
-            Post.deleted_at.is_(None)
-        ).order_by(Post.created_at.desc()).limit(limit * 2)
+        stmt = (
+            select(Post)
+            .where(Post.deleted_at.is_(None))
+            .order_by(Post.created_at.desc())
+            .limit(limit * 2)
+        )
 
         posts = session.exec(stmt).all()
 
@@ -1587,13 +1824,16 @@ async def test_generate_from_scraping(
                     "source": p.source_url,
                 }
                 for p in posts[:10]
-            ]
+            ],
         }
     except Exception as e:
         print(f"❌ Generation test failed: {str(e)}")
         import traceback
+
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Generation failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Generation failed: {str(e)}"
+        )
 
 
 # ==================== END SCRAPING TEST ====================
@@ -1601,10 +1841,10 @@ async def test_generate_from_scraping(
 
 # ==================== NEW VIDEO GENERATION SYSTEM ====================
 
+
 @router.post("/api/video/generate-pro/{post_id}")
 async def generate_professional_video(
-    post_id: int,
-    session: Session = Depends(get_session)
+    post_id: int, session: Session = Depends(get_session)
 ) -> Dict[str, Any]:
     """
     Generate professional competitor-style video from post script.
@@ -1625,7 +1865,9 @@ async def generate_professional_video(
             raise HTTPException(status_code=404, detail="Post not found")
 
         if post.kind != "video":
-            raise HTTPException(status_code=400, detail="Post is not a video type")
+            raise HTTPException(
+                status_code=400, detail="Post is not a video type"
+            )
 
         # Get script
         script = post.body
@@ -1634,8 +1876,7 @@ async def generate_professional_video(
 
         # Generate video
         result = await video_production.generate_video_from_script(
-            script=script,
-            title=post.title or "Untitled"
+            script=script, title=post.title or "Untitled"
         )
 
         if result.get("success"):
@@ -1650,7 +1891,7 @@ async def generate_professional_video(
         else:
             raise HTTPException(
                 status_code=500,
-                detail=f"Video generation failed: {result.get('error', 'Unknown error')}"
+                detail=f"Video generation failed: {result.get('error', 'Unknown error')}",
             )
 
     except HTTPException:
@@ -1658,14 +1899,17 @@ async def generate_professional_video(
     except Exception as e:
         print(f"❌ Error: {str(e)}")
         import traceback
+
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Video generation failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Video generation failed: {str(e)}"
+        )
 
 
 @router.post("/api/video/generate-test")
 async def test_video_generation(
     script: str = Body(..., embed=True),
-    title: str = Body("Test Video", embed=True)
+    title: str = Body("Test Video", embed=True),
 ) -> Dict[str, Any]:
     """
     Test endpoint to generate video from custom script.
@@ -1682,8 +1926,7 @@ async def test_video_generation(
         print(f"{'='*80}\n")
 
         result = await video_production.generate_video_from_script(
-            script=script,
-            title=title
+            script=script, title=title
         )
 
         if result.get("success"):
@@ -1697,7 +1940,7 @@ async def test_video_generation(
         else:
             raise HTTPException(
                 status_code=500,
-                detail=f"Video generation failed: {result.get('error', 'Unknown error')}"
+                detail=f"Video generation failed: {result.get('error', 'Unknown error')}",
             )
 
     except HTTPException:
@@ -1705,8 +1948,11 @@ async def test_video_generation(
     except Exception as e:
         print(f"❌ Error: {str(e)}")
         import traceback
+
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Video generation failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Video generation failed: {str(e)}"
+        )
 
 
 # ==================== END NEW VIDEO GENERATION ====================
@@ -1714,10 +1960,10 @@ async def test_video_generation(
 
 # ==================== COMPETITOR-EXACT VIDEO (30s Viral Style) ====================
 
+
 @router.post("/api/video/competitor/{post_id}")
 async def generate_competitor_exact_video(
-    post_id: int,
-    session: Session = Depends(get_session)
+    post_id: int, session: Session = Depends(get_session)
 ) -> Dict[str, Any]:
     """
     Generate EXACT competitor-style 30s video from post.
@@ -1742,7 +1988,9 @@ async def generate_competitor_exact_video(
             raise HTTPException(status_code=404, detail="Post not found")
 
         if post.kind != "video":
-            raise HTTPException(status_code=400, detail="Post is not a video type")
+            raise HTTPException(
+                status_code=400, detail="Post is not a video type"
+            )
 
         # Get script
         script = post.body
@@ -1751,9 +1999,7 @@ async def generate_competitor_exact_video(
 
         # Generate competitor-style video
         result = await video_competitor_exact.generate_exact_competitor_video(
-            script=script,
-            title=post.title or "AI News",
-            add_voiceover=True
+            script=script, title=post.title or "AI News", add_voiceover=True
         )
 
         if result.get("success"):
@@ -1768,7 +2014,7 @@ async def generate_competitor_exact_video(
         else:
             raise HTTPException(
                 status_code=500,
-                detail=f"Video generation failed: {result.get('error', 'Unknown error')}"
+                detail=f"Video generation failed: {result.get('error', 'Unknown error')}",
             )
 
     except HTTPException:
@@ -1776,14 +2022,17 @@ async def generate_competitor_exact_video(
     except Exception as e:
         print(f"❌ Error: {str(e)}")
         import traceback
+
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Video generation failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Video generation failed: {str(e)}"
+        )
 
 
 @router.post("/api/video/competitor-test")
 async def test_competitor_video(
     script: str = Body(..., embed=True),
-    title: str = Body("AI Innovation", embed=True)
+    title: str = Body("AI Innovation", embed=True),
 ) -> Dict[str, Any]:
     """
     Test COMPETITOR-EXACT 30s video generation with custom script.
@@ -1801,9 +2050,7 @@ async def test_competitor_video(
         print(f"{'='*80}\n")
 
         result = await video_competitor_exact.generate_exact_competitor_video(
-            script=script,
-            title=title,
-            add_voiceover=True
+            script=script, title=title, add_voiceover=True
         )
 
         if result.get("success"):
@@ -1818,7 +2065,7 @@ async def test_competitor_video(
         else:
             raise HTTPException(
                 status_code=500,
-                detail=f"Video generation failed: {result.get('error', 'Unknown error')}"
+                detail=f"Video generation failed: {result.get('error', 'Unknown error')}",
             )
 
     except HTTPException:
@@ -1826,8 +2073,11 @@ async def test_competitor_video(
     except Exception as e:
         print(f"❌ Error: {str(e)}")
         import traceback
+
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Video generation failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Video generation failed: {str(e)}"
+        )
 
 
 # ==================== END COMPETITOR-EXACT VIDEO ====================
@@ -1835,10 +2085,10 @@ async def test_competitor_video(
 
 # ==================== VOICE SELECTION SYSTEM ====================
 
+
 @router.post("/api/voice/analyze/{post_id}")
 async def analyze_voice_for_post(
-    post_id: int,
-    session: Session = Depends(get_session)
+    post_id: int, session: Session = Depends(get_session)
 ) -> Dict[str, Any]:
     """
     Analyze post script and recommend voices based on content style.
@@ -1863,14 +2113,16 @@ async def analyze_voice_for_post(
         style_analysis = voice_selector.analyze_script_style(narration_text)
 
         # Get recommendations
-        recommendations = voice_selector.get_voice_recommendations(narration_text)
+        recommendations = voice_selector.get_voice_recommendations(
+            narration_text
+        )
 
         return {
             "post_id": post_id,
             "script_preview": narration_text[:200] + "...",
             "style_analysis": style_analysis,
             "recommended_voices": recommendations[:6],  # Top 6
-            "total_voices": len(recommendations)
+            "total_voices": len(recommendations),
         }
 
     except HTTPException:
@@ -1878,15 +2130,20 @@ async def analyze_voice_for_post(
     except Exception as e:
         print(f"❌ Voice analysis error: {str(e)}")
         import traceback
+
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Voice analysis failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Voice analysis failed: {str(e)}"
+        )
 
 
 @router.post("/api/voice/preview/{post_id}")
 async def generate_voice_previews(
     post_id: int,
     session: Session = Depends(get_session),
-    voices: List[str] = Body(..., description="List of voice keys to generate previews for")
+    voices: List[str] = Body(
+        ..., description="List of voice keys to generate previews for"
+    ),
 ) -> Dict[str, Any]:
     """
     Generate preview audio files for selected voices.
@@ -1921,9 +2178,9 @@ async def generate_voice_previews(
 
             voice_info = voice_selector.RECOMMENDED_VOICES[voice_key]
             preview_path = await voice_selector.generate_voice_preview(
-                voice_id=voice_info['id'],
-                voice_name=voice_info['name'],
-                sample_text=sample_text
+                voice_id=voice_info["id"],
+                voice_name=voice_info["name"],
+                sample_text=sample_text,
             )
 
             if preview_path:
@@ -1934,20 +2191,20 @@ async def generate_voice_previews(
                 preview_url = f"/api/voice/preview-file/{filename}"
 
                 previews[voice_key] = {
-                    "name": voice_info['name'],
-                    "gender": voice_info['gender'],
-                    "accent": voice_info['accent'],
-                    "style": voice_info['style'],
-                    "use_case": voice_info['use_case'],
+                    "name": voice_info["name"],
+                    "gender": voice_info["gender"],
+                    "accent": voice_info["accent"],
+                    "style": voice_info["style"],
+                    "use_case": voice_info["use_case"],
                     "preview_url": preview_url,
-                    "preview_path": preview_path
+                    "preview_path": preview_path,
                 }
 
         return {
             "post_id": post_id,
             "sample_text": sample_text[:150] + "...",
             "previews": previews,
-            "count": len(previews)
+            "count": len(previews),
         }
 
     except HTTPException:
@@ -1955,8 +2212,11 @@ async def generate_voice_previews(
     except Exception as e:
         print(f"❌ Voice preview generation error: {str(e)}")
         import traceback
+
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Preview generation failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Preview generation failed: {str(e)}"
+        )
 
 
 @router.get("/api/voice/preview-file/{filename}")
@@ -1965,23 +2225,28 @@ async def serve_voice_preview(filename: str):
     Serve voice preview audio files.
     """
     try:
-        preview_dir = Path(__file__).parent.parent / "output" / "voice_previews"
+        preview_dir = (
+            Path(__file__).parent.parent / "output" / "voice_previews"
+        )
         file_path = preview_dir / filename
 
         if not file_path.exists():
-            raise HTTPException(status_code=404, detail="Preview file not found")
+            raise HTTPException(
+                status_code=404, detail="Preview file not found"
+            )
 
         from fastapi.responses import FileResponse
+
         return FileResponse(
-            path=str(file_path),
-            media_type="audio/mpeg",
-            filename=filename
+            path=str(file_path), media_type="audio/mpeg", filename=filename
         )
 
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"File serving failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"File serving failed: {str(e)}"
+        )
 
 
 @router.post("/api/voice/select/{post_id}")
@@ -1989,7 +2254,7 @@ async def save_voice_selection(
     post_id: int,
     voice_key: str = Body(..., embed=True),
     energy: Optional[str] = Body("professional", embed=True),
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
 ) -> Dict[str, Any]:
     """
     Save user's voice selection and energy mode for a post.
@@ -2009,13 +2274,20 @@ async def save_voice_selection(
 
         # Validate voice key
         from app import voice_selector
+
         if voice_key not in voice_selector.RECOMMENDED_VOICES:
-            raise HTTPException(status_code=400, detail=f"Invalid voice key: {voice_key}")
+            raise HTTPException(
+                status_code=400, detail=f"Invalid voice key: {voice_key}"
+            )
 
         # Validate energy mode
         from app import tts_service
+
         if energy and energy not in tts_service.VOICE_ENERGY_PRESETS:
-            raise HTTPException(status_code=400, detail=f"Invalid energy mode: {energy}. Must be one of: {list(tts_service.VOICE_ENERGY_PRESETS.keys())}")
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid energy mode: {energy}. Must be one of: {list(tts_service.VOICE_ENERGY_PRESETS.keys())}",
+            )
 
         # Store voice selection in post extra_data
         if not post.extra_data:
@@ -2028,7 +2300,9 @@ async def save_voice_selection(
         session.refresh(post)
 
         voice_info = voice_selector.RECOMMENDED_VOICES[voice_key]
-        energy_info = tts_service.VOICE_ENERGY_PRESETS.get(energy or "professional", {})
+        energy_info = tts_service.VOICE_ENERGY_PRESETS.get(
+            energy or "professional", {}
+        )
 
         return {
             "post_id": post_id,
@@ -2036,7 +2310,7 @@ async def save_voice_selection(
             "voice_energy": energy,
             "voice_info": voice_info,
             "energy_info": energy_info,
-            "message": f"Voice '{voice_info['name']}' with {energy} energy selected successfully"
+            "message": f"Voice '{voice_info['name']}' with {energy} energy selected successfully",
         }
 
     except HTTPException:
@@ -2044,8 +2318,11 @@ async def save_voice_selection(
     except Exception as e:
         print(f"❌ Voice selection error: {str(e)}")
         import traceback
+
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Voice selection failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Voice selection failed: {str(e)}"
+        )
 
 
 @router.get("/api/voice/available")
@@ -2058,11 +2335,13 @@ async def get_available_voices() -> Dict[str, Any]:
 
         return {
             "voices": voice_selector.RECOMMENDED_VOICES,
-            "count": len(voice_selector.RECOMMENDED_VOICES)
+            "count": len(voice_selector.RECOMMENDED_VOICES),
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get voices: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to get voices: {str(e)}"
+        )
 
 
 @router.get("/api/voice/energy-modes")
@@ -2079,11 +2358,13 @@ async def get_energy_modes() -> Dict[str, Any]:
         return {
             "energy_modes": tts_service.VOICE_ENERGY_PRESETS,
             "default": tts_service.DEFAULT_ENERGY,
-            "count": len(tts_service.VOICE_ENERGY_PRESETS)
+            "count": len(tts_service.VOICE_ENERGY_PRESETS),
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get energy modes: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to get energy modes: {str(e)}"
+        )
 
 
 # ==================== END VOICE SELECTION SYSTEM ====================

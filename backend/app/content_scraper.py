@@ -4,7 +4,10 @@ from __future__ import annotations
 Content Scraper Module
 Handles RSS feeds, web scraping, and content aggregation from multiple sources.
 """
-from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401
+from agents.checks.router import (
+    should_offload,
+    offload_to_gemini,
+)  # noqa: F401
 
 import hashlib
 import re
@@ -21,20 +24,32 @@ from bs4 import BeautifulSoup
 
 NEWS_SOURCES: List[Tuple[str, str]] = [
     # Primary sources (highly reliable)
-    ("TechCrunch AI", "https://techcrunch.com/category/artificial-intelligence/feed/"),
+    (
+        "TechCrunch AI",
+        "https://techcrunch.com/category/artificial-intelligence/feed/",
+    ),
     ("VentureBeat AI", "https://venturebeat.com/category/ai/feed/"),
-    ("The Verge AI", "https://www.theverge.com/ai-artificial-intelligence/rss/index.xml"),
-
+    (
+        "The Verge AI",
+        "https://www.theverge.com/ai-artificial-intelligence/rss/index.xml",
+    ),
     # Tech news aggregators (very reliable)
-    ("Hacker News", "https://hnrss.org/newest?q=AI+OR+GPT+OR+LLM+OR+machine+learning"),
-    ("Ars Technica", "https://feeds.arstechnica.com/arstechnica/technology-lab"),
+    (
+        "Hacker News",
+        "https://hnrss.org/newest?q=AI+OR+GPT+OR+LLM+OR+machine+learning",
+    ),
+    (
+        "Ars Technica",
+        "https://feeds.arstechnica.com/arstechnica/technology-lab",
+    ),
     ("The AI Blog", "https://ai.googleblog.com/feeds/posts/default"),
-
     # Additional sources (may need fallback)
-    ("MIT Tech Review", "https://www.technologyreview.com/topic/artificial-intelligence/feed"),
+    (
+        "MIT Tech Review",
+        "https://www.technologyreview.com/topic/artificial-intelligence/feed",
+    ),
     ("Wired AI", "https://www.wired.com/feed/tag/ai/latest/rss"),
     ("AI News", "https://artificialintelligence-news.com/feed/"),
-
     # Corporate blogs (sometimes blocked)
     ("OpenAI Blog", "https://openai.com/blog/rss.xml"),
     ("DeepMind", "https://deepmind.google/blog/rss.xml"),
@@ -42,13 +57,24 @@ NEWS_SOURCES: List[Tuple[str, str]] = [
 
 AUTHORITATIVE_SOURCES = {"OpenAI", "Google AI", "DeepMind", "MIT", "Stanford"}
 KEYWORDS = {
-    "ai", "llm", "gpt", "genai", "chatgpt", "claude",
-    "artificial intelligence", "machine learning", "deep learning",
-    "neural network", "transformer", "automation", "chatbot"
+    "ai",
+    "llm",
+    "gpt",
+    "genai",
+    "chatgpt",
+    "claude",
+    "artificial intelligence",
+    "machine learning",
+    "deep learning",
+    "neural network",
+    "transformer",
+    "automation",
+    "chatbot",
 }
 
 
 # ==================== RSS FEED FETCHING ====================
+
 
 def fetch_rss_feed(url: str, source_name: str) -> List[Dict[str, Any]]:
     """
@@ -60,9 +86,10 @@ def fetch_rss_feed(url: str, source_name: str) -> List[Dict[str, Any]]:
 
         # Use requests with proper headers to avoid blocking
         import requests
+
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            'Accept': 'application/rss+xml, application/xml, text/xml, */*',
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+            "Accept": "application/rss+xml, application/xml, text/xml, */*",
         }
 
         try:
@@ -79,7 +106,9 @@ def fetch_rss_feed(url: str, source_name: str) -> List[Dict[str, Any]]:
 
         if feed.bozo:
             # Feed has parsing issues but might still have entries
-            print(f"[scraper] Warning: Feed has parsing issues for {source_name}")
+            print(
+                f"[scraper] Warning: Feed has parsing issues for {source_name}"
+            )
 
         if not feed.entries:
             print(f"[scraper] No entries found in feed: {source_name}")
@@ -91,13 +120,19 @@ def fetch_rss_feed(url: str, source_name: str) -> List[Dict[str, Any]]:
             try:
                 # Extract article data
                 title = entry.get("title", "").strip()
-                summary = entry.get("summary", entry.get("description", "")).strip()
+                summary = entry.get(
+                    "summary", entry.get("description", "")
+                ).strip()
                 link = entry.get("link", "").strip()
 
                 # Parse published date
-                published_parsed = entry.get("published_parsed") or entry.get("updated_parsed")
+                published_parsed = entry.get("published_parsed") or entry.get(
+                    "updated_parsed"
+                )
                 if published_parsed:
-                    published = datetime(*published_parsed[:6], tzinfo=timezone.utc)
+                    published = datetime(
+                        *published_parsed[:6], tzinfo=timezone.utc
+                    )
                 else:
                     published = datetime.now(timezone.utc)
 
@@ -119,10 +154,14 @@ def fetch_rss_feed(url: str, source_name: str) -> List[Dict[str, Any]]:
                 articles.append(article)
 
             except Exception as e:
-                print(f"[scraper] Error parsing entry from {source_name}: {str(e)}")
+                print(
+                    f"[scraper] Error parsing entry from {source_name}: {str(e)}"
+                )
                 continue
 
-        print(f"[scraper] ✅ Fetched {len(articles)} articles from {source_name}")
+        print(
+            f"[scraper] ✅ Fetched {len(articles)} articles from {source_name}"
+        )
         return articles
 
     except Exception as e:
@@ -141,16 +180,17 @@ def clean_html(text: str) -> str:
         # Extract text
         clean_text = soup.get_text(separator=" ", strip=True)
         # Remove extra whitespace
-        clean_text = re.sub(r'\s+', ' ', clean_text).strip()
+        clean_text = re.sub(r"\s+", " ", clean_text).strip()
         return clean_text
     except Exception:
         # Fallback: simple regex-based cleaning
-        clean_text = re.sub(r'<[^>]+>', '', text)
-        clean_text = re.sub(r'\s+', ' ', clean_text).strip()
+        clean_text = re.sub(r"<[^>]+>", "", text)
+        clean_text = re.sub(r"\s+", " ", clean_text).strip()
         return clean_text
 
 
 # ==================== WEB SCRAPING (for non-RSS sources) ====================
+
 
 async def scrape_webpage(url: str) -> Optional[Dict[str, Any]]:
     """
@@ -177,8 +217,9 @@ async def scrape_webpage(url: str) -> Optional[Dict[str, Any]]:
 
             # Extract meta description
             meta_desc = ""
-            meta_tag = soup.find("meta", attrs={"name": "description"}) or \
-                      soup.find("meta", attrs={"property": "og:description"})
+            meta_tag = soup.find(
+                "meta", attrs={"name": "description"}
+            ) or soup.find("meta", attrs={"property": "og:description"})
             if meta_tag and meta_tag.get("content"):
                 meta_desc = meta_tag.get("content")
 
@@ -186,7 +227,9 @@ async def scrape_webpage(url: str) -> Optional[Dict[str, Any]]:
             published = extract_published_date(soup)
 
             if not title or not content:
-                print(f"[scraper] Could not extract title or content from {url}")
+                print(
+                    f"[scraper] Could not extract title or content from {url}"
+                )
                 return None
 
             return {
@@ -206,17 +249,19 @@ async def scrape_webpage(url: str) -> Optional[Dict[str, Any]]:
 def extract_main_content(soup: BeautifulSoup) -> str:
     """Extract main content from webpage, filtering out nav/footer/ads."""
     # Remove unwanted elements
-    for element in soup.find_all(['script', 'style', 'nav', 'footer', 'header', 'aside']):
+    for element in soup.find_all(
+        ["script", "style", "nav", "footer", "header", "aside"]
+    ):
         element.decompose()
 
     # Try common article containers
     article_selectors = [
-        'article',
+        "article",
         '[role="main"]',
-        '.article-content',
-        '.post-content',
-        '.entry-content',
-        'main',
+        ".article-content",
+        ".post-content",
+        ".entry-content",
+        "main",
     ]
 
     for selector in article_selectors:
@@ -227,8 +272,8 @@ def extract_main_content(soup: BeautifulSoup) -> str:
                 return text
 
     # Fallback: extract all paragraph text
-    paragraphs = soup.find_all('p')
-    text = ' '.join([p.get_text(strip=True) for p in paragraphs])
+    paragraphs = soup.find_all("p")
+    text = " ".join([p.get_text(strip=True) for p in paragraphs])
     return text
 
 
@@ -249,7 +294,9 @@ def extract_published_date(soup: BeautifulSoup) -> Optional[datetime]:
             if date_str:
                 try:
                     # Try parsing ISO format
-                    return datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+                    return datetime.fromisoformat(
+                        date_str.replace("Z", "+00:00")
+                    )
                 except Exception:
                     pass
 
@@ -258,7 +305,10 @@ def extract_published_date(soup: BeautifulSoup) -> Optional[datetime]:
 
 # ==================== ARTICLE RANKING & FILTERING ====================
 
-def rank_articles(articles: List[Dict[str, Any]]) -> List[Tuple[Dict[str, Any], int]]:
+
+def rank_articles(
+    articles: List[Dict[str, Any]],
+) -> List[Tuple[Dict[str, Any], int]]:
     """
     Rank articles by relevance score based on:
     - Freshness (published date)
@@ -289,11 +339,15 @@ def rank_articles(articles: List[Dict[str, Any]]) -> List[Tuple[Dict[str, Any], 
 
         # 2. Authority Score (0-30 points)
         source = str(article.get("source", "")).strip()
-        if any(auth.lower() in source.lower() for auth in AUTHORITATIVE_SOURCES):
+        if any(
+            auth.lower() in source.lower() for auth in AUTHORITATIVE_SOURCES
+        ):
             score += 30
 
         # 3. Keyword Relevance (0-30 points)
-        haystack = f"{article.get('title', '')}\n{article.get('summary', '')}".lower()
+        haystack = (
+            f"{article.get('title', '')}\n{article.get('summary', '')}".lower()
+        )
         keyword_matches = sum(1 for kw in KEYWORDS if kw in haystack)
         score += min(keyword_matches * 5, 30)  # Cap at 30 points
 
@@ -304,10 +358,10 @@ def rank_articles(articles: List[Dict[str, Any]]) -> List[Tuple[Dict[str, Any], 
             if len(title) > 40:
                 score += 10
             # Titles with numbers/data tend to perform well
-            if re.search(r'\d+', title):
+            if re.search(r"\d+", title):
                 score += 5
             # Question titles engage readers
-            if '?' in title:
+            if "?" in title:
                 score += 5
 
         ranked.append((article, score))
@@ -352,6 +406,7 @@ def filter_duplicates(articles: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
 # ==================== MAIN SCRAPING FUNCTION ====================
 
+
 async def fetch_all_content() -> List[Dict[str, Any]]:
     """
     Fetch content from all sources (RSS feeds + web scraping).
@@ -385,20 +440,34 @@ async def fetch_all_content() -> List[Dict[str, Any]]:
 
     # Print top 5 for debugging
     for i, (article, score) in enumerate(ranked[:5], 1):
-        print(f"  {i}. [{score}pts] {article['title'][:60]}... - {article['source']}")
+        print(
+            f"  {i}. [{score}pts] {article['title'][:60]}... - {article['source']}"
+        )
 
     return top_articles
 
 
 # ==================== UTILITY FUNCTIONS ====================
 
+
 def extract_keywords(text: str, max_keywords: int = 5) -> List[str]:
     """Extract key topics/keywords from text for better content categorization."""
     # Simple keyword extraction (in production, use NLP libraries)
-    words = re.findall(r'\b[a-z]{4,}\b', text.lower())
+    words = re.findall(r"\b[a-z]{4,}\b", text.lower())
 
     # Filter out common words
-    common_words = {'that', 'this', 'with', 'from', 'have', 'been', 'will', 'there', 'what', 'about'}
+    common_words = {
+        "that",
+        "this",
+        "with",
+        "from",
+        "have",
+        "been",
+        "will",
+        "there",
+        "what",
+        "about",
+    }
     keywords = [w for w in words if w not in common_words and w in KEYWORDS]
 
     # Return unique keywords

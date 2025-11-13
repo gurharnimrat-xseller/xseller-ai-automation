@@ -13,7 +13,10 @@ load_dotenv(env_path)
 from contextlib import asynccontextmanager  # noqa: E402
 from typing import AsyncIterator  # noqa: E402
 
-from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401, E402
+from agents.checks.router import (
+    should_offload,
+    offload_to_gemini,
+)  # noqa: F401, E402
 from fastapi import FastAPI  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
@@ -43,10 +46,9 @@ app = FastAPI(lifespan=lifespan)
 
 # CORS: allow localhost:3000 (MUST be added before routers)
 # Production: Set ALLOWED_ORIGINS environment variable (comma-separated)
-ALLOWED_ORIGINS = os.getenv(
-    "ALLOWED_ORIGINS",
-    "http://localhost:3000"
-).split(",")
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(
+    ","
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -81,7 +83,11 @@ async def health():
         database_status = "error"
 
     scheduler_status = "running" if scheduler.is_running() else "stopped"
-    return {"api": "healthy", "database": database_status, "scheduler": scheduler_status}
+    return {
+        "api": "healthy",
+        "database": database_status,
+        "scheduler": scheduler_status,
+    }
 
 
 # Allow running via: python -m app.main

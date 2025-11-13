@@ -2,7 +2,11 @@
 Text rendering utilities using PIL (no ImageMagick required)
 Provides TextClip-like functionality without external dependencies
 """
-from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401
+
+from agents.checks.router import (
+    should_offload,
+    offload_to_gemini,
+)  # noqa: F401
 
 import os
 import numpy as np
@@ -11,6 +15,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 try:
     from moviepy.editor import ImageClip
+
     MOVIEPY_AVAILABLE = True
 except ImportError:
     MOVIEPY_AVAILABLE = False
@@ -25,7 +30,7 @@ def create_text_clip_pil(
     bg_color: Optional[Tuple[int, int, int, int]] = None,
     size: Tuple[int, int] = (1080, 1920),
     duration: float = 3.0,
-) -> 'ImageClip':
+) -> "ImageClip":
     """
     Create a text clip using PIL (replacement for MoviePy's TextClip).
 
@@ -47,9 +52,9 @@ def create_text_clip_pil(
 
     # Create image with transparent or colored background
     if bg_color is None:
-        img = Image.new('RGBA', size, (0, 0, 0, 0))
+        img = Image.new("RGBA", size, (0, 0, 0, 0))
     else:
-        img = Image.new('RGBA', size, bg_color)
+        img = Image.new("RGBA", size, bg_color)
 
     draw = ImageDraw.Draw(img)
 
@@ -57,7 +62,7 @@ def create_text_clip_pil(
     font = _load_bold_font(fontsize)
 
     # Handle multi-line text
-    lines = text.split('\n')
+    lines = text.split("\n")
 
     # Calculate total text height
     line_heights = []
@@ -82,7 +87,12 @@ def create_text_clip_pil(
         if stroke_width > 0:
             for adj_x in range(-stroke_width, stroke_width + 1):
                 for adj_y in range(-stroke_width, stroke_width + 1):
-                    draw.text((x + adj_x, current_y + adj_y), line, font=font, fill=stroke_color)
+                    draw.text(
+                        (x + adj_x, current_y + adj_y),
+                        line,
+                        font=font,
+                        fill=stroke_color,
+                    )
 
         # Draw main text
         draw.text((x, current_y), line, font=font, fill=color)

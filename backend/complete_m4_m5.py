@@ -1,7 +1,11 @@
 """
 Complete M4 & M5 with detailed tasks + add missing metadata
 """
-from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401
+
+from agents.checks.router import (
+    should_offload,
+    offload_to_gemini,
+)  # noqa: F401
 import os
 from datetime import datetime, timedelta
 from notion_client import Client
@@ -12,34 +16,34 @@ load_dotenv()
 client = Client(auth=os.getenv("NOTION_API_KEY"))
 db_id = os.getenv("NOTION_DATABASE_ID")
 
-def create_detailed_task(title, summary, milestone, status, owner, priority, eod_date, effort_hours=None, tags=None, acceptance_criteria=None):
+
+def create_detailed_task(
+    title,
+    summary,
+    milestone,
+    status,
+    owner,
+    priority,
+    eod_date,
+    effort_hours=None,
+    tags=None,
+    acceptance_criteria=None,
+):
     """Create a detailed task with all metadata"""
     try:
         properties = {
-            "Item": {
-                "title": [{"text": {"content": title}}]
-            },
-            "Entry Type": {
-                "select": {"name": "Task"}
-            },
-            "Owner": {
-                "rich_text": [{"text": {"content": owner}}]
-            },
-            "Status": {
-                "status": {"name": status}
-            },
-            "Milestone": {
-                "select": {"name": milestone}
-            },
-            "Priority": {
-                "select": {"name": priority}
-            },
+            "Item": {"title": [{"text": {"content": title}}]},
+            "Entry Type": {"select": {"name": "Task"}},
+            "Owner": {"rich_text": [{"text": {"content": owner}}]},
+            "Status": {"status": {"name": status}},
+            "Milestone": {"select": {"name": milestone}},
+            "Priority": {"select": {"name": priority}},
             "Summary / Notes": {
-                "rich_text": [{"text": {"content": summary[:1900]}}]  # Leave buffer for safety
+                "rich_text": [
+                    {"text": {"content": summary[:1900]}}
+                ]  # Leave buffer for safety
             },
-            "EOD Date": {
-                "date": {"start": eod_date.isoformat()}
-            }
+            "EOD Date": {"date": {"start": eod_date.isoformat()}},
         }
 
         # Add effort hours if provided
@@ -55,12 +59,13 @@ def create_detailed_task(title, summary, milestone, status, owner, priority, eod
         # Add acceptance criteria to summary
         if acceptance_criteria:
             properties["Acceptance Criteria"] = {
-                "rich_text": [{"text": {"content": acceptance_criteria[:2000]}}]
+                "rich_text": [
+                    {"text": {"content": acceptance_criteria[:2000]}}
+                ]
             }
 
         response = client.pages.create(
-            parent={"database_id": db_id},
-            properties=properties
+            parent={"database_id": db_id}, properties=properties
         )
 
         print(f"✅ {title}")
@@ -70,14 +75,15 @@ def create_detailed_task(title, summary, milestone, status, owner, priority, eod
         print(f"❌ Failed: {title} - {str(e)}")
         return None
 
+
 # Calculate dates
 today = datetime.now()
 m4_start = today + timedelta(days=22)  # Week 4
 m5_start = today + timedelta(days=29)  # Week 5
 
-print("="*80)
+print("=" * 80)
 print("🚀 COMPLETING M4 & M5 WITH FULL DETAILS")
-print("="*80)
+print("=" * 80)
 
 # ==========================================
 # MILESTONE 4: REVIEW INTERFACE (Week 4)
@@ -167,7 +173,7 @@ frontend/api/videoQueue.ts
     eod_date=m4_start + timedelta(days=1),
     effort_hours=16,
     tags=["frontend", "ui", "react", "video"],
-    acceptance_criteria="Video plays smoothly, script edits save, B-roll grid works, approve/reject instant, keyboard shortcuts, mobile responsive"
+    acceptance_criteria="Video plays smoothly, script edits save, B-roll grid works, approve/reject instant, keyboard shortcuts, mobile responsive",
 )
 
 create_detailed_task(
@@ -290,7 +296,7 @@ backend/app/routes/feedback.py
     eod_date=m4_start + timedelta(days=2),
     effort_hours=8,
     tags=["frontend", "forms", "feedback", "ui"],
-    acceptance_criteria="All categories work, ratings intuitive, notes save, database stores feedback, can filter by issue type"
+    acceptance_criteria="All categories work, ratings intuitive, notes save, database stores feedback, can filter by issue type",
 )
 
 create_detailed_task(
@@ -439,7 +445,7 @@ backend/app/learning_loop.py
     eod_date=m4_start + timedelta(days=4),
     effort_hours=16,
     tags=["backend", "ml", "feedback", "regeneration"],
-    acceptance_criteria="Feedback parsed, script adjusts, voice regenerates, B-roll replaces, reassembly works, versions tracked, 80% approval"
+    acceptance_criteria="Feedback parsed, script adjusts, voice regenerates, B-roll replaces, reassembly works, versions tracked, 80% approval",
 )
 
 # ==========================================
@@ -597,7 +603,7 @@ backend/app/video_converter.py
     eod_date=m5_start + timedelta(days=1),
     effort_hours=16,
     tags=["backend", "api", "social-media", "publishing"],
-    acceptance_criteria="Posts to 5 platforms, formatting correct, captions generate, hashtags relevant, 95% success rate"
+    acceptance_criteria="Posts to 5 platforms, formatting correct, captions generate, hashtags relevant, 95% success rate",
 )
 
 create_detailed_task(
@@ -742,7 +748,7 @@ backend/app/metrics_aggregator.py
     eod_date=m5_start + timedelta(days=3),
     effort_hours=16,
     tags=["frontend", "analytics", "charts", "dashboard"],
-    acceptance_criteria="Dashboard loads fast, charts accurate, real-time works, emails send, exports work, handles 100+ videos"
+    acceptance_criteria="Dashboard loads fast, charts accurate, real-time works, emails send, exports work, handles 100+ videos",
 )
 
 create_detailed_task(
@@ -924,7 +930,7 @@ backend/app/ml/knowledge_base.py
     eod_date=m5_start + timedelta(days=4),
     effort_hours=8,
     tags=["ml", "analytics", "optimization", "backend"],
-    acceptance_criteria="Collects data, detects patterns, generates recommendations, A/B tests, auto-applies, performance improves 10%+"
+    acceptance_criteria="Collects data, detects patterns, generates recommendations, A/B tests, auto-applies, performance improves 10%+",
 )
 
 # ==========================================
@@ -1036,12 +1042,12 @@ create_detailed_task(
     eod_date=m5_start + timedelta(days=7),
     effort_hours=8,
     tags=["testing", "integration", "launch", "automation"],
-    acceptance_criteria="Runs 7 days, 28 videos, 90% QC pass, 80% approval, 95% publish, zero critical failures, <30 min/day human time"
+    acceptance_criteria="Runs 7 days, 28 videos, 90% QC pass, 80% approval, 95% publish, zero critical failures, <30 min/day human time",
 )
 
-print("\n"+"="*80)
+print("\n" + "=" * 80)
 print("✅ M4 & M5 COMPLETE WITH FULL DETAILS!")
-print("="*80)
+print("=" * 80)
 print("\n📊 Summary:")
 print("  • M4: 3 detailed tasks (40 hours total)")
 print("  • M5: 4 detailed tasks (48 hours total)")
@@ -1054,4 +1060,4 @@ print("    - Testing procedures")
 print("    - Effort estimates")
 print("    - Tags for filtering")
 print("\n🎯 Total structure now 100% complete!")
-print("="*80)
+print("=" * 80)
