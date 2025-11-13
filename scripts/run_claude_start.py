@@ -10,7 +10,7 @@ This script:
 5. Checks for new PRs today with feat(scraper) or feat(rank) in titles
 6. Posts wake comment to the issue if no PRs exist
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
+from agents.checks.router import should_offload, offload_to_gemini  # guardrails  # noqa: F401
 
 import sys
 import time
@@ -127,7 +127,7 @@ def find_or_create_issue() -> int:
                 return issue_number
         
         # If not found, create it
-        print(f"📝 Issue not found. Creating new issue...")
+        print("📝 Issue not found. Creating new issue...")
         cmd = [
             "gh", "issue", "create",
             "--title", issue_title,
@@ -282,26 +282,26 @@ def main():
     print("\n" + "=" * 60)
     print("📊 SUMMARY")
     print("=" * 60)
-    print(f"\n🔗 Workflow Run URL:")
+    print("\n🔗 Workflow Run URL:")
     print(f"   {workflow_url}")
-    print(f"\n🔗 Issue URL (Start Claude M01 (auto)):")
+    print("\n🔗 Issue URL (Start Claude M01 (auto)):")
     print(f"   {issue_url}")
     
     if latest_comment:
-        print(f"\n💬 Latest Comment Body:")
+        print("\n💬 Latest Comment Body:")
         print("─" * 60)
         print(latest_comment)
         print("─" * 60)
     else:
-        print(f"\n💬 Latest Comment Body: None")
+        print("\n💬 Latest Comment Body: None")
     
     if prs_today:
-        print(f"\n📋 PRs Created Today:")
+        print("\n📋 PRs Created Today:")
         for pr in prs_today:
             print(f"   - {pr['title']}")
             print(f"     {pr['url']}")
     else:
-        print(f"\n📋 PRs Created Today: None (wake comment posted)")
+        print("\n📋 PRs Created Today: None (wake comment posted)")
     
     print("\n✅ Done!")
 
