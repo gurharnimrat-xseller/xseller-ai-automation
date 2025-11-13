@@ -21,6 +21,9 @@ def should_scan(path: str) -> bool:
     # Exclude the verify_guardrails.py script itself
     if path.endswith("verify_guardrails.py"):
         return False
+    # Exclude router.py - it's ALLOWED to have direct SDK imports
+    if path.endswith("agents/checks/router.py"):
+        return False
     return any(path.startswith(f"./{inc}") for inc in INCLUDE)
 
 
@@ -36,6 +39,9 @@ def main() -> int:
             path = os.path.join(root, name)
             # Skip verify_guardrails.py itself
             if path.endswith("verify_guardrails.py"):
+                continue
+            # Skip router.py - it's ALLOWED to have direct SDK imports
+            if path.endswith("router.py") and "agents/checks" in path:
                 continue
             try:
                 text = open(path, "r", encoding="utf-8", errors="ignore").read()

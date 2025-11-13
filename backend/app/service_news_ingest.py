@@ -1,15 +1,13 @@
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 """
 News ingestion service (M01A).
 
 Handles fetching articles from external sources and storing them in the database.
 """
-
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
+from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401 guardrails
 
 import os
 from datetime import datetime
-from typing import List, Dict, Any
+from typing import List
 from sqlmodel import Session, select
 from sqlalchemy.exc import IntegrityError
 
@@ -128,7 +126,7 @@ class NewsIngestService:
                 self.db.commit()
                 stored_count += 1
 
-            except IntegrityError as e:
+            except IntegrityError:
                 # Duplicate external_id, rollback and continue
                 self.db.rollback()
                 print(f"[Ingest] Duplicate detected (IntegrityError): {raw.external_id}")

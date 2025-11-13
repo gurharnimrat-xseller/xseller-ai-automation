@@ -3,9 +3,6 @@ Pydantic schemas for News API (M01A).
 
 These schemas validate request/response data for the news ingestion and ranking pipeline.
 """
-
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
-
 from datetime import datetime
 from typing import List, Optional
 from pydantic import BaseModel, Field, validator
