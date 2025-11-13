@@ -90,8 +90,8 @@ jobs:
     name: Lint (Python)
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: [guardrails]
-    if: ${{ needs.guardrails.result == 'success' || needs.guardrails.result == 'skipped' }}
+    needs: [check-files, guardrails]
+    if: ${{ always() && (needs.guardrails.result == 'success' || needs.guardrails.result == 'skipped') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -114,8 +114,8 @@ jobs:
     name: Lint (Node)
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: [guardrails]
-    if: ${{ needs.guardrails.result == 'success' || needs.guardrails.result == 'skipped' }}
+    needs: [check-files, guardrails]
+    if: ${{ always() && (needs.guardrails.result == 'success' || needs.guardrails.result == 'skipped') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -139,6 +139,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [lint_python]
+    if: ${{ always() && needs.lint_python.result == 'success' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -155,6 +156,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [lint_node]
+    if: ${{ always() && needs.lint_node.result == 'success' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
