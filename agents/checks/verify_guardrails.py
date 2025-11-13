@@ -3,7 +3,7 @@ import re
 import sys
 
 INCLUDE = ("runners/", "agents/", "backend/", "scripts/")
-EXCLUDE = ("/tests/", "/node_modules/", "/vendor/", "/.venv/", "/venv/", "/docs/", "verify_guardrails.py")
+EXCLUDE = ("/tests/", "/node_modules/", "/vendor/", "/.venv/", "/venv/", "/docs/")
 DENY_IMPORTS = (
     r"^[^#]*\bimport\s+openai\b",
     r"^[^#]*\bimport\s+anthropic\b",
@@ -34,8 +34,8 @@ def main() -> int:
             if not name.endswith(".py"):
                 continue
             path = os.path.join(root, name)
-            # Skip verify_guardrails.py itself
-            if path.endswith("verify_guardrails.py"):
+            # Check if this specific file should be scanned
+            if not should_scan(path):
                 continue
             try:
                 text = open(path, "r", encoding="utf-8", errors="ignore").read()
