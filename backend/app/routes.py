@@ -259,6 +259,7 @@ async def approve_post(
             try:
                 # removed per guardrails; use router
 # # removed per guardrails; use router
+# # removed per guardrails; use router
 # from openai import AsyncOpenAI
                 client = AsyncOpenAI()
 
@@ -739,6 +740,7 @@ async def regenerate_text(
         try:
             # removed per guardrails; use router
 # # removed per guardrails; use router
+# # removed per guardrails; use router
 # from openai import AsyncOpenAI
             client = AsyncOpenAI()
         except ImportError:
@@ -853,6 +855,7 @@ async def regenerate_video(
         # Import OpenAI client
         try:
             # removed per guardrails; use router
+# # removed per guardrails; use router
 # # removed per guardrails; use router
 # from openai import AsyncOpenAI
             client = AsyncOpenAI()

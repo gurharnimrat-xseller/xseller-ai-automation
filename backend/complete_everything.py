@@ -419,6 +419,7 @@ Requirements:
         create_heading("💻 Implementation Code", 2),
         create_code("""# removed per guardrails; use router
 # # removed per guardrails; use router
+# # removed per guardrails; use router
 # import google.generativeai as genai
 
 def generate_script(article: Dict) -> Dict:

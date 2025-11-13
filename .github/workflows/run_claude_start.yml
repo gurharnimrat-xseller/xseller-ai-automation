@@ -1,0 +1,27 @@
+---
+name: Run Claude Start Automation
+
+"on":
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  run-automation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Run Claude Start automation script
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/run_claude_start.py

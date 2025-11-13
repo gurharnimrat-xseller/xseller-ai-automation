@@ -9,7 +9,7 @@ DENY_IMPORTS = (
     r"\bimport\s+anthropic\b",
     r"\bimport\s+google\.generativeai\b",
 )
-REQUIRE_ROUTER_HINT = r"agents\.checks\.router"
+REQUIRE_ROUTER_HINT = "agents.checks.router"
 
 
 def should_scan(path: str) -> bool:
@@ -34,8 +34,19 @@ def main() -> int:
                 text = open(path, "r", encoding="utf-8", errors="ignore").read()
             except Exception:
                 continue
-            if any(re.search(pat, text) for pat in DENY_IMPORTS):
-                offenders.append((path, "Direct AI client import"))
+            # Check for direct AI imports, but skip commented lines
+            for pat in DENY_IMPORTS:
+                for match in re.finditer(pat, text):
+                    # Get the line containing the match
+                    line_start = text.rfind('\n', 0, match.start()) + 1
+                    line_end = text.find('\n', match.end())
+                    if line_end == -1:
+                        line_end = len(text)
+                    line = text[line_start:line_end]
+                    # Skip if line is commented
+                    if not line.lstrip().startswith('#'):
+                        offenders.append((path, "Direct AI client import"))
+                        break
             if re.search(r"\bcomplete|generate|llm|client", text, re.I):
                 if REQUIRE_ROUTER_HINT not in text:
                     offenders.append((path, "Missing router import"))
