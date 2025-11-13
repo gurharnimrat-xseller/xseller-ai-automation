@@ -4,7 +4,7 @@ M01 Daily Batch Job - News Ingestion + Ranking Pipeline
 Orchestrates the daily execution of M01A news ingestion and ranking.
 Calls the backend API endpoints to trigger the pipeline.
 """
-from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401
+from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401 guardrails
 
 import argparse
 import logging
