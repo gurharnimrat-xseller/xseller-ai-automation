@@ -38,8 +38,9 @@ env:
 
       - name: Run M01 daily batch
         working-directory: backend
+              - name: Run M01 daily batch
         run: |
-          python -m app.jobs.m01_daily_batch \
+          python -m backend.app.jobs.m01_daily_batch \
             --base-url "${BACKEND_API_BASE_URL}" \
             --sources "${NEWS_SOURCES}" \
             --limit-per-source "${NEWS_LIMIT_PER_SOURCE}" \
