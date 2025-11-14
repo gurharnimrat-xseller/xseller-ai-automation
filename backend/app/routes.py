@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import os
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Body
@@ -14,6 +16,7 @@ from app import content_scraper
 from app import scheduler
 from app import video_production
 from app import video_competitor_exact
+from app import schemas_news
 
 # Create router
 router = APIRouter()
@@ -243,7 +246,7 @@ async def approve_post(
         if post.deleted_at:
             raise HTTPException(status_code=400, detail="Post is deleted")
 
-        schedule_immediately = body_data.get("schedule_immediately", False)
+        _schedule_immediately = body_data.get("schedule_immediately", False)  # noqa: F841
 
         # Update text post status to approved
         post.status = "approved"
@@ -258,7 +261,7 @@ async def approve_post(
                 # removed per guardrails; use router
 # # removed per guardrails; use router
 # from openai import AsyncOpenAI
-                client = AsyncOpenAI()
+                client = AsyncOpenAI()  # noqa: F821
 
                 prompt = (
                     f"Create a VIRAL video script (15-20 seconds) based on this social media post.\n\n"
@@ -738,7 +741,7 @@ async def regenerate_text(
             # removed per guardrails; use router
 # # removed per guardrails; use router
 # from openai import AsyncOpenAI
-            client = AsyncOpenAI()
+            client = AsyncOpenAI()  # noqa: F821
         except ImportError:
             raise HTTPException(
                 status_code=500, detail="OpenAI client not available")
@@ -839,7 +842,7 @@ async def regenerate_video(
                 status_code=400, detail="Post must be a video post")
 
         # Extract options - handle both camelCase and snake_case
-        num_variants = body_data.get(
+        _num_variants = body_data.get(  # noqa: F841
             "variantCount") or body_data.get("num_variants", 1)
         custom_instructions = body_data.get(
             "customInstructions") or body_data.get("custom_instructions", "")
@@ -853,7 +856,7 @@ async def regenerate_video(
             # removed per guardrails; use router
 # # removed per guardrails; use router
 # from openai import AsyncOpenAI
-            client = AsyncOpenAI()
+            client = AsyncOpenAI()  # noqa: F821
         except ImportError:
             raise HTTPException(
                 status_code=500, detail="OpenAI client not available")

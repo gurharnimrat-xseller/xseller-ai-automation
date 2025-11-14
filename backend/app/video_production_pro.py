@@ -32,6 +32,9 @@ except ImportError:
 import httpx
 from PIL import Image, ImageDraw, ImageFont
 
+# Video settings (9:16 vertical for shorts) - defined early for function defaults
+VIDEO_WIDTH = 1080
+VIDEO_HEIGHT = 1920
 
 # ==================== PIL-BASED TEXT RENDERING (NO IMAGEMAGICK) ====================
 
@@ -98,9 +101,7 @@ def create_text_image_pil(
 PEXELS_API_KEY = os.getenv("PEXELS_API_KEY", "")
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "")
 
-# Video settings (9:16 vertical for shorts)
-VIDEO_WIDTH = 1080
-VIDEO_HEIGHT = 1920
+# Video settings (9:16 vertical for shorts) - VIDEO_WIDTH and VIDEO_HEIGHT defined above
 VIDEO_FPS = 30
 
 # Competitor-style text settings

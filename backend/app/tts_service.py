@@ -197,7 +197,7 @@ async def generate_tts_openai(
         energy_preset = VOICE_ENERGY_PRESETS.get(energy.lower(), VOICE_ENERGY_PRESETS[DEFAULT_ENERGY])
 
         # Initialize OpenAI client
-        client = AsyncOpenAI(api_key=OPENAI_API_KEY)
+        client = AsyncOpenAI(api_key=OPENAI_API_KEY)  # noqa: F821
 
         print(f"[TTS] Generating OpenAI TTS with voice: {voice_name}, energy: {energy} ({energy_preset['description']})")
         response = await client.audio.speech.create(

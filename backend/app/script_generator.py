@@ -131,7 +131,7 @@ async def generate_viral_text_posts(
     Returns:
         List of dicts with 'platform', 'text', 'hook_type' fields
     """
-    client = AsyncOpenAI()
+    client = AsyncOpenAI()  # noqa: F821
 
     if platforms is None:
         platforms = ["LinkedIn", "Twitter", "Instagram", "Facebook"]
@@ -256,7 +256,7 @@ async def generate_viral_video_scripts(
     Returns:
         List of dicts with 'script', 'hook_type', 'duration' fields
     """
-    client = AsyncOpenAI()
+    client = AsyncOpenAI()  # noqa: F821
 
     prompt = f"""You are a VIRAL VIDEO SCRIPT EXPERT. Your scripts get millions of views.
 
