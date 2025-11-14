@@ -4,7 +4,6 @@ Test the entire content generation pipeline:
 2. Generate viral text posts
 3. Generate viral video scripts
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
 import asyncio
 import sys
@@ -13,14 +12,18 @@ import os
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(__file__))
 
-from app import content_scraper
-from app import script_generator
+from agents.checks.router import (
+    should_offload,
+    offload_to_gemini,
+)  # noqa: F401, E402
+from app import content_scraper  # noqa: E402
+from app import script_generator  # noqa: E402
 
 
 async def main():
-    print("="*80)
+    print("=" * 80)
     print("🧪 TESTING COMPLETE CONTENT GENERATION PIPELINE")
-    print("="*80)
+    print("=" * 80)
 
     try:
         # Step 1: Scrape content
@@ -35,7 +38,9 @@ async def main():
 
         # Use top article for testing
         top_article = articles[0]
-        print(f"📝 Testing with article: {top_article.get('title', 'No title')[:80]}...")
+        print(
+            f"📝 Testing with article: {top_article.get('title', 'No title')[:80]}..."
+        )
         print(f"   Source: {top_article.get('source', 'Unknown')}")
         print()
 
@@ -45,15 +50,15 @@ async def main():
         text_posts = await script_generator.generate_viral_text_posts(
             article=top_article,
             num_variants=3,
-            platforms=["LinkedIn", "Twitter", "Instagram"]
+            platforms=["LinkedIn", "Twitter", "Instagram"],
         )
 
         print(f"✅ Generated {len(text_posts)} text posts\n")
         for i, post in enumerate(text_posts, 1):
-            platform = post.get('platform', 'Unknown')
-            text = post.get('text', '')
-            hook_type = post.get('hook_type', 'unknown')
-            framework = post.get('framework', 'unknown')
+            platform = post.get("platform", "Unknown")
+            text = post.get("text", "")
+            hook_type = post.get("hook_type", "unknown")
+            framework = post.get("framework", "unknown")
 
             print(f"Post {i} - {platform} [{hook_type}/{framework}]:")
             print(f"{text[:200]}...")
@@ -63,34 +68,33 @@ async def main():
         print("\n🎬 STEP 3: Generating viral video scripts...")
         print("-" * 80)
         video_scripts = await script_generator.generate_viral_video_scripts(
-            article=top_article,
-            num_variants=2,
-            duration=20
+            article=top_article, num_variants=2, duration=20
         )
 
         print(f"✅ Generated {len(video_scripts)} video scripts\n")
         for i, script_data in enumerate(video_scripts, 1):
-            script = script_data.get('script', '')
-            hook_type = script_data.get('hook_type', 'unknown')
-            formula = script_data.get('formula', 'unknown')
-            duration = script_data.get('duration', 0)
+            script = script_data.get("script", "")
+            hook_type = script_data.get("hook_type", "unknown")
+            formula = script_data.get("formula", "unknown")
+            duration = script_data.get("duration", 0)
 
             print(f"Script {i} - {duration}s [{hook_type}/{formula}]:")
             print(f"{script[:300]}...")
             print()
 
         # Summary
-        print("="*80)
+        print("=" * 80)
         print("✅ PIPELINE TEST COMPLETE!")
-        print("="*80)
+        print("=" * 80)
         print(f"Articles Scraped: {len(articles)}")
         print(f"Text Posts Generated: {len(text_posts)}")
         print(f"Video Scripts Generated: {len(video_scripts)}")
-        print("="*80)
+        print("=" * 80)
 
     except Exception as e:
         print(f"\n❌ ERROR: {str(e)}")
         import traceback
+
         traceback.print_exc()
 
 

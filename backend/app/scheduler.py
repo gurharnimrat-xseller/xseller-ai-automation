@@ -1,14 +1,16 @@
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 from __future__ import annotations
 
+from agents.checks.router import (
+    should_offload,
+    offload_to_gemini,
+)  # noqa: F401
 import asyncio
 import hashlib
-import json
-from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
+
 # removed per guardrails; use router
 # # removed per guardrails; use router
 # from openai import AsyncOpenAI
@@ -52,20 +54,22 @@ def start_scheduler() -> None:
             name="fetch_generate_2100",
             replace_existing=True,
         )
-        
+
         # Process video generation queue every 2 minutes (async job)
         async def process_queue():
             await video_generator.process_video_generation_queue()
-        
+
         _scheduler.add_job(
             process_queue,
             CronTrigger(minute="*/2"),  # Every 2 minutes
             name="process_video_queue",
             replace_existing=True,
         )
-        
+
         _scheduler.start()
-        print("[scheduler] Started AsyncIOScheduler with NZDT cron jobs and video processing")
+        print(
+            "[scheduler] Started AsyncIOScheduler with NZDT cron jobs and video processing"
+        )
     else:
         if not _scheduler.running:
             _scheduler.start()
@@ -90,7 +94,8 @@ def is_running() -> bool:
 
 def check_duplicate(url: str, title: str, body: str) -> bool:
     content_hash = hashlib.sha256(
-        f"{title}\n{url}\n{body}".encode("utf-8")).hexdigest()
+        f"{title}\n{url}\n{body}".encode("utf-8")
+    ).hexdigest()
     with Session(engine) as session:
         stmt = select(Post).where(
             (Post.source_url == url) | (Post.content_hash == content_hash)
@@ -121,17 +126,19 @@ async def generate_text_post(article: Dict[str, Any]) -> List[Dict[str, Any]]:
         posts = await script_generator.generate_viral_text_posts(
             article=article,
             num_variants=5,
-            platforms=["LinkedIn", "Twitter", "Instagram", "Facebook"]
+            platforms=["LinkedIn", "Twitter", "Instagram", "Facebook"],
         )
 
         # Convert to expected format
         results: List[Dict[str, Any]] = []
         for post in posts:
-            results.append({
-                "platform": post.get("platform", "General"),
-                "text": post.get("text", ""),
-                "hook_type": post.get("hook_type", "unknown"),
-            })
+            results.append(
+                {
+                    "platform": post.get("platform", "General"),
+                    "text": post.get("text", ""),
+                    "hook_type": post.get("hook_type", "unknown"),
+                }
+            )
 
         return results
     except Exception as e:
@@ -144,9 +151,7 @@ async def generate_video_script(article: Dict[str, Any]) -> List[str]:
     try:
         # Use the new enhanced script generator
         scripts = await script_generator.generate_viral_video_scripts(
-            article=article,
-            num_variants=3,
-            duration=20
+            article=article, num_variants=3, duration=20
         )
 
         # Convert to expected format (list of script strings)
@@ -175,6 +180,7 @@ async def fetch_and_generate_content() -> None:
     except Exception as e:
         print(f"[job] ❌ Error fetching content: {e}")
         import traceback
+
         traceback.print_exc()
         return
 
@@ -197,13 +203,16 @@ async def fetch_and_generate_content() -> None:
         try:
             text_task = asyncio.create_task(generate_text_post(article))
             video_task = asyncio.create_task(generate_video_script(article))
-            text_posts, video_scripts = await asyncio.gather(text_task, video_task)
+            text_posts, video_scripts = await asyncio.gather(
+                text_task, video_task
+            )
         except Exception as e:
             print(f"[openai] Error generating content: {e}")
             text_posts, video_scripts = [], []
 
         content_hash = hashlib.sha256(
-            f"{title}\n{url}\n{summary}".encode("utf-8")).hexdigest()
+            f"{title}\n{url}\n{summary}".encode("utf-8")
+        ).hexdigest()
 
         with Session(engine) as session:
             # Save text posts
@@ -237,6 +246,7 @@ async def fetch_and_generate_content() -> None:
 
             session.commit()
             print(
-                f"[db] Saved {len(text_posts)} text + {len(video_scripts)} video for: {title}")
+                f"[db] Saved {len(text_posts)} text + {len(video_scripts)} video for: {title}"
+            )
 
     print("[job] fetch_and_generate_content finished")

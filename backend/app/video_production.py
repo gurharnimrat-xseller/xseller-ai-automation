@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Competitor-Style Video Production Module
 Generates viral short-form videos with:
@@ -6,9 +8,10 @@ Generates viral short-form videos with:
 - Stock footage backgrounds
 - Professional transitions
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
-
-from __future__ import annotations
+from agents.checks.router import (
+    should_offload,
+    offload_to_gemini,
+)  # noqa: F401
 
 import os
 import re
@@ -20,15 +23,21 @@ from pathlib import Path
 # Video generation imports
 try:
     from moviepy.editor import (
-        VideoFileClip, ColorClip, CompositeVideoClip,
-        concatenate_videoclips, AudioFileClip, ImageClip
+        VideoFileClip,
+        ColorClip,
+        CompositeVideoClip,
+        concatenate_videoclips,
+        AudioFileClip,
+        ImageClip,
     )
-    from moviepy.video.fx.all import fadein, fadeout
     import numpy as np
+
     MOVIEPY_AVAILABLE = True
 except ImportError:
     MOVIEPY_AVAILABLE = False
-    print("[video_production] WARNING: MoviePy not available. Install with: pip install moviepy")
+    print(
+        "[video_production] WARNING: MoviePy not available. Install with: pip install moviepy"
+    )
 
 import httpx
 from PIL import Image, ImageDraw, ImageFont
@@ -57,6 +66,7 @@ DEFAULT_SCENE_DURATION = 3.0
 
 # ==================== SCRIPT PARSING ====================
 
+
 def parse_script_with_timing(script: str) -> List[Dict[str, Any]]:
     """
     Parse video script into scenes with precise timing.
@@ -73,7 +83,7 @@ def parse_script_with_timing(script: str) -> List[Dict[str, Any]]:
 
     # Regex pattern to extract scenes with timing
     # Matches: "Hook (0-2s):", "Main (3-10s):", etc.
-    pattern = r'(Hook|Main|Why|CTA)\s*\((\d+)-(\d+)s?\):\s*(.+?)(?=(?:Hook|Main|Why|CTA)\s*\(|\Z)'
+    pattern = r"(Hook|Main|Why|CTA)\s*\((\d+)-(\d+)s?\):\s*(.+?)(?=(?:Hook|Main|Why|CTA)\s*\(|\Z)"
 
     matches = re.finditer(pattern, script, re.IGNORECASE | re.DOTALL)
 
@@ -83,18 +93,20 @@ def parse_script_with_timing(script: str) -> List[Dict[str, Any]]:
         end_time = int(match.group(3))
         text = match.group(4).strip()
 
-        scenes.append({
-            "type": scene_type,
-            "start_time": start_time,
-            "end_time": end_time,
-            "duration": end_time - start_time,
-            "text": text,
-        })
+        scenes.append(
+            {
+                "type": scene_type,
+                "start_time": start_time,
+                "end_time": end_time,
+                "duration": end_time - start_time,
+                "text": text,
+            }
+        )
 
     # Fallback: If no timing found, split by scene labels
     if not scenes:
         print("[video_production] No timing found, using fallback parsing")
-        lines = script.split('\n')
+        lines = script.split("\n")
         current_scene = None
         current_text = []
 
@@ -104,30 +116,47 @@ def parse_script_with_timing(script: str) -> List[Dict[str, Any]]:
                 continue
 
             # Check if line starts with scene label
-            if line.lower().startswith(('hook:', 'hook ', 'main:', 'main ', 'why:', 'why ', 'cta:', 'cta ')):
+            if line.lower().startswith(
+                (
+                    "hook:",
+                    "hook ",
+                    "main:",
+                    "main ",
+                    "why:",
+                    "why ",
+                    "cta:",
+                    "cta ",
+                )
+            ):
                 # Save previous scene
                 if current_scene and current_text:
-                    scenes.append({
-                        "type": current_scene,
-                        "text": ' '.join(current_text),
-                        "duration": DEFAULT_SCENE_DURATION,
-                    })
+                    scenes.append(
+                        {
+                            "type": current_scene,
+                            "text": " ".join(current_text),
+                            "duration": DEFAULT_SCENE_DURATION,
+                        }
+                    )
 
                 # Start new scene
-                scene_label = line.split(':')[0].strip().lower()
+                scene_label = line.split(":")[0].strip().lower()
                 current_scene = scene_label
-                current_text = [line.split(':', 1)[1].strip() if ':' in line else line]
+                current_text = [
+                    line.split(":", 1)[1].strip() if ":" in line else line
+                ]
             else:
                 if current_text:
                     current_text.append(line)
 
         # Add last scene
         if current_scene and current_text:
-            scenes.append({
-                "type": current_scene,
-                "text": ' '.join(current_text),
-                "duration": DEFAULT_SCENE_DURATION,
-            })
+            scenes.append(
+                {
+                    "type": current_scene,
+                    "text": " ".join(current_text),
+                    "duration": DEFAULT_SCENE_DURATION,
+                }
+            )
 
         # Calculate start/end times for fallback
         cumulative_time = 0
@@ -138,12 +167,15 @@ def parse_script_with_timing(script: str) -> List[Dict[str, Any]]:
 
     print(f"[video_production] Parsed {len(scenes)} scenes from script")
     for i, scene in enumerate(scenes, 1):
-        print(f"  Scene {i} ({scene['type']}): {scene.get('start_time', 0)}-{scene.get('end_time', 0)}s - {scene['text'][:50]}...")
+        print(
+            f"  Scene {i} ({scene['type']}): {scene.get('start_time', 0)}-{scene.get('end_time', 0)}s - {scene['text'][:50]}..."
+        )
 
     return scenes
 
 
 # ==================== STOCK FOOTAGE ====================
+
 
 async def get_pexels_video(query: str, duration: int = 5) -> Optional[str]:
     """
@@ -162,9 +194,7 @@ async def get_pexels_video(query: str, duration: int = 5) -> Optional[str]:
 
     try:
         async with httpx.AsyncClient() as client:
-            headers = {
-                "Authorization": PEXELS_API_KEY
-            }
+            headers = {"Authorization": PEXELS_API_KEY}
 
             # Search for videos
             response = await client.get(
@@ -175,7 +205,7 @@ async def get_pexels_video(query: str, duration: int = 5) -> Optional[str]:
                     "per_page": 10,
                     "orientation": "portrait",  # Vertical for social media
                 },
-                timeout=15.0
+                timeout=15.0,
             )
 
             if response.status_code == 200:
@@ -189,7 +219,10 @@ async def get_pexels_video(query: str, duration: int = 5) -> Optional[str]:
                         # Get HD video file
                         video_files = video.get("video_files", [])
                         for file in video_files:
-                            if file.get("quality") == "hd" and file.get("width") == 1080:
+                            if (
+                                file.get("quality") == "hd"
+                                and file.get("width") == 1080
+                            ):
                                 return file.get("link")
 
                         # Fallback: any HD video
@@ -197,10 +230,14 @@ async def get_pexels_video(query: str, duration: int = 5) -> Optional[str]:
                             if file.get("quality") == "hd":
                                 return file.get("link")
 
-                print(f"[video_production] No suitable video found for '{query}'")
+                print(
+                    f"[video_production] No suitable video found for '{query}'"
+                )
                 return None
             else:
-                print(f"[video_production] Pexels API error: {response.status_code}")
+                print(
+                    f"[video_production] Pexels API error: {response.status_code}"
+                )
                 return None
 
     except Exception as e:
@@ -221,7 +258,15 @@ def get_scene_keywords(scene_type: str, text: str) -> str:
     keywords = base_keywords.get(scene_type, ["business"])
 
     # Extract important words from text
-    important_words = ["ai", "technology", "business", "data", "innovation", "future", "success"]
+    important_words = [
+        "ai",
+        "technology",
+        "business",
+        "data",
+        "innovation",
+        "future",
+        "success",
+    ]
     text_lower = text.lower()
 
     for word in important_words:
@@ -232,6 +277,7 @@ def get_scene_keywords(scene_type: str, text: str) -> str:
 
 
 # ==================== TEXT RENDERING ====================
+
 
 def _load_bold_font(fontsize: int) -> ImageFont.FreeTypeFont:
     """
@@ -268,7 +314,7 @@ def create_text_image_pil(
     stroke_color: str = "black",
     stroke_width: int = 3,
     size: Tuple[int, int] = (VIDEO_WIDTH, VIDEO_HEIGHT),
-    max_width: int = None
+    max_width: int = None,
 ) -> Image.Image:
     """
     Create text image using PIL (no ImageMagick required).
@@ -277,14 +323,14 @@ def create_text_image_pil(
         max_width = size[0] - 100  # Default padding
 
     # Create transparent image
-    img = Image.new('RGBA', size, (0, 0, 0, 0))
+    img = Image.new("RGBA", size, (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
 
     # Load font
     font = _load_bold_font(fontsize)
 
     # Handle multi-line text (text already formatted with \n)
-    lines = text.split('\n')
+    lines = text.split("\n")
 
     # Calculate total height
     line_heights = []
@@ -308,7 +354,12 @@ def create_text_image_pil(
         if stroke_width > 0:
             for adj_x in range(-stroke_width, stroke_width + 1):
                 for adj_y in range(-stroke_width, stroke_width + 1):
-                    draw.text((x + adj_x, current_y + adj_y), line, font=font, fill=stroke_color)
+                    draw.text(
+                        (x + adj_x, current_y + adj_y),
+                        line,
+                        font=font,
+                        fill=stroke_color,
+                    )
 
         # Draw main text
         draw.text((x, current_y), line, font=font, fill=color)
@@ -317,7 +368,7 @@ def create_text_image_pil(
 
     # Convert RGBA to RGB for MoviePy compatibility
     # Create a black background and composite the RGBA image on it
-    rgb_img = Image.new('RGB', size, (0, 0, 0))
+    rgb_img = Image.new("RGB", size, (0, 0, 0))
     rgb_img.paste(img, (0, 0), img)  # Use img as mask for transparency
 
     return rgb_img
@@ -356,20 +407,20 @@ def create_text_clip(
 
     for word in words:
         current_line.append(word)
-        line_text = ' '.join(current_line)
+        line_text = " ".join(current_line)
         if len(line_text) > max_chars_per_line:
             if len(current_line) > 1:
                 current_line.pop()
-                lines.append(' '.join(current_line))
+                lines.append(" ".join(current_line))
                 current_line = [word]
             else:
                 lines.append(line_text)
                 current_line = []
 
     if current_line:
-        lines.append(' '.join(current_line))
+        lines.append(" ".join(current_line))
 
-    formatted_text = '\n'.join(lines)
+    formatted_text = "\n".join(lines)
 
     # Create text image using PIL (no ImageMagick needed)
     text_img = create_text_image_pil(
@@ -379,7 +430,7 @@ def create_text_clip(
         stroke_color=TEXT_STROKE_COLOR,
         stroke_width=TEXT_STROKE_WIDTH,
         size=size,
-        max_width=size[0] - 100  # Padding
+        max_width=size[0] - 100,  # Padding
     )
 
     # Convert PIL image to ImageClip
@@ -387,11 +438,11 @@ def create_text_clip(
 
     # Position text
     if position == "center":
-        txt_clip = txt_clip.set_position('center')
+        txt_clip = txt_clip.set_position("center")
     elif position == "top":
-        txt_clip = txt_clip.set_position(('center', 100))
+        txt_clip = txt_clip.set_position(("center", 100))
     elif position == "bottom":
-        txt_clip = txt_clip.set_position(('center', size[1] - 300))
+        txt_clip = txt_clip.set_position(("center", size[1] - 300))
 
     # Add fade in/out animations
     txt_clip = txt_clip.crossfadein(0.3)
@@ -404,9 +455,10 @@ def create_text_clip(
 
 # ==================== SCENE GENERATION ====================
 
+
 async def create_scene(
     scene: Dict[str, Any],
-    output_size: Tuple[int, int] = (VIDEO_WIDTH, VIDEO_HEIGHT)
+    output_size: Tuple[int, int] = (VIDEO_WIDTH, VIDEO_HEIGHT),
 ) -> CompositeVideoClip:
     """
     Create a single scene with background and text overlay.
@@ -431,8 +483,8 @@ async def create_scene(
     scene_colors = {
         "hook": "#FF0050",  # Vibrant red/pink
         "main": "#0066FF",  # Blue
-        "why": "#00D9FF",   # Cyan
-        "cta": "#00FF88",   # Green
+        "why": "#00D9FF",  # Cyan
+        "cta": "#00FF88",  # Green
     }
 
     bg_color = scene_colors.get(scene_type, "#1a1a2e")
@@ -445,7 +497,9 @@ async def create_scene(
     if stock_video_url:
         try:
             # Download and use stock video
-            temp_video = tempfile.NamedTemporaryFile(suffix='.mp4', delete=False)
+            temp_video = tempfile.NamedTemporaryFile(
+                suffix=".mp4", delete=False
+            )
             async with httpx.AsyncClient() as client:
                 response = await client.get(stock_video_url, timeout=30.0)
                 temp_video.write(response.content)
@@ -461,7 +515,9 @@ async def create_scene(
             bg_clip = bg_clip.resize(output_size)
 
             # Apply color overlay for brand consistency
-            overlay = ColorClip(size=output_size, color=bg_color, duration=duration).set_opacity(0.4)
+            overlay = ColorClip(
+                size=output_size, color=bg_color, duration=duration
+            ).set_opacity(0.4)
             bg_clip = CompositeVideoClip([bg_clip, overlay])
 
             # Clean up temp file
@@ -469,11 +525,17 @@ async def create_scene(
 
             print(f"[video_production] Using stock footage for {scene_type}")
         except Exception as e:
-            print(f"[video_production] Failed to load stock video: {e}, using color background")
-            bg_clip = ColorClip(size=output_size, color=bg_color, duration=duration)
+            print(
+                f"[video_production] Failed to load stock video: {e}, using color background"
+            )
+            bg_clip = ColorClip(
+                size=output_size, color=bg_color, duration=duration
+            )
     else:
         # Fallback: solid color background
-        bg_clip = ColorClip(size=output_size, color=bg_color, duration=duration)
+        bg_clip = ColorClip(
+            size=output_size, color=bg_color, duration=duration
+        )
         print(f"[video_production] Using color background for {scene_type}")
 
     # Create text overlay
@@ -489,7 +551,7 @@ async def create_scene(
         duration=duration,
         size=output_size,
         fontsize=fontsize,
-        position="center"
+        position="center",
     )
 
     # Composite scene
@@ -500,9 +562,9 @@ async def create_scene(
 
 # ==================== VOICEOVER GENERATION ====================
 
+
 async def generate_voiceover_elevenlabs(
-    text: str,
-    output_path: Optional[str] = None
+    text: str, output_path: Optional[str] = None
 ) -> Optional[str]:
     """
     Generate voiceover using Eleven Labs API.
@@ -522,7 +584,7 @@ async def generate_voiceover_elevenlabs(
         async with httpx.AsyncClient() as client:
             headers = {
                 "xi-api-key": ELEVENLABS_API_KEY,
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
             }
 
             # Use default voice (Rachel) - professional, clear
@@ -537,23 +599,24 @@ async def generate_voiceover_elevenlabs(
                     "stability": 0.5,
                     "similarity_boost": 0.75,
                     "style": 0.0,
-                    "use_speaker_boost": True
-                }
+                    "use_speaker_boost": True,
+                },
             }
 
-            print(f"[video_production] Generating voiceover ({len(text)} chars)...")
+            print(
+                f"[video_production] Generating voiceover ({len(text)} chars)..."
+            )
 
             response = await client.post(
-                url,
-                headers=headers,
-                json=payload,
-                timeout=60.0
+                url, headers=headers, json=payload, timeout=60.0
             )
 
             if response.status_code == 200:
                 # Save audio file
                 if not output_path:
-                    audio_dir = Path(__file__).parent.parent / "output" / "audio"
+                    audio_dir = (
+                        Path(__file__).parent.parent / "output" / "audio"
+                    )
                     audio_dir.mkdir(parents=True, exist_ok=True)
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                     output_path = str(audio_dir / f"voiceover_{timestamp}.mp3")
@@ -561,26 +624,32 @@ async def generate_voiceover_elevenlabs(
                 with open(output_path, "wb") as f:
                     f.write(response.content)
 
-                print(f"[video_production] ✅ Voiceover saved to {output_path}")
+                print(
+                    f"[video_production] ✅ Voiceover saved to {output_path}"
+                )
                 return output_path
             else:
-                print(f"[video_production] Eleven Labs API error: {response.status_code} - {response.text}")
+                print(
+                    f"[video_production] Eleven Labs API error: {response.status_code} - {response.text}"
+                )
                 return None
 
     except Exception as e:
         print(f"[video_production] Error generating voiceover: {str(e)}")
         import traceback
+
         traceback.print_exc()
         return None
 
 
 # ==================== VIDEO ASSEMBLY ====================
 
+
 async def generate_video_from_script(
     script: str,
     title: str,
     output_path: Optional[str] = None,
-    add_voiceover: bool = True
+    add_voiceover: bool = True,
 ) -> Dict[str, Any]:
     """
     Generate complete video from script.
@@ -596,7 +665,7 @@ async def generate_video_from_script(
     if not MOVIEPY_AVAILABLE:
         return {
             "success": False,
-            "error": "MoviePy not installed. Run: pip install moviepy"
+            "error": "MoviePy not installed. Run: pip install moviepy",
         }
 
     print(f"[video_production] Starting video generation for: {title}")
@@ -606,10 +675,7 @@ async def generate_video_from_script(
         scenes = parse_script_with_timing(script)
 
         if not scenes:
-            return {
-                "success": False,
-                "error": "No scenes found in script"
-            }
+            return {"success": False, "error": "No scenes found in script"}
 
         # Step 2: Generate scenes
         scene_clips = []
@@ -621,7 +687,7 @@ async def generate_video_from_script(
         voiceover_path = None
         if add_voiceover:
             # Extract full text from script (remove timing labels)
-            full_text = ' '.join([scene.get('text', '') for scene in scenes])
+            full_text = " ".join([scene.get("text", "") for scene in scenes])
             voiceover_path = await generate_voiceover_elevenlabs(full_text)
 
         # Step 4: Concatenate scenes
@@ -652,11 +718,11 @@ async def generate_video_from_script(
         final_video.write_videofile(
             output_path,
             fps=VIDEO_FPS,
-            codec='libx264',
+            codec="libx264",
             audio=False,  # No audio for now
-            preset='medium',
+            preset="medium",
             threads=4,
-            logger='bar'
+            logger="bar",
         )
 
         # Clean up
@@ -664,7 +730,9 @@ async def generate_video_from_script(
         for clip in scene_clips:
             clip.close()
 
-        print(f"[video_production] ✅ Video generated successfully: {output_path}")
+        print(
+            f"[video_production] ✅ Video generated successfully: {output_path}"
+        )
 
         return {
             "success": True,
@@ -676,9 +744,7 @@ async def generate_video_from_script(
     except Exception as e:
         print(f"[video_production] ❌ Video generation failed: {str(e)}")
         import traceback
+
         traceback.print_exc()
 
-        return {
-            "success": False,
-            "error": str(e)
-        }
+        return {"success": False, "error": str(e)}

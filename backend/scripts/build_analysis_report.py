@@ -1,4 +1,7 @@
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
+from agents.checks.router import (
+    should_offload,
+    offload_to_gemini,
+)  # noqa: F401
 from pathlib import Path
 
 OUTPUT_DIR = Path("backend/output/competitor_analysis")
@@ -16,16 +19,24 @@ def main():
     report.append("# Competitor Video Analysis")
     report.append("")
     report.append("## Hook & Opening (0-3s)")
-    report.append("- Identify the exact words used in the hook and note the visual in the first frame.")
+    report.append(
+        "- Identify the exact words used in the hook and note the visual in the first frame."
+    )
     report.append("")
     report.append("## Narrative Structure")
-    report.append("- Summarize how the video introduces the problem, provides value, and calls to action.")
+    report.append(
+        "- Summarize how the video introduces the problem, provides value, and calls to action."
+    )
     report.append("")
     report.append("## Visual Style & B-roll Timing")
-    report.append("- Reference `broll_sync_map.csv` to describe shot changes and overlay usage.")
+    report.append(
+        "- Reference `broll_sync_map.csv` to describe shot changes and overlay usage."
+    )
     report.append("")
     report.append("## Voice & Audio Characteristics")
-    report.append("- Use `voice_profile.json` to comment on pacing, energy, and audio mix.")
+    report.append(
+        "- Use `voice_profile.json` to comment on pacing, energy, and audio mix."
+    )
     report.append("")
     report.append("## Key Takeaways")
     report.append("- What makes this video stop-worthy?")

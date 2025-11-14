@@ -1,10 +1,13 @@
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 from __future__ import annotations
 
+from agents.checks.router import (
+    should_offload,
+    offload_to_gemini,
+)  # noqa: F401
 import json
 import os
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import httpx
 from sqlmodel import Session, select
@@ -232,7 +235,9 @@ async def get_publish_status(post_id: int) -> List[Dict[str, Any]]:
                 "external_id": log.external_id,
                 "external_url": log.external_url,
                 "error_message": log.error_message,
-                "created_at": log.created_at.isoformat() if log.created_at else None,
+                "created_at": (
+                    log.created_at.isoformat() if log.created_at else None
+                ),
             }
             for log in logs
         ]

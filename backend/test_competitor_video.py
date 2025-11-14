@@ -2,7 +2,6 @@
 Test EXACT Competitor-Style Video Generation
 Matches viral tech shorts (30 seconds, 5-scene structure)
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
 import asyncio
 import sys
@@ -10,13 +9,17 @@ import os
 
 sys.path.insert(0, os.path.dirname(__file__))
 
-from app import video_competitor_exact
+from agents.checks.router import (
+    should_offload,
+    offload_to_gemini,
+)  # noqa: F401, E402
+from app import video_competitor_exact  # noqa: E402
 
 
 async def main():
-    print("="*80)
+    print("=" * 80)
     print("🎬 TESTING COMPETITOR-EXACT VIDEO GENERATION")
-    print("="*80)
+    print("=" * 80)
 
     # Real-world example: GPT-4 Vision announcement
     test_script = """Hook: Can AI actually see and understand images now?
@@ -38,7 +41,9 @@ CTA: Link in bio for full tutorial. Follow @yourhandle for daily AI updates!"""
     print("-" * 80)
 
     print("\n🎬 Generating 30-second competitor-style video...")
-    print("   Structure: Hook (3s) → Demo (6s) → Proof (9s) → Impact (6s) → CTA (6s)")
+    print(
+        "   Structure: Hook (3s) → Demo (6s) → Proof (9s) → Impact (6s) → CTA (6s)"
+    )
     print("   Features:")
     print("   ✅ Exact text styles (90pt/50pt/colors)")
     print("   ✅ Relevant stock footage (Pexels)")
@@ -48,28 +53,30 @@ CTA: Link in bio for full tutorial. Follow @yourhandle for daily AI updates!"""
 
     # Generate video
     result = await video_competitor_exact.generate_exact_competitor_video(
-        script=test_script,
-        title=title,
-        add_voiceover=True
+        script=test_script, title=title, add_voiceover=True
     )
 
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     if result.get("success"):
         print("✅ VIDEO GENERATION SUCCESSFUL!")
-        print("="*80)
+        print("=" * 80)
         print(f"📍 Video Location: {result['video_path']}")
         print(f"⏱️  Duration: {result['duration']} seconds")
-        print(f"🎬 Structure: {result.get('structure', 'Hook/Demo/Proof/Impact/CTA')}")
+        print(
+            f"🎬 Structure: {result.get('structure', 'Hook/Demo/Proof/Impact/CTA')}"
+        )
         print(f"🎞️  Scenes: 5 (rapid-fire tech shorts style)")
         print("\n💡 Next Steps:")
         print("   1. Open the video file to review")
-        print("   2. Test on actual social media (YouTube Shorts/TikTok/Instagram)")
+        print(
+            "   2. Test on actual social media (YouTube Shorts/TikTok/Instagram)"
+        )
         print("   3. Adjust script for better engagement")
         print("   4. Scale to full automation!")
-        print("="*80)
+        print("=" * 80)
     else:
         print("❌ VIDEO GENERATION FAILED")
-        print("="*80)
+        print("=" * 80)
         print(f"Error: {result.get('error', 'Unknown error')}")
         print("\nTroubleshooting:")
         print("   - Check that MoviePy is installed: pip install moviepy")

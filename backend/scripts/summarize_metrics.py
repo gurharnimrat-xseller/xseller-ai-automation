@@ -1,4 +1,7 @@
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
+from agents.checks.router import (
+    should_offload,
+    offload_to_gemini,
+)  # noqa: F401
 import json
 from pathlib import Path
 
@@ -44,7 +47,9 @@ def main():
         "mean_pitch_hz": voice.get("mean_pitch_hz"),
     }
 
-    (OUTPUT_DIR / "quality_benchmark.json").write_text(json.dumps(metrics, indent=2))
+    (OUTPUT_DIR / "quality_benchmark.json").write_text(
+        json.dumps(metrics, indent=2)
+    )
     print(f"Saved metrics to {OUTPUT_DIR / 'quality_benchmark.json'}")
 
 

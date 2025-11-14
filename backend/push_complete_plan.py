@@ -2,7 +2,11 @@
 Push the COMPLETE development plan to Notion with full details
 This creates a comprehensive structure matching the full plan document
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
+
+from agents.checks.router import (
+    should_offload,
+    offload_to_gemini,
+)  # noqa: F401
 import os
 from datetime import datetime, timedelta
 from notion_client import Client
@@ -13,45 +17,48 @@ load_dotenv()
 client = Client(auth=os.getenv("NOTION_API_KEY"))
 db_id = os.getenv("NOTION_DATABASE_ID")
 
-def create_entry(title, summary, entry_type, milestone, status, owner, priority="Medium", eod_date=None, branch=None, pr=None):
+
+def create_entry(
+    title,
+    summary,
+    entry_type,
+    milestone,
+    status,
+    owner,
+    priority="Medium",
+    eod_date=None,
+    branch=None,
+    pr=None,
+):
     """Create an entry in Notion with full details"""
     try:
         properties = {
-            "Item": {
-                "title": [{"text": {"content": title}}]
-            },
-            "Entry Type": {
-                "select": {"name": entry_type}
-            },
-            "Owner": {
-                "rich_text": [{"text": {"content": owner}}]
-            },
-            "Status": {
-                "status": {"name": status}
-            },
-            "Milestone": {
-                "select": {"name": milestone}
-            },
-            "Priority": {
-                "select": {"name": priority}
-            },
+            "Item": {"title": [{"text": {"content": title}}]},
+            "Entry Type": {"select": {"name": entry_type}},
+            "Owner": {"rich_text": [{"text": {"content": owner}}]},
+            "Status": {"status": {"name": status}},
+            "Milestone": {"select": {"name": milestone}},
+            "Priority": {"select": {"name": priority}},
             "Summary / Notes": {
                 "rich_text": [{"text": {"content": summary[:2000]}}]
-            }
+            },
         }
 
         if eod_date:
             properties["EOD Date"] = {"date": {"start": eod_date.isoformat()}}
 
         if branch:
-            properties["Branch"] = {"rich_text": [{"text": {"content": branch}}]}
+            properties["Branch"] = {
+                "rich_text": [{"text": {"content": branch}}]
+            }
 
         if pr:
-            properties["GitHub PR #"] = {"rich_text": [{"text": {"content": pr}}]}
+            properties["GitHub PR #"] = {
+                "rich_text": [{"text": {"content": pr}}]
+            }
 
         response = client.pages.create(
-            parent={"database_id": db_id},
-            properties=properties
+            parent={"database_id": db_id}, properties=properties
         )
 
         print(f"✅ {title}")
@@ -60,6 +67,7 @@ def create_entry(title, summary, entry_type, milestone, status, owner, priority=
     except Exception as e:
         print(f"❌ Failed: {title} - {str(e)}")
         return None
+
 
 # Dates
 today = datetime.now()
@@ -73,7 +81,9 @@ print("=" * 80)
 print("🎯 XSELLER.AI COMPLETE DEVELOPMENT PLAN")
 print("=" * 80)
 print(f"Start: {today.strftime('%B %d, %Y')}")
-print(f"MVP Target: {(today + timedelta(days=35)).strftime('%B %d, %Y')} (5 weeks)")
+print(
+    f"MVP Target: {(today + timedelta(days=35)).strftime('%B %d, %Y')} (5 weeks)"
+)
 print("Team: Claude (Architect/QA), Codex (Implementation), Gurvinder (PM)")
 print("=" * 80)
 
@@ -126,7 +136,7 @@ Competitor: @mrwhosetheboss YouTube Shorts
     status="Done",
     owner="Claude + Codex + Gurvinder",
     priority="High",
-    eod_date=today
+    eod_date=today,
 )
 
 # ====================
@@ -185,7 +195,7 @@ Goal: Migrate to Codespaces, achieve zero laptop dependency
     priority="High",
     eod_date=today,
     branch="main",
-    pr="#3"
+    pr="#3",
 )
 
 # ====================
@@ -229,7 +239,7 @@ Generate 1 viral-quality script from real AI news
     status="Todo",
     owner="Codex + Claude",
     priority="High",
-    eod_date=m1_start
+    eod_date=m1_start,
 )
 
 # M1 Sub-tasks
@@ -272,7 +282,7 @@ Build RSS aggregator for top 10 AI news sites
     status="Todo",
     owner="Codex",
     priority="High",
-    eod_date=m1_start + timedelta(days=1)
+    eod_date=m1_start + timedelta(days=1),
 )
 
 create_entry(
@@ -317,7 +327,7 @@ Score = (recency_score * 0.3) + (authority_score * 0.3) + (engagement_score * 0.
     status="Todo",
     owner="Codex",
     priority="High",
-    eod_date=m1_start + timedelta(days=2)
+    eod_date=m1_start + timedelta(days=2),
 )
 
 create_entry(
@@ -378,7 +388,7 @@ Timestamp | Keyword
     status="Todo",
     owner="Claude + Codex",
     priority="High",
-    eod_date=m1_start + timedelta(days=4)
+    eod_date=m1_start + timedelta(days=4),
 )
 
 create_entry(
@@ -431,7 +441,7 @@ Validate complete content pipeline end-to-end
     status="Todo",
     owner="Claude + Codex",
     priority="High",
-    eod_date=m1_start + timedelta(days=4)
+    eod_date=m1_start + timedelta(days=4),
 )
 
 # ====================
@@ -475,7 +485,7 @@ Voice + B-roll sequence matching competitor quality
     status="Todo",
     owner="Codex + Claude",
     priority="High",
-    eod_date=m2_start
+    eod_date=m2_start,
 )
 
 create_entry(
@@ -531,7 +541,7 @@ Integrate ElevenLabs for professional voice matching competitor
     status="Todo",
     owner="Codex",
     priority="High",
-    eod_date=m2_start
+    eod_date=m2_start,
 )
 
 create_entry(
@@ -589,7 +599,7 @@ Build keyword → footage search and download system
     status="Todo",
     owner="Codex",
     priority="High",
-    eod_date=m2_start + timedelta(days=2)
+    eod_date=m2_start + timedelta(days=2),
 )
 
 create_entry(
@@ -646,7 +656,7 @@ Example Sync Map:
     status="Todo",
     owner="Codex",
     priority="High",
-    eod_date=m2_start + timedelta(days=4)
+    eod_date=m2_start + timedelta(days=4),
 )
 
 # ====================
@@ -690,7 +700,7 @@ Complete video at competitor quality (1080x1920, 30fps)
     status="Todo",
     owner="Codex + Claude",
     priority="High",
-    eod_date=m3_start
+    eod_date=m3_start,
 )
 
 # Continue with M3, M4, M5 tasks...
@@ -744,7 +754,7 @@ ffmpeg -i clip1.mp4 -i clip2.mp4 ... -i voice.mp3 -i music.mp3 \\
     status="Todo",
     owner="Codex",
     priority="High",
-    eod_date=m3_start + timedelta(days=1)
+    eod_date=m3_start + timedelta(days=1),
 )
 
 create_entry(
@@ -793,7 +803,7 @@ Animation: Scale 0.8→1.0 over 0.3s
     status="Todo",
     owner="Claude",
     priority="High",
-    eod_date=m3_start + timedelta(days=3)
+    eod_date=m3_start + timedelta(days=3),
 )
 
 create_entry(
@@ -844,7 +854,7 @@ Visual Quality:
     status="Todo",
     owner="Claude + Codex",
     priority="High",
-    eod_date=m3_start + timedelta(days=6)
+    eod_date=m3_start + timedelta(days=6),
 )
 
 # ====================
@@ -880,7 +890,7 @@ Success = Approve 10 videos via dashboard""",
     status="Todo",
     owner="Claude + Codex",
     priority="High",
-    eod_date=m4_start
+    eod_date=m4_start,
 )
 
 create_entry(
@@ -908,7 +918,7 @@ Success = System runs autonomously for 1 week""",
     status="Todo",
     owner="Codex + Claude",
     priority="High",
-    eod_date=m5_start
+    eod_date=m5_start,
 )
 
 # ====================
@@ -958,7 +968,7 @@ Confidence: 95% we'll hit MVP by Dec 15""",
     status="Done",
     owner="Claude",
     priority="High",
-    eod_date=today
+    eod_date=today,
 )
 
 # ====================
@@ -1039,7 +1049,7 @@ Process:
     status="Done",
     owner="Claude + Codex + Gurvinder",
     priority="Medium",
-    eod_date=today
+    eod_date=today,
 )
 
 print("\n" + "=" * 80)

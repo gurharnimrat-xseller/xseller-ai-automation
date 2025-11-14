@@ -1,11 +1,14 @@
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 from __future__ import annotations
 
+from agents.checks.router import (
+    should_offload,
+    offload_to_gemini,
+)  # noqa: F401
 from datetime import datetime
 from typing import List, Optional
 
 from sqlalchemy import Column, DateTime, JSON, func, Integer
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, SQLModel
 
 try:
     from werkzeug.security import check_password_hash, generate_password_hash
@@ -52,7 +55,8 @@ class Post(SQLModel, table=True):
     content_hash: Optional[str] = Field(default=None, index=True)
     tags: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
     platforms: Optional[List[str]] = Field(
-        default=None, sa_column=Column(JSON))
+        default=None, sa_column=Column(JSON)
+    )
     # draft, approved, published
     status: str = Field(default="draft", index=True)
     scheduled_at: Optional[datetime] = Field(
@@ -68,19 +72,31 @@ class Post(SQLModel, table=True):
     updated_at: datetime = Field(
         default_factory=datetime.utcnow,
         sa_column=Column(
-            DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+            DateTime(timezone=True),
+            server_default=func.now(),
+            onupdate=func.now(),
         ),
     )
     deleted_at: Optional[datetime] = Field(
         default=None, sa_column=Column(DateTime(timezone=True))
     )
-    
+
     # Additional fields for content management
-    hook_type: Optional[str] = Field(default=None, index=True)  # Type of viral hook used
-    video_duration: Optional[int] = Field(default=None)  # Duration in seconds for video posts
-    regeneration_count: int = Field(default=0, sa_column=Column(Integer))  # Number of times regenerated
-    total_cost: Optional[float] = Field(default=None)  # Total cost of regeneration
-    extra_data: Optional[dict] = Field(default=None, sa_column=Column(JSON))  # Extra data for voice selection, etc.
+    hook_type: Optional[str] = Field(
+        default=None, index=True
+    )  # Type of viral hook used
+    video_duration: Optional[int] = Field(
+        default=None
+    )  # Duration in seconds for video posts
+    regeneration_count: int = Field(
+        default=0, sa_column=Column(Integer)
+    )  # Number of times regenerated
+    total_cost: Optional[float] = Field(
+        default=None
+    )  # Total cost of regeneration
+    extra_data: Optional[dict] = Field(
+        default=None, sa_column=Column(JSON)
+    )  # Extra data for voice selection, etc.
 
     # Relationships (commented out for now due to SQLModel version compatibility)
     # assets: List["Asset"] = Relationship(back_populates="post")
@@ -135,7 +151,8 @@ class LearningLog(SQLModel, table=True):
     topic: str = Field(index=True)
     hook_type: Optional[str] = Field(default=None, index=True)
     metric_snapshot: Optional[dict] = Field(
-        default=None, sa_column=Column(JSON))
+        default=None, sa_column=Column(JSON)
+    )
     created_at: datetime = Field(
         default_factory=datetime.utcnow,
         sa_column=Column(DateTime(timezone=True), server_default=func.now()),

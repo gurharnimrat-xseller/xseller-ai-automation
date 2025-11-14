@@ -64,16 +64,26 @@ def main() -> int:
 
     if ok:
         ok_version, version = run_command(["gemini", "--version"])
-        report(ok_version, "Gemini CLI version check", version if ok_version else version)
+        report(
+            ok_version,
+            "Gemini CLI version check",
+            version if ok_version else version,
+        )
 
     # 4. Python deps quick import check
     try:
         import feedparser  # noqa: F401
         import notion_client  # type: ignore # noqa: F401
     except Exception as exc:  # noqa: BLE001
-        report(False, "Python dependencies (feedparser/notion-client) installed", str(exc))
+        report(
+            False,
+            "Python dependencies (feedparser/notion-client) installed",
+            str(exc),
+        )
     else:
-        report(True, "Python dependencies (feedparser/notion-client) installed")
+        report(
+            True, "Python dependencies (feedparser/notion-client) installed"
+        )
 
     if failures:
         print("\n⚠️  Resolve the failures above before starting M1A.")
@@ -84,5 +94,9 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    from agents.checks.router import (  # noqa: F401
+        should_offload,
+        offload_to_gemini,
+    )
+
     sys.exit(main())
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails

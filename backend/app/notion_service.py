@@ -2,7 +2,11 @@
 Notion Integration Service
 Automatically posts daily updates to Notion database
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
+
+from agents.checks.router import (
+    should_offload,
+    offload_to_gemini,
+)  # noqa: F401
 
 import os
 from datetime import datetime
@@ -12,17 +16,27 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
+
 class NotionService:
     def __init__(self):
         self.api_key = os.getenv("NOTION_API_KEY")
-        self.database_id = os.getenv("NOTION_DATABASE_ID", "3b5e99f3b35c45d58be175049977540a")
+        self.database_id = os.getenv(
+            "NOTION_DATABASE_ID", "3b5e99f3b35c45d58be175049977540a"
+        )
 
         if not self.api_key:
             raise ValueError("NOTION_API_KEY not set in environment")
 
         self.client = Client(auth=self.api_key)
 
-    def post_daily_update(self, title, summary, owner="Claude", milestone="M0: Cloud Setup", status="Done"):
+    def post_daily_update(
+        self,
+        title,
+        summary,
+        owner="Claude",
+        milestone="M0: Cloud Setup",
+        status="Done",
+    ):
         """
         Post a daily update to Notion Work Log database
 
@@ -38,54 +52,26 @@ class NotionService:
             response = self.client.pages.create(
                 parent={"database_id": self.database_id},
                 properties={
-                    "Item": {
-                        "title": [
-                            {
-                                "text": {
-                                    "content": title
-                                }
-                            }
-                        ]
-                    },
-                    "Entry Type": {
-                        "select": {
-                            "name": "Daily update"
-                        }
-                    },
-                    "Owner": {
-                        "rich_text": [
-                            {
-                                "text": {
-                                    "content": owner
-                                }
-                            }
-                        ]
-                    },
-                    "Status": {
-                        "status": {
-                            "name": status
-                        }
-                    },
-                    "Milestone": {
-                        "select": {
-                            "name": milestone
-                        }
-                    },
+                    "Item": {"title": [{"text": {"content": title}}]},
+                    "Entry Type": {"select": {"name": "Daily update"}},
+                    "Owner": {"rich_text": [{"text": {"content": owner}}]},
+                    "Status": {"status": {"name": status}},
+                    "Milestone": {"select": {"name": milestone}},
                     "EOD Date": {
-                        "date": {
-                            "start": datetime.now().isoformat()
-                        }
+                        "date": {"start": datetime.now().isoformat()}
                     },
                     "Summary / Notes": {
                         "rich_text": [
                             {
                                 "text": {
-                                    "content": summary[:2000]  # Notion has 2000 char limit for rich_text
+                                    "content": summary[
+                                        :2000
+                                    ]  # Notion has 2000 char limit for rich_text
                                 }
                             }
                         ]
-                    }
-                }
+                    },
+                },
             )
 
             print(f"✅ Posted to Notion: {title}")
@@ -95,7 +81,9 @@ class NotionService:
             print(f"❌ Failed to post to Notion: {str(e)}")
             raise
 
-    def post_milestone_complete(self, milestone_num, title, summary, achievements):
+    def post_milestone_complete(
+        self, milestone_num, title, summary, achievements
+    ):
         """
         Post milestone completion to Notion
 
@@ -117,7 +105,7 @@ class NotionService:
             2: "M2: Media",
             3: "M3: Video",
             4: "M4: Review",
-            5: "M5: Publishing"
+            5: "M5: Publishing",
         }
 
         return self.post_daily_update(
@@ -125,15 +113,19 @@ class NotionService:
             summary=formatted_summary,
             owner="Claude + Codex",
             milestone=milestone_names.get(milestone_num, f"M{milestone_num}"),
-            status="Done"
+            status="Done",
         )
 
     def test_connection(self):
         """Test Notion API connection"""
         try:
             # Try to retrieve database info
-            database = self.client.databases.retrieve(database_id=self.database_id)
-            print(f"✅ Connected to Notion database: {database.get('title', [{}])[0].get('plain_text', 'Unknown')}")
+            database = self.client.databases.retrieve(
+                database_id=self.database_id
+            )
+            print(
+                f"✅ Connected to Notion database: {database.get('title', [{}])[0].get('plain_text', 'Unknown')}"
+            )
             return True
         except Exception as e:
             print(f"❌ Failed to connect to Notion: {str(e)}")
@@ -181,7 +173,7 @@ Files: 66 changed
 Lines: +12,401 / -1,086""",
             owner="Claude",
             milestone="M0: Cloud Setup",
-            status="Done"
+            status="Done",
         )
     else:
         print("\n❌ Check your Notion API key and database ID")

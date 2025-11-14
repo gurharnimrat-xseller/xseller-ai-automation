@@ -1,7 +1,6 @@
 """
 Test voice energy modes (professional vs energetic vs viral)
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
 import asyncio
 import sys
@@ -9,13 +8,17 @@ import os
 
 sys.path.insert(0, os.path.dirname(__file__))
 
-from app import tts_service
+from agents.checks.router import (
+    should_offload,
+    offload_to_gemini,
+)  # noqa: F401, E402
+from app import tts_service  # noqa: E402
 
 
 async def main():
-    print("="*80)
+    print("=" * 80)
     print("🎙️  TESTING VOICE ENERGY MODES")
-    print("="*80)
+    print("=" * 80)
 
     # Test script
     test_text = "CRED is revolutionizing customer experience in India with OpenAI. GPT-powered tools analyze queries instantly and provide personalized responses."
@@ -43,7 +46,7 @@ async def main():
             text=test_text,
             provider="auto",  # Will try ElevenLabs -> OpenAI -> gTTS
             voice="charlotte",
-            energy=energy
+            energy=energy,
         )
 
         if audio_path:
@@ -53,9 +56,9 @@ async def main():
         else:
             print(f"   ❌ Audio generation failed")
 
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("✅ VOICE ENERGY TESTING COMPLETE!")
-    print("="*80)
+    print("=" * 80)
     print("\n📍 Audio files are saved in: backend/output/audio/")
     print("💡 Listen to each file to compare the energy levels")
 

@@ -2,7 +2,11 @@
 Push complete development plan to Notion
 Creates entries for all milestones and daily tasks
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
+
+from agents.checks.router import (
+    should_offload,
+    offload_to_gemini,
+)  # noqa: F401
 import os
 from datetime import datetime, timedelta
 from notion_client import Client
@@ -13,41 +17,36 @@ load_dotenv()
 client = Client(auth=os.getenv("NOTION_API_KEY"))
 db_id = os.getenv("NOTION_DATABASE_ID")
 
-def create_task(title, summary, entry_type, milestone, status, owner, priority="Medium", eod_date=None):
+
+def create_task(
+    title,
+    summary,
+    entry_type,
+    milestone,
+    status,
+    owner,
+    priority="Medium",
+    eod_date=None,
+):
     """Create a task entry in Notion"""
     try:
         properties = {
-            "Item": {
-                "title": [{"text": {"content": title}}]
-            },
-            "Entry Type": {
-                "select": {"name": entry_type}
-            },
-            "Owner": {
-                "rich_text": [{"text": {"content": owner}}]
-            },
-            "Status": {
-                "status": {"name": status}
-            },
-            "Milestone": {
-                "select": {"name": milestone}
-            },
-            "Priority": {
-                "select": {"name": priority}
-            },
+            "Item": {"title": [{"text": {"content": title}}]},
+            "Entry Type": {"select": {"name": entry_type}},
+            "Owner": {"rich_text": [{"text": {"content": owner}}]},
+            "Status": {"status": {"name": status}},
+            "Milestone": {"select": {"name": milestone}},
+            "Priority": {"select": {"name": priority}},
             "Summary / Notes": {
                 "rich_text": [{"text": {"content": summary[:2000]}}]
-            }
+            },
         }
 
         if eod_date:
-            properties["EOD Date"] = {
-                "date": {"start": eod_date.isoformat()}
-            }
+            properties["EOD Date"] = {"date": {"start": eod_date.isoformat()}}
 
         response = client.pages.create(
-            parent={"database_id": db_id},
-            properties=properties
+            parent={"database_id": db_id}, properties=properties
         )
 
         print(f"✅ Created: {title}")
@@ -56,6 +55,7 @@ def create_task(title, summary, entry_type, milestone, status, owner, priority="
     except Exception as e:
         print(f"❌ Failed to create '{title}': {str(e)}")
         return None
+
 
 # Calculate dates (starting from today)
 start_date = datetime.now()
@@ -86,7 +86,7 @@ create_task(
     status="Done",
     owner="Claude + Codex",
     priority="High",
-    eod_date=start_date
+    eod_date=start_date,
 )
 
 # ====================
@@ -118,7 +118,7 @@ Acceptance Criteria:
     status="Todo",
     owner="Codex",
     priority="High",
-    eod_date=m1_start
+    eod_date=m1_start,
 )
 
 # Day 2: Content Analysis
@@ -143,7 +143,7 @@ Acceptance Criteria:
     status="Todo",
     owner="Codex",
     priority="High",
-    eod_date=m1_start + timedelta(days=1)
+    eod_date=m1_start + timedelta(days=1),
 )
 
 # Day 3: Script Generator
@@ -175,7 +175,7 @@ Acceptance Criteria:
     status="Todo",
     owner="Claude",
     priority="High",
-    eod_date=m1_start + timedelta(days=2)
+    eod_date=m1_start + timedelta(days=2),
 )
 
 # Day 4: Testing & Refinement
@@ -201,7 +201,7 @@ Success Metrics:
     status="Todo",
     owner="Claude + Codex",
     priority="High",
-    eod_date=m1_start + timedelta(days=3)
+    eod_date=m1_start + timedelta(days=3),
 )
 
 # ====================
@@ -239,7 +239,7 @@ Acceptance Criteria:
     status="Todo",
     owner="Codex",
     priority="High",
-    eod_date=m2_start
+    eod_date=m2_start,
 )
 
 # Day 6: Image Generation
@@ -270,7 +270,7 @@ Acceptance Criteria:
     status="Todo",
     owner="Claude",
     priority="Medium",
-    eod_date=m2_start + timedelta(days=1)
+    eod_date=m2_start + timedelta(days=1),
 )
 
 # Day 7: Media Processing
@@ -302,7 +302,7 @@ Acceptance Criteria:
     status="Todo",
     owner="Codex",
     priority="High",
-    eod_date=m2_start + timedelta(days=2)
+    eod_date=m2_start + timedelta(days=2),
 )
 
 # ====================
@@ -344,7 +344,7 @@ Acceptance Criteria:
     status="Todo",
     owner="Claude",
     priority="High",
-    eod_date=m3_start
+    eod_date=m3_start,
 )
 
 # Day 9: Video Assembly
@@ -380,7 +380,7 @@ Acceptance Criteria:
     status="Todo",
     owner="Codex",
     priority="High",
-    eod_date=m3_start + timedelta(days=1)
+    eod_date=m3_start + timedelta(days=1),
 )
 
 # Day 10: Competitor Analysis Replication
@@ -417,7 +417,7 @@ Acceptance Criteria:
     status="Todo",
     owner="Claude + Codex",
     priority="High",
-    eod_date=m3_start + timedelta(days=2)
+    eod_date=m3_start + timedelta(days=2),
 )
 
 # Day 11: Batch Generation
@@ -449,7 +449,7 @@ Acceptance Criteria:
     status="Todo",
     owner="Codex",
     priority="High",
-    eod_date=m3_start + timedelta(days=3)
+    eod_date=m3_start + timedelta(days=3),
 )
 
 # ====================
@@ -488,7 +488,7 @@ Acceptance Criteria:
     status="Todo",
     owner="Codex",
     priority="High",
-    eod_date=m4_start
+    eod_date=m4_start,
 )
 
 # Day 13: Review Dashboard
@@ -527,7 +527,7 @@ Acceptance Criteria:
     status="Todo",
     owner="Claude",
     priority="High",
-    eod_date=m4_start + timedelta(days=1)
+    eod_date=m4_start + timedelta(days=1),
 )
 
 # Day 14: Feedback Loop
@@ -565,7 +565,7 @@ Acceptance Criteria:
     status="Todo",
     owner="Claude + Codex",
     priority="Medium",
-    eod_date=m4_start + timedelta(days=2)
+    eod_date=m4_start + timedelta(days=2),
 )
 
 # ====================
@@ -609,7 +609,7 @@ Acceptance Criteria:
     status="Todo",
     owner="Codex",
     priority="High",
-    eod_date=m5_start
+    eod_date=m5_start,
 )
 
 # Day 16: Scheduling System
@@ -648,7 +648,7 @@ Acceptance Criteria:
     status="Todo",
     owner="Claude",
     priority="High",
-    eod_date=m5_start + timedelta(days=1)
+    eod_date=m5_start + timedelta(days=1),
 )
 
 # Day 17: Monitoring & Alerts
@@ -687,7 +687,7 @@ Acceptance Criteria:
     status="Todo",
     owner="Codex",
     priority="Medium",
-    eod_date=m5_start + timedelta(days=2)
+    eod_date=m5_start + timedelta(days=2),
 )
 
 # Day 18: Full Automation
@@ -731,7 +731,7 @@ Acceptance Criteria:
     status="Todo",
     owner="Claude + Codex",
     priority="High",
-    eod_date=m5_start + timedelta(days=3)
+    eod_date=m5_start + timedelta(days=3),
 )
 
 # ====================
@@ -775,7 +775,7 @@ Success Criteria:
     status="Todo",
     owner="Claude + Codex",
     priority="High",
-    eod_date=m5_start + timedelta(days=6)
+    eod_date=m5_start + timedelta(days=6),
 )
 
 # ====================
@@ -823,7 +823,7 @@ Next Steps:
     status="Done",
     owner="Claude",
     priority="High",
-    eod_date=start_date
+    eod_date=start_date,
 )
 
 create_task(
@@ -860,7 +860,7 @@ Team:
     status="Todo",
     owner="Claude + Codex",
     priority="High",
-    eod_date=m1_start
+    eod_date=m1_start,
 )
 
 create_task(
@@ -898,7 +898,7 @@ Team:
     status="Todo",
     owner="Claude + Codex",
     priority="High",
-    eod_date=m3_start
+    eod_date=m3_start,
 )
 
 create_task(
@@ -941,7 +941,7 @@ Team:
     status="Todo",
     owner="Claude + Codex",
     priority="High",
-    eod_date=m5_start
+    eod_date=m5_start,
 )
 
 print("\n✅ Development plan pushed to Notion!")

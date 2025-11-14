@@ -1,11 +1,16 @@
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
+from agents.checks.router import (
+    should_offload,
+    offload_to_gemini,
+)  # noqa: F401
 import json
 from pathlib import Path
 
 import librosa
 import numpy as np
 
-BASE_DIR = Path(__file__).resolve().parents[1] / "output" / "competitor_analysis"
+BASE_DIR = (
+    Path(__file__).resolve().parents[1] / "output" / "competitor_analysis"
+)
 AUDIO_PATH = BASE_DIR / "audio" / "narration.wav"
 TRANSCRIPT_PATH = BASE_DIR / "transcript.txt"
 REPORT_PATH = BASE_DIR / "voice_profile.json"

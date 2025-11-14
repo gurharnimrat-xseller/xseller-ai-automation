@@ -1,18 +1,21 @@
+from __future__ import annotations
+
 """
 Viral Script Generator Module
 Advanced script generation with proven hooks, formulas, and psychological triggers.
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
-
-from __future__ import annotations
+from agents.checks.router import (
+    should_offload,
+    offload_to_gemini,
+)  # noqa: F401
 
 import json
 import random
 from typing import Any, Dict, List, Optional
+
 # removed per guardrails; use router
 # # removed per guardrails; use router
 # from openai import AsyncOpenAI
-import os
 
 
 # ==================== VIRAL HOOK FORMULAS ====================
@@ -117,10 +120,11 @@ COPYWRITING_FRAMEWORKS = [
 
 # ==================== SCRIPT GENERATION ====================
 
+
 async def generate_viral_text_posts(
     article: Dict[str, Any],
     num_variants: int = 5,
-    platforms: Optional[List[str]] = None
+    platforms: Optional[List[str]] = None,
 ) -> List[Dict[str, str]]:
     """
     Generate viral text posts from an article using advanced hooks and frameworks.
@@ -201,7 +205,7 @@ Generate {num_variants} VIRAL posts NOW:"""
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a viral social media expert. You ONLY return valid JSON arrays. Your posts get 10x engagement. You use proven hooks, frameworks, and psychological triggers."
+                    "content": "You are a viral social media expert. You ONLY return valid JSON arrays. Your posts get 10x engagement. You use proven hooks, frameworks, and psychological triggers.",
                 },
                 {"role": "user", "content": prompt},
             ],
@@ -224,13 +228,19 @@ Generate {num_variants} VIRAL posts NOW:"""
         # Validate and clean posts
         valid_posts = []
         for post in posts:
-            if isinstance(post, dict) and "platform" in post and "text" in post:
-                valid_posts.append({
-                    "platform": post.get("platform", "General"),
-                    "text": post.get("text", ""),
-                    "hook_type": post.get("hook_type", "unknown"),
-                    "framework": post.get("framework", "unknown"),
-                })
+            if (
+                isinstance(post, dict)
+                and "platform" in post
+                and "text" in post
+            ):
+                valid_posts.append(
+                    {
+                        "platform": post.get("platform", "General"),
+                        "text": post.get("text", ""),
+                        "hook_type": post.get("hook_type", "unknown"),
+                        "framework": post.get("framework", "unknown"),
+                    }
+                )
 
         print(f"[script_gen] Generated {len(valid_posts)} viral text posts")
         return valid_posts
@@ -238,14 +248,13 @@ Generate {num_variants} VIRAL posts NOW:"""
     except Exception as e:
         print(f"[script_gen] Error generating text posts: {str(e)}")
         import traceback
+
         traceback.print_exc()
         return []
 
 
 async def generate_viral_video_scripts(
-    article: Dict[str, Any],
-    num_variants: int = 3,
-    duration: int = 20
+    article: Dict[str, Any], num_variants: int = 3, duration: int = 20
 ) -> List[Dict[str, Any]]:
     """
     Generate viral video scripts with precise timing and psychological hooks.
@@ -328,7 +337,7 @@ Generate {num_variants} VIRAL scripts NOW:"""
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a viral video script expert. Return ONLY valid JSON. Your scripts follow proven formulas and precise timing. Every second counts."
+                    "content": "You are a viral video script expert. Return ONLY valid JSON. Your scripts follow proven formulas and precise timing. Every second counts.",
                 },
                 {"role": "user", "content": prompt},
             ],
@@ -351,25 +360,33 @@ Generate {num_variants} VIRAL scripts NOW:"""
         valid_scripts = []
         for script in scripts:
             if isinstance(script, dict) and "script" in script:
-                valid_scripts.append({
-                    "script": script.get("script", ""),
-                    "hook_type": script.get("hook_type", "unknown"),
-                    "formula": script.get("formula", "unknown"),
-                    "duration": script.get("duration", duration),
-                    "visual_suggestions": script.get("visual_suggestions", ""),
-                })
+                valid_scripts.append(
+                    {
+                        "script": script.get("script", ""),
+                        "hook_type": script.get("hook_type", "unknown"),
+                        "formula": script.get("formula", "unknown"),
+                        "duration": script.get("duration", duration),
+                        "visual_suggestions": script.get(
+                            "visual_suggestions", ""
+                        ),
+                    }
+                )
 
-        print(f"[script_gen] Generated {len(valid_scripts)} viral video scripts")
+        print(
+            f"[script_gen] Generated {len(valid_scripts)} viral video scripts"
+        )
         return valid_scripts
 
     except Exception as e:
         print(f"[script_gen] Error generating video scripts: {str(e)}")
         import traceback
+
         traceback.print_exc()
         return []
 
 
 # ==================== UTILITY FUNCTIONS ====================
+
 
 def get_random_hook_template(hook_type: str) -> str:
     """Get a random hook template for the specified type."""

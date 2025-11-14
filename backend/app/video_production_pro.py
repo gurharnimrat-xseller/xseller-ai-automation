@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Competitor-Style Video Production (Tech Focus, Clean)
 Replicates viral YouTube Shorts/TikTok tech videos with:
@@ -7,13 +9,13 @@ Replicates viral YouTube Shorts/TikTok tech videos with:
 - Clean tech aesthetic
 - Professional transitions
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
-
-from __future__ import annotations
+from agents.checks.router import (
+    should_offload,
+    offload_to_gemini,
+)  # noqa: F401
 
 import os
 import re
-import tempfile
 from datetime import datetime
 from typing import Dict, List, Any, Optional, Tuple
 from pathlib import Path
@@ -21,12 +23,14 @@ from pathlib import Path
 # Video generation imports
 try:
     from moviepy.editor import (
-        VideoFileClip, ColorClip, TextClip, CompositeVideoClip,
-        concatenate_videoclips, AudioFileClip, ImageClip
+        ColorClip,
+        CompositeVideoClip,
+        concatenate_videoclips,
+        AudioFileClip,
+        ImageClip,
     )
-    from moviepy.video.fx.all import fadein, fadeout, resize
-    from moviepy.video.fx.all import crop
     import numpy as np
+
     MOVIEPY_AVAILABLE = True
 except ImportError:
     MOVIEPY_AVAILABLE = False
@@ -35,7 +39,16 @@ import httpx
 from PIL import Image, ImageDraw, ImageFont
 
 
+# ==================== CONFIGURATION ====================
+
+# Video settings (9:16 vertical for shorts)
+VIDEO_WIDTH = 1080
+VIDEO_HEIGHT = 1920
+VIDEO_FPS = 30
+
+
 # ==================== PIL-BASED TEXT RENDERING (NO IMAGEMAGICK) ====================
+
 
 def create_text_image_pil(
     text: str,
@@ -51,7 +64,7 @@ def create_text_image_pil(
     Returns a PIL Image that can be converted to ImageClip.
     """
     # Create image
-    img = Image.new('RGBA', size, (0, 0, 0, 0) if not bg_color else bg_color)
+    img = Image.new("RGBA", size, (0, 0, 0, 0) if not bg_color else bg_color)
     draw = ImageDraw.Draw(img)
 
     # Try to load a bold font, fallback to default
@@ -86,7 +99,9 @@ def create_text_image_pil(
         # Draw outline
         for adj_x in range(-stroke_width, stroke_width + 1):
             for adj_y in range(-stroke_width, stroke_width + 1):
-                draw.text((x + adj_x, y + adj_y), text, font=font, fill=stroke_color)
+                draw.text(
+                    (x + adj_x, y + adj_y), text, font=font, fill=stroke_color
+                )
 
     # Draw main text
     draw.text((x, y), text, font=font, fill=color)
@@ -94,16 +109,11 @@ def create_text_image_pil(
     return img
 
 
-# ==================== CONFIGURATION ====================
+# ==================== CONFIGURATION (continued) ====================
 
 # API Keys
 PEXELS_API_KEY = os.getenv("PEXELS_API_KEY", "")
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "")
-
-# Video settings (9:16 vertical for shorts)
-VIDEO_WIDTH = 1080
-VIDEO_HEIGHT = 1920
-VIDEO_FPS = 30
 
 # Competitor-style text settings
 TEXT_FONT_BOLD = "Arial-Bold"
@@ -127,6 +137,7 @@ COLORS = {
 
 # ==================== SCRIPT PARSING ====================
 
+
 def parse_script_competitor_style(script: str) -> List[Dict[str, Any]]:
     """
     Parse script into rapid-fire scenes (1-3 seconds each).
@@ -135,7 +146,7 @@ def parse_script_competitor_style(script: str) -> List[Dict[str, Any]]:
     scenes = []
 
     # First try to parse with timing
-    pattern = r'(Hook|Main|Why|CTA)\s*\((\d+)-(\d+)s?\):\s*(.+?)(?=(?:Hook|Main|Why|CTA)\s*\(|\Z)'
+    pattern = r"(Hook|Main|Why|CTA)\s*\((\d+)-(\d+)s?\):\s*(.+?)(?=(?:Hook|Main|Why|CTA)\s*\(|\Z)"
     matches = list(re.finditer(pattern, script, re.IGNORECASE | re.DOTALL))
 
     if matches:
@@ -146,7 +157,7 @@ def parse_script_competitor_style(script: str) -> List[Dict[str, Any]]:
             text = match.group(4).strip()
 
             # Split into shorter segments (max 10 words per scene)
-            sentences = re.split(r'[.!?]\s+|\n+', text)
+            sentences = re.split(r"[.!?]\s+|\n+", text)
             segment_duration = (end_time - start_time) / max(len(sentences), 1)
 
             cumulative = start_time
@@ -160,27 +171,31 @@ def parse_script_competitor_style(script: str) -> List[Dict[str, Any]]:
                 if len(words) > 10:
                     # Split into 10-word chunks
                     for i in range(0, len(words), 10):
-                        chunk = ' '.join(words[i:i+10])
-                        scenes.append({
-                            "type": scene_type,
-                            "text": chunk,
-                            "start_time": cumulative,
-                            "duration": min(3, segment_duration),
-                            "words": chunk.split(),
-                        })
+                        chunk = " ".join(words[i : i + 10])
+                        scenes.append(
+                            {
+                                "type": scene_type,
+                                "text": chunk,
+                                "start_time": cumulative,
+                                "duration": min(3, segment_duration),
+                                "words": chunk.split(),
+                            }
+                        )
                         cumulative += min(3, segment_duration)
                 else:
-                    scenes.append({
-                        "type": scene_type,
-                        "text": sentence,
-                        "start_time": cumulative,
-                        "duration": min(3, segment_duration),
-                        "words": sentence.split(),
-                    })
+                    scenes.append(
+                        {
+                            "type": scene_type,
+                            "text": sentence,
+                            "start_time": cumulative,
+                            "duration": min(3, segment_duration),
+                            "words": sentence.split(),
+                        }
+                    )
                     cumulative += min(3, segment_duration)
     else:
         # Fallback: split by sentences
-        sentences = re.split(r'[.!?]\s+|\n+', script)
+        sentences = re.split(r"[.!?]\s+|\n+", script)
         cumulative = 0
 
         for sentence in sentences:
@@ -189,13 +204,15 @@ def parse_script_competitor_style(script: str) -> List[Dict[str, Any]]:
                 continue
 
             duration = max(2, min(len(sentence.split()) * 0.3, 4))
-            scenes.append({
-                "type": "main",
-                "text": sentence,
-                "start_time": cumulative,
-                "duration": duration,
-                "words": sentence.split(),
-            })
+            scenes.append(
+                {
+                    "type": "main",
+                    "text": sentence,
+                    "start_time": cumulative,
+                    "duration": duration,
+                    "words": sentence.split(),
+                }
+            )
             cumulative += duration
 
     # Set end times
@@ -207,6 +224,7 @@ def parse_script_competitor_style(script: str) -> List[Dict[str, Any]]:
 
 
 # ==================== ADVANCED TEXT ANIMATIONS ====================
+
 
 def create_word_by_word_clip(
     words: List[str],
@@ -250,16 +268,16 @@ def create_word_by_word_clip(
                 color=word_color,
                 stroke_color="black",
                 stroke_width=4,
-                size=size
+                size=size,
             )
 
             # Convert PIL image to MoviePy ImageClip
             txt = ImageClip(np.array(text_img)).set_duration(word_duration)
 
             # Position words flowing down the screen
-            y_position = 'center' if len(words) <= 3 else 400 + (i * 150)
+            y_position = "center" if len(words) <= 3 else 400 + (i * 150)
 
-            txt = txt.set_position(('center', y_position))
+            txt = txt.set_position(("center", y_position))
             txt = txt.set_start(start_time)
 
             # Add pop-in animation (scale effect)
@@ -267,7 +285,9 @@ def create_word_by_word_clip(
 
             text_clips.append(txt)
         except Exception as e:
-            print(f"[video_pro] Warning: Could not create text for '{word}': {e}")
+            print(
+                f"[video_pro] Warning: Could not create text for '{word}': {e}"
+            )
             continue
 
     # Composite all elements
@@ -286,7 +306,7 @@ def create_bold_text_clip(
     fontsize: int = TEXT_SIZE_LARGE,
     color: str = COLORS["white"],
     bg_color: str = COLORS["dark_bg"],
-    animation_style: str = "fade"
+    animation_style: str = "fade",
 ) -> CompositeVideoClip:
     """
     Create bold, centered text with clean animation.
@@ -304,19 +324,19 @@ def create_bold_text_clip(
 
     for word in words:
         current_line.append(word)
-        if len(' '.join(current_line)) > 20:
+        if len(" ".join(current_line)) > 20:
             if len(current_line) > 1:
                 current_line.pop()
-                lines.append(' '.join(current_line))
+                lines.append(" ".join(current_line))
                 current_line = [word]
             else:
-                lines.append(' '.join(current_line))
+                lines.append(" ".join(current_line))
                 current_line = []
 
     if current_line:
-        lines.append(' '.join(current_line))
+        lines.append(" ".join(current_line))
 
-    formatted_text = '\n'.join(lines)
+    formatted_text = "\n".join(lines)
 
     try:
         # Create main text using PIL (no ImageMagick needed)
@@ -326,19 +346,21 @@ def create_bold_text_clip(
             color=color,
             stroke_color="black",
             stroke_width=4,
-            size=size
+            size=size,
         )
 
         # Convert PIL image to MoviePy ImageClip
         txt = ImageClip(np.array(text_img)).set_duration(duration)
-        txt = txt.set_position('center')
+        txt = txt.set_position("center")
         txt = txt.set_duration(duration)
 
         # Apply animation
         if animation_style == "fade":
             txt = txt.crossfadein(0.2).crossfadeout(0.2)
         elif animation_style == "slide":
-            txt = txt.set_position(lambda t: ('center', min(960, -200 + t * 400)))
+            txt = txt.set_position(
+                lambda t: ("center", min(960, -200 + t * 400))
+            )
 
         final = CompositeVideoClip([bg, txt], size=size)
     except Exception as e:
@@ -350,10 +372,11 @@ def create_bold_text_clip(
 
 # ==================== SCENE GENERATION ====================
 
+
 async def create_competitor_scene(
     scene: Dict[str, Any],
     output_size: Tuple[int, int] = (VIDEO_WIDTH, VIDEO_HEIGHT),
-    use_word_by_word: bool = True
+    use_word_by_word: bool = True,
 ) -> CompositeVideoClip:
     """
     Create scene in competitor style (tech focus, clean).
@@ -366,7 +389,9 @@ async def create_competitor_scene(
     words = scene.get("words", text.split())
     scene_type = scene.get("type", "main")
 
-    print(f"[video_pro] Creating scene: {scene_type} ({duration}s) - {text[:50]}...")
+    print(
+        f"[video_pro] Creating scene: {scene_type} ({duration}s) - {text[:50]}..."
+    )
 
     # Choose color scheme based on scene type
     color_schemes = {
@@ -376,7 +401,9 @@ async def create_competitor_scene(
         "cta": {"bg": COLORS["tech_green"], "text": COLORS["dark_bg"]},
     }
 
-    scheme = color_schemes.get(scene_type, {"bg": COLORS["dark_bg"], "text": COLORS["white"]})
+    scheme = color_schemes.get(
+        scene_type, {"bg": COLORS["dark_bg"], "text": COLORS["white"]}
+    )
 
     # Create scene with word-by-word animation for short text
     if use_word_by_word and len(words) <= 8 and duration <= 4:
@@ -397,13 +424,14 @@ async def create_competitor_scene(
             fontsize=TEXT_SIZE_MEDIUM,
             color=scheme["text"],
             bg_color=scheme["bg"],
-            animation_style="fade"
+            animation_style="fade",
         )
 
     return scene_clip
 
 
 # ==================== VOICEOVER (from original) ====================
+
 
 async def generate_voiceover_elevenlabs(text: str) -> Optional[str]:
     """Generate voiceover using Eleven Labs."""
@@ -414,7 +442,7 @@ async def generate_voiceover_elevenlabs(text: str) -> Optional[str]:
         async with httpx.AsyncClient() as client:
             headers = {
                 "xi-api-key": ELEVENLABS_API_KEY,
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
             }
 
             voice_id = "21m00Tcm4TlvDq8ikWAM"  # Rachel
@@ -426,10 +454,12 @@ async def generate_voiceover_elevenlabs(text: str) -> Optional[str]:
                 "voice_settings": {
                     "stability": 0.5,
                     "similarity_boost": 0.75,
-                }
+                },
             }
 
-            response = await client.post(url, headers=headers, json=payload, timeout=60.0)
+            response = await client.post(
+                url, headers=headers, json=payload, timeout=60.0
+            )
 
             if response.status_code == 200:
                 audio_dir = Path(__file__).parent.parent / "output" / "audio"
@@ -451,11 +481,12 @@ async def generate_voiceover_elevenlabs(text: str) -> Optional[str]:
 
 # ==================== MAIN VIDEO GENERATION ====================
 
+
 async def generate_competitor_video(
     script: str,
     title: str,
     output_path: Optional[str] = None,
-    add_voiceover: bool = True
+    add_voiceover: bool = True,
 ) -> Dict[str, Any]:
     """
     Generate competitor-style video (tech focus, clean aesthetic).
@@ -477,7 +508,7 @@ async def generate_competitor_video(
         # Step 2: Generate voiceover
         voiceover_path = None
         if add_voiceover:
-            full_text = ' '.join([s.get('text', '') for s in scenes])
+            full_text = " ".join([s.get("text", "") for s in scenes])
             voiceover_path = await generate_voiceover_elevenlabs(full_text)
 
         # Step 3: Create scenes
@@ -514,10 +545,10 @@ async def generate_competitor_video(
         final_video.write_videofile(
             output_path,
             fps=VIDEO_FPS,
-            codec='libx264',
-            preset='medium',
+            codec="libx264",
+            preset="medium",
             threads=4,
-            logger='bar'
+            logger="bar",
         )
 
         # Cleanup
@@ -539,5 +570,6 @@ async def generate_competitor_video(
     except Exception as e:
         print(f"\n❌ Video generation failed: {str(e)}")
         import traceback
+
         traceback.print_exc()
         return {"success": False, "error": str(e)}
