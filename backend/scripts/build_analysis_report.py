@@ -1,4 +1,3 @@
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 from pathlib import Path
 
 OUTPUT_DIR = Path("backend/output/competitor_analysis")

@@ -3,7 +3,6 @@
 from app.database import engine
 from app.models import Post
 from sqlmodel import Session
-from datetime import datetime
 
 # Create sample posts
 sample_posts = [
@@ -51,4 +50,3 @@ with Session(engine) as session:
     session.commit()
     print(f"✅ Created {len(sample_posts)} sample posts")
 
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails

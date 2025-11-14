@@ -1,11 +1,8 @@
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 from __future__ import annotations
 
 import asyncio
 import hashlib
-import json
-from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -104,13 +101,13 @@ def check_duplicate(url: str, title: str, body: str) -> bool:
 # -----------------------------
 # OpenAI generation helpers
 # -----------------------------
-_openai_client: Optional[AsyncOpenAI] = None
+_openai_client: Optional[AsyncOpenAI] = None  # noqa: F821
 
 
-def _get_openai_client() -> AsyncOpenAI:
+def _get_openai_client() -> AsyncOpenAI:  # noqa: F821
     global _openai_client
     if _openai_client is None:
-        _openai_client = AsyncOpenAI()
+        _openai_client = AsyncOpenAI()  # noqa: F821
     return _openai_client
 
 

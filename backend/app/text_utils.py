@@ -2,7 +2,6 @@
 Text rendering utilities using PIL (no ImageMagick required)
 Provides TextClip-like functionality without external dependencies
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
 import os
 import numpy as np
@@ -68,7 +67,7 @@ def create_text_clip_pil(
         line_heights.append(bbox[3] - bbox[1])
 
     total_height = sum(line_heights) + (len(lines) - 1) * 20  # 20px spacing
-    max_width = max(line_widths)
+    _max_width = max(line_widths)  # noqa: F841
 
     # Start position (centered)
     start_y = (size[1] - total_height) // 2

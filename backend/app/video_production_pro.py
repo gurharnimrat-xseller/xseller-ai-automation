@@ -7,13 +7,11 @@ Replicates viral YouTube Shorts/TikTok tech videos with:
 - Clean tech aesthetic
 - Professional transitions
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
 from __future__ import annotations
 
 import os
 import re
-import tempfile
 from datetime import datetime
 from typing import Dict, List, Any, Optional, Tuple
 from pathlib import Path
@@ -21,11 +19,11 @@ from pathlib import Path
 # Video generation imports
 try:
     from moviepy.editor import (
-        VideoFileClip, ColorClip, TextClip, CompositeVideoClip,
+        VideoFileClip, ColorClip, TextClip, CompositeVideoClip,  # noqa: F401
         concatenate_videoclips, AudioFileClip, ImageClip
     )
-    from moviepy.video.fx.all import fadein, fadeout, resize
-    from moviepy.video.fx.all import crop
+    from moviepy.video.fx.all import fadein, fadeout, resize  # noqa: F401
+    from moviepy.video.fx.all import crop  # noqa: F401
     import numpy as np
     MOVIEPY_AVAILABLE = True
 except ImportError:
@@ -34,6 +32,9 @@ except ImportError:
 import httpx
 from PIL import Image, ImageDraw, ImageFont
 
+# Video settings (9:16 vertical for shorts) - defined early for function defaults
+VIDEO_WIDTH = 1080
+VIDEO_HEIGHT = 1920
 
 # ==================== PIL-BASED TEXT RENDERING (NO IMAGEMAGICK) ====================
 
@@ -100,9 +101,7 @@ def create_text_image_pil(
 PEXELS_API_KEY = os.getenv("PEXELS_API_KEY", "")
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "")
 
-# Video settings (9:16 vertical for shorts)
-VIDEO_WIDTH = 1080
-VIDEO_HEIGHT = 1920
+# Video settings (9:16 vertical for shorts) - VIDEO_WIDTH and VIDEO_HEIGHT defined above
 VIDEO_FPS = 30
 
 # Competitor-style text settings
@@ -464,7 +463,7 @@ async def generate_competitor_video(
         return {"success": False, "error": "MoviePy not installed"}
 
     print(f"\n{'='*80}")
-    print(f"🎬 GENERATING COMPETITOR-STYLE VIDEO")
+    print("🎬 GENERATING COMPETITOR-STYLE VIDEO")
     print(f"{'='*80}\n")
 
     try:
@@ -526,7 +525,7 @@ async def generate_competitor_video(
             clip.close()
 
         print(f"\n{'='*80}")
-        print(f"✅ VIDEO GENERATION COMPLETE!")
+        print("✅ VIDEO GENERATION COMPLETE!")
         print(f"{'='*80}")
 
         return {

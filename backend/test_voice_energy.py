@@ -1,7 +1,6 @@
 """
 Test voice energy modes (professional vs energetic vs viral)
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
 import asyncio
 import sys
@@ -32,11 +31,11 @@ async def main():
 
         energy_preset = tts_service.VOICE_ENERGY_PRESETS[energy]
         print(f"   Description: {energy_preset['description']}")
-        print(f"   Settings:")
+        print("   Settings:")
         print(f"   - Stability: {energy_preset['stability']}")
         print(f"   - Style: {energy_preset['style']}")
         print(f"   - Speed: {energy_preset['speed']}x")
-        print(f"\n   Generating audio...")
+        print("\n   Generating audio...")
 
         # Generate audio
         audio_path = await tts_service.generate_voiceover(
@@ -51,7 +50,7 @@ async def main():
             print(f"   ✅ Audio generated: {audio_path}")
             print(f"   📦 File size: {file_size:.2f} KB")
         else:
-            print(f"   ❌ Audio generation failed")
+            print("   ❌ Audio generation failed")
 
     print("\n" + "="*80)
     print("✅ VOICE ENERGY TESTING COMPLETE!")
