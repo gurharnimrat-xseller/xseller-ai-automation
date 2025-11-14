@@ -10,14 +10,13 @@ on:
 permissions:
   contents: read
 
-jobs:
-  m01_daily_batch:
-    name: Run M01 news ingestion + ranking
-    runs-on: ubuntu-latest
+env:
+  BACKEND_API_BASE_URL: ${{ secrets.BACKEND_API_BASE_URL }}
+  NEWS_SOURCES: newsapi,mock
+  NEWS_LIMIT_PER_SOURCE: "20"
+  MIN_SCORE: "0.6"
+  PYTHONPATH: "${{ github.workspace }}"
 
-    # External config goes in secrets so we don't hard-code URLs or keys
-    env:
-      BACKEND_API_BASE_URL: ${{ secrets.BACKEND_API_BASE_URL }}
       NEWS_SOURCES: newsapi,mock
       NEWS_LIMIT_PER_SOURCE: "20"
       MIN_SCORE: "0.6"
@@ -39,8 +38,9 @@ jobs:
 
       - name: Run M01 daily batch
         working-directory: backend
+              - name: Run M01 daily batch
         run: |
-          python -m app.jobs.m01_daily_batch \
+          python -m backend.app.jobs.m01_daily_batch \
             --base-url "${BACKEND_API_BASE_URL}" \
             --sources "${NEWS_SOURCES}" \
             --limit-per-source "${NEWS_LIMIT_PER_SOURCE}" \
