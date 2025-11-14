@@ -2,7 +2,6 @@
 Viral Script Generator Module
 Advanced script generation with proven hooks, formulas, and psychological triggers.
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
 from __future__ import annotations
 
@@ -12,7 +11,6 @@ from typing import Any, Dict, List, Optional
 # removed per guardrails; use router
 # # removed per guardrails; use router
 # from openai import AsyncOpenAI
-import os
 
 
 # ==================== VIRAL HOOK FORMULAS ====================

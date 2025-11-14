@@ -2,7 +2,6 @@
 Text rendering utilities using PIL (no ImageMagick required)
 Provides TextClip-like functionality without external dependencies
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
 import os
 import numpy as np

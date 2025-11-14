@@ -1,7 +1,6 @@
 """
 Quick script to query recent entries from Notion
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 import os
 from notion_client import Client
 from dotenv import load_dotenv
@@ -24,7 +23,7 @@ try:
         page_size=5
     )
 
-    print(f"✅ Recent entries in database:\n")
+    print("✅ Recent entries in database:\n")
     for page in results.get('results', []):
         title = page.get('properties', {}).get('Item', {}).get('title', [{}])[0].get('plain_text', 'No title')
         eod_date = page.get('properties', {}).get('EOD Date', {}).get('date', {})

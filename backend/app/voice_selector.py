@@ -2,7 +2,6 @@
 Voice Selection System for TTS
 Allows users to preview and select voices from ElevenLabs
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
 from __future__ import annotations
 
@@ -140,7 +139,7 @@ async def generate_voice_preview(
         Path to generated preview file or None on failure
     """
     if not ELEVENLABS_API_KEY:
-        print(f"[VoiceSelector] Cannot generate preview: ElevenLabs API key not configured")
+        print("[VoiceSelector] Cannot generate preview: ElevenLabs API key not configured")
         return None
 
     try:
@@ -205,7 +204,7 @@ async def generate_all_previews(
     style_analysis = analyze_script_style(script)
 
     print(f"\n{'='*80}")
-    print(f"📊 SCRIPT ANALYSIS")
+    print("📊 SCRIPT ANALYSIS")
     print(f"{'='*80}")
     print(f"Style: {style_analysis['style']}")
     print(f"Tone: {style_analysis['tone']}")
@@ -303,7 +302,7 @@ def get_voice_recommendations(script: str) -> List[Dict]:
 def display_recommendations(recommendations: List[Dict]) -> None:
     """Display voice recommendations to console."""
     print(f"\n{'='*80}")
-    print(f"🎤 RECOMMENDED VOICES (Top to Bottom)")
+    print("🎤 RECOMMENDED VOICES (Top to Bottom)")
     print(f"{'='*80}\n")
 
     for i, voice in enumerate(recommendations[:6], 1):
@@ -321,7 +320,7 @@ def display_recommendations(recommendations: List[Dict]) -> None:
 async def test_voice_selector(script: str):
     """Test the voice selector with a sample script."""
     print(f"\n{'='*80}")
-    print(f"🎬 VOICE SELECTOR TEST")
+    print("🎬 VOICE SELECTOR TEST")
     print(f"{'='*80}\n")
 
     # Get recommendations
@@ -330,7 +329,7 @@ async def test_voice_selector(script: str):
 
     # Generate previews for top 3
     print(f"\n{'='*80}")
-    print(f"🎙️ GENERATING PREVIEW AUDIO (Top 3 Voices)")
+    print("🎙️ GENERATING PREVIEW AUDIO (Top 3 Voices)")
     print(f"{'='*80}\n")
 
     top_3 = recommendations[:3]
@@ -346,7 +345,7 @@ async def test_voice_selector(script: str):
             previews[voice['key']] = preview_path
 
     print(f"\n{'='*80}")
-    print(f"✅ PREVIEW GENERATION COMPLETE")
+    print("✅ PREVIEW GENERATION COMPLETE")
     print(f"{'='*80}")
     print(f"\nGenerated {len(previews)} preview files:")
     for voice_key, path in previews.items():

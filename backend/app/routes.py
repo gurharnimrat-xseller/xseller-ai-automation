@@ -1,7 +1,5 @@
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 from __future__ import annotations
 
-import json
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
@@ -9,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from sqlmodel import Session, select, func
 
 from app.database import engine
-from app.models import Post, PublishLog
+from app.models import Post
 from app import publishing
 from app import video_generator
 from app import content_scraper
@@ -1163,9 +1161,9 @@ async def test_competitor_style_video(post_id: int):
             print(f"   - Body length: {len(post.body)} chars")
 
         # Step 2: Check dependencies
-        print(f"\n[STEP 2] Checking dependencies...")
+        print("\n[STEP 2] Checking dependencies...")
         try:
-            from moviepy.editor import VideoFileClip, ColorClip, ImageClip, CompositeVideoClip, concatenate_videoclips, VideoClip
+            from moviepy.editor import ImageClip, concatenate_videoclips
             import numpy as np
             from PIL import Image, ImageDraw, ImageFont
             print("✅ MoviePy and PIL imported")
@@ -1175,7 +1173,6 @@ async def test_competitor_style_video(post_id: int):
                 status_code=500, detail=f"Dependencies not installed: {e}")
 
         try:
-            import requests
             print("✅ Requests imported")
         except Exception as e:
             print(f"❌ Requests import failed: {e}")
@@ -1183,7 +1180,7 @@ async def test_competitor_style_video(post_id: int):
                 status_code=500, detail=f"Requests not installed: {e}")
 
         # Step 3: Check Pexels API key
-        print(f"\n[STEP 3] Checking Pexels API key...")
+        print("\n[STEP 3] Checking Pexels API key...")
         pexels_key = os.getenv("PEXELS_API_KEY", "")
         if pexels_key:
             print(f"✅ Pexels key found: {pexels_key[:10]}...")
@@ -1264,7 +1261,7 @@ async def test_competitor_style_video(post_id: int):
             return img  # Keep RGBA for transparency
 
         # Step 5: Create scenes
-        print(f"\n[STEP 4] Creating scene structure...")
+        print("\n[STEP 4] Creating scene structure...")
         SCENES = [
             {"duration": 6, "text": "🚨 BREAKING NEWS", "color": "#000000",
                 "size": 100, "keywords": ["ai", "technology"]},  # Black text on yellow bg
@@ -1280,7 +1277,7 @@ async def test_competitor_style_video(post_id: int):
         print(f"✅ Created {len(SCENES)} scenes")
 
         # Step 5: Generate clips
-        print(f"\n[STEP 5] Generating video clips...")
+        print("\n[STEP 5] Generating video clips...")
         clips = []
         # Vibrant colors matching competitor videos (bright, eye-catching)
         colors = ['#FFFF00', '#0066FF', '#00FF00', '#FF0000', '#FFFFFF']  # Yellow, Blue, Green, Red, White
@@ -1351,7 +1348,7 @@ async def test_competitor_style_video(post_id: int):
             raise
 
         # Step 7: Generate TTS voiceover
-        print(f"\n[STEP 7] Generating TTS voiceover...")
+        print("\n[STEP 7] Generating TTS voiceover...")
         audio_path = None
         try:
             from app import tts_service
@@ -1395,7 +1392,7 @@ async def test_competitor_style_video(post_id: int):
 
         # Step 8: Add audio to video if available
         if audio_path and os.path.exists(audio_path):
-            print(f"\n[STEP 8] Adding audio to video...")
+            print("\n[STEP 8] Adding audio to video...")
             try:
                 from moviepy.editor import AudioFileClip
                 audio_clip = AudioFileClip(audio_path)
@@ -1406,7 +1403,7 @@ async def test_competitor_style_video(post_id: int):
                     audio_clip = audio_clip.subclip(0, final.duration)
                 elif audio_clip.duration < final.duration:
                     print(f"   Video duration ({final.duration}s) > audio duration ({audio_clip.duration}s)")
-                    print(f"   Trimming video to match audio")
+                    print("   Trimming video to match audio")
                     final = final.subclip(0, audio_clip.duration)
 
                 final = final.set_audio(audio_clip)
@@ -1417,7 +1414,7 @@ async def test_competitor_style_video(post_id: int):
                 traceback.print_exc()
 
         # Step 9: Export
-        print(f"\n[STEP 9] Exporting video...")
+        print("\n[STEP 9] Exporting video...")
         try:
             # Create output directory relative to backend root
             output_dir = os.path.join(os.path.dirname(
@@ -1444,7 +1441,7 @@ async def test_competitor_style_video(post_id: int):
                     '-movflags', '+faststart'  # Enable streaming (move moov atom to beginning)
                 ]
             )
-            print(f"✅ Export complete!")
+            print("✅ Export complete!")
         except Exception as e:
             print(f"❌ Export FAILED: {e}")
             print(f"Traceback: {traceback.format_exc()}")
@@ -1455,7 +1452,7 @@ async def test_competitor_style_video(post_id: int):
         print("="*80 + "\n")
 
         # Step 10: Update database with video path
-        print(f"\n[STEP 10] Updating database with video asset...")
+        print("\n[STEP 10] Updating database with video asset...")
         try:
             # Store relative path from output directory for serving via /output route
             relative_video_path = f"test_videos/competitor_test_{post_id}.mp4"
@@ -1476,7 +1473,7 @@ async def test_competitor_style_video(post_id: int):
                     existing_asset.path = relative_video_path
                     session.add(existing_asset)
                 else:
-                    print(f"   No existing video asset, creating new one...")
+                    print("   No existing video asset, creating new one...")
                     new_asset = Asset(
                         post_id=post_id,
                         type="video",
@@ -1503,11 +1500,11 @@ async def test_competitor_style_video(post_id: int):
         raise
     except Exception as e:
         print(f"\n{'='*80}")
-        print(f"💥 FATAL ERROR in competitor-test endpoint")
+        print("💥 FATAL ERROR in competitor-test endpoint")
         print(f"{'='*80}")
         print(f"Error type: {type(e).__name__}")
         print(f"Error message: {str(e)}")
-        print(f"\nFull traceback:")
+        print("\nFull traceback:")
         print(traceback.format_exc())
         print(f"{'='*80}\n")
 
@@ -1576,7 +1573,7 @@ async def test_generate_from_scraping(
 
         return {
             "success": True,
-            "message": f"Content generation completed. Check recent posts.",
+            "message": "Content generation completed. Check recent posts.",
             "recent_posts_count": len(posts),
             "recent_posts": [
                 {
@@ -1679,7 +1676,7 @@ async def test_video_generation(
     """
     try:
         print(f"\n{'='*80}")
-        print(f"🧪 TESTING VIDEO GENERATION")
+        print("🧪 TESTING VIDEO GENERATION")
         print(f"{'='*80}\n")
 
         result = await video_production.generate_video_from_script(
@@ -1797,7 +1794,7 @@ async def test_competitor_video(
     """
     try:
         print(f"\n{'='*80}")
-        print(f"🧪 TESTING COMPETITOR VIDEO GENERATION")
+        print("🧪 TESTING COMPETITOR VIDEO GENERATION")
         print(f"Title: {title}")
         print(f"{'='*80}\n")
 

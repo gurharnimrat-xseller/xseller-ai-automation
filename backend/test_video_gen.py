@@ -1,7 +1,6 @@
 """
 Test script for the new video generation system
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
 import asyncio
 import sys

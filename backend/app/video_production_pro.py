@@ -7,13 +7,11 @@ Replicates viral YouTube Shorts/TikTok tech videos with:
 - Clean tech aesthetic
 - Professional transitions
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
 from __future__ import annotations
 
 import os
 import re
-import tempfile
 from datetime import datetime
 from typing import Dict, List, Any, Optional, Tuple
 from pathlib import Path
@@ -21,11 +19,11 @@ from pathlib import Path
 # Video generation imports
 try:
     from moviepy.editor import (
-        VideoFileClip, ColorClip, TextClip, CompositeVideoClip,
+        VideoFileClip, ColorClip, TextClip, CompositeVideoClip,  # noqa: F401
         concatenate_videoclips, AudioFileClip, ImageClip
     )
-    from moviepy.video.fx.all import fadein, fadeout, resize
-    from moviepy.video.fx.all import crop
+    from moviepy.video.fx.all import fadein, fadeout, resize  # noqa: F401
+    from moviepy.video.fx.all import crop  # noqa: F401
     import numpy as np
     MOVIEPY_AVAILABLE = True
 except ImportError:
@@ -464,7 +462,7 @@ async def generate_competitor_video(
         return {"success": False, "error": "MoviePy not installed"}
 
     print(f"\n{'='*80}")
-    print(f"🎬 GENERATING COMPETITOR-STYLE VIDEO")
+    print("🎬 GENERATING COMPETITOR-STYLE VIDEO")
     print(f"{'='*80}\n")
 
     try:
@@ -526,7 +524,7 @@ async def generate_competitor_video(
             clip.close()
 
         print(f"\n{'='*80}")
-        print(f"✅ VIDEO GENERATION COMPLETE!")
+        print("✅ VIDEO GENERATION COMPLETE!")
         print(f"{'='*80}")
 
         return {

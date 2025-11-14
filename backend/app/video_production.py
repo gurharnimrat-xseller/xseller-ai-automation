@@ -6,7 +6,6 @@ Generates viral short-form videos with:
 - Stock footage backgrounds
 - Professional transitions
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
 from __future__ import annotations
 
@@ -23,7 +22,7 @@ try:
         VideoFileClip, ColorClip, CompositeVideoClip,
         concatenate_videoclips, AudioFileClip, ImageClip
     )
-    from moviepy.video.fx.all import fadein, fadeout
+    from moviepy.video.fx.all import fadein, fadeout  # noqa: F401
     import numpy as np
     MOVIEPY_AVAILABLE = True
 except ImportError:
@@ -636,7 +635,7 @@ async def generate_video_from_script(
                 if audio_clip.duration > final_video.duration:
                     audio_clip = audio_clip.subclip(0, final_video.duration)
                 final_video = final_video.set_audio(audio_clip)
-                print(f"[video_production] ✅ Voiceover added to video")
+                print("[video_production] ✅ Voiceover added to video")
             except Exception as e:
                 print(f"[video_production] Warning: Could not add audio: {e}")
 
