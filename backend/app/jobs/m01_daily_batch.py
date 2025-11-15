@@ -4,11 +4,15 @@ M01 Daily Batch Job - News Ingestion + Ranking Pipeline
 Orchestrates the daily execution of M01A news ingestion and ranking.
 Calls the backend API endpoints to trigger the pipeline.
 """
+# Fix import path: ensure agents module can be found from repo root
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
+
 from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401 guardrails
 
 import argparse
 import logging
-import sys
 from typing import Dict, Any, List
 import requests
 
@@ -129,6 +133,12 @@ def main() -> int:
     args = parse_args()
 
     try:
+        # Validate base URL
+        if not args.base_url or args.base_url.strip() == "":
+            logger.error("ERROR: --base-url is required but was not provided or is empty")
+            logger.error("Please set BACKEND_API_BASE_URL secret in GitHub Actions")
+            return 1
+
         # Parse sources
         sources = [s.strip() for s in args.sources.split(",") if s.strip()]
         if not sources:
