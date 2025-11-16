@@ -1,34 +1,18 @@
-# Production Dockerfile for Railway deployment
-# Builds and runs the FastAPI backend
-
 FROM python:3.11-slim
 
-# Set working directory
+# Work inside /app
 WORKDIR /app
 
-# Install system dependencies needed for video/audio processing
-# ffmpeg: video generation and manipulation
-# build-essential: compiling Python packages with C extensions
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ffmpeg \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
+# Copy requirements and install packages
+COPY backend/requirements.txt /app/requirements.txt
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential ffmpeg && rm -rf /var/lib/apt/lists/*
+RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r /app/requirements.txt
 
-# Copy the entire repository (needed for agents/ directory and guardrails)
+# Copy the whole repo (backend + agents + everything)
 COPY . /app
 
-# Install Python dependencies from backend/requirements.txt
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r backend/requirements.txt
-
-# Create output directory for generated content
-RUN mkdir -p /app/backend/output
-
-# Expose port 8000 (Railway will map this automatically)
+# Expose port (Railway maps this)
 EXPOSE 8000
 
-# Start FastAPI with Uvicorn
-# - backend.app.main:app is the FastAPI application instance
-# - host 0.0.0.0 allows external connections
-# - port from $PORT env var (Railway injects this) or default 8000
+# Start the app
 CMD uvicorn backend.app.main:app --host 0.0.0.0 --port ${PORT:-8000}
