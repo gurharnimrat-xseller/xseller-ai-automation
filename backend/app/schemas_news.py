@@ -95,6 +95,7 @@ class IngestResponse(BaseModel):
     status: str
     started_at: datetime
     articles_fetched: int
+    article_ids: List[int] = Field(default_factory=list, description="IDs of articles fetched in this job")
     message: str
 
 

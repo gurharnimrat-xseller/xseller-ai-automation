@@ -23,7 +23,7 @@ class NewsRankingService:
         self,
         article_ids: List[int],
         force_rerank: bool = False
-    ) -> Dict[int, RankingScore]:
+    ) -> tuple[Dict[int, RankingScore], List[str]]:
         """
         Rank articles by viral potential using LLM.
 
@@ -32,7 +32,7 @@ class NewsRankingService:
             force_rerank: If True, re-rank even if already ranked
 
         Returns:
-            Dict mapping article_id to RankingScore
+            Tuple of (Dict mapping article_id to RankingScore, List of error messages)
         """
         results = {}
         errors = []
@@ -67,13 +67,15 @@ class NewsRankingService:
                     article.status = "ranked"
                     self.db.add(article)
                     self.db.commit()
+                else:
+                    errors.append(f"Failed to rank article {article_id}: No score returned")
 
             except Exception as e:
                 errors.append(f"Error ranking article {article_id}: {str(e)}")
                 print(f"[Ranking] Error: {e}")
                 continue
 
-        return results
+        return results, errors
 
     def _rank_single_article(self, article: Article) -> Optional[RankingScore]:
         """

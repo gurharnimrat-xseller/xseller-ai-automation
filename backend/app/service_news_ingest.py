@@ -26,7 +26,7 @@ class NewsIngestService:
         self,
         sources: List[str],
         limit_per_source: int = 10
-    ) -> IngestionJob:
+    ) -> tuple[IngestionJob, List[int]]:
         """
         Run a news ingestion job from specified sources.
 
@@ -35,7 +35,7 @@ class NewsIngestService:
             limit_per_source: Max articles to fetch per source
 
         Returns:
-            IngestionJob record with results
+            Tuple of (IngestionJob record with results, list of article IDs)
         """
         # Create job record
         job = IngestionJob(
@@ -50,6 +50,7 @@ class NewsIngestService:
 
         total_fetched = 0
         errors = {}
+        article_ids = []
 
         # Process each source
         for source_name in sources:
@@ -60,12 +61,13 @@ class NewsIngestService:
                     api_key=self.news_api_key if source_name == "newsapi" else None
                 )
 
-                # Fetch articles
+                # Fetch articles (with timeout handled by client)
                 raw_articles = client.fetch_top_headlines(limit=limit_per_source)
 
-                # Store articles
-                stored_count = self._store_articles(raw_articles)
+                # Store articles and collect IDs
+                stored_count, new_ids = self._store_articles(raw_articles)
                 total_fetched += stored_count
+                article_ids.extend(new_ids)
 
             except Exception as e:
                 errors[source_name] = str(e)
@@ -85,9 +87,9 @@ class NewsIngestService:
         self.db.commit()
         self.db.refresh(job)
 
-        return job
+        return job, article_ids
 
-    def _store_articles(self, raw_articles: List[NewsArticleRaw]) -> int:
+    def _store_articles(self, raw_articles: List[NewsArticleRaw]) -> tuple[int, List[int]]:
         """
         Store raw articles in database, handling duplicates.
 
@@ -95,10 +97,13 @@ class NewsIngestService:
             raw_articles: List of raw articles from source
 
         Returns:
-            Count of successfully stored articles
+            Tuple of (count of successfully stored articles, list of article IDs)
         """
         stored_count = 0
+        article_ids = []
+        articles_to_add = []
 
+        # First pass: check for duplicates and prepare articles
         for raw in raw_articles:
             try:
                 # Check if article already exists
@@ -107,9 +112,11 @@ class NewsIngestService:
 
                 if existing:
                     print(f"[Ingest] Skipping duplicate: {raw.external_id}")
+                    # Still include existing article ID for downstream processing
+                    article_ids.append(existing.id)
                     continue
 
-                # Create new article
+                # Create new article (don't add to DB yet)
                 article = Article(
                     source_name=raw.source_name,
                     external_id=raw.external_id,
@@ -121,22 +128,51 @@ class NewsIngestService:
                     published_at=raw.published_at,
                     status="pending"
                 )
+                articles_to_add.append(article)
 
-                self.db.add(article)
-                self.db.commit()
-                stored_count += 1
-
-            except IntegrityError:
-                # Duplicate external_id, rollback and continue
-                self.db.rollback()
-                print(f"[Ingest] Duplicate detected (IntegrityError): {raw.external_id}")
+            except Exception as e:
+                print(f"[Ingest] Error preparing article {raw.external_id}: {e}")
                 continue
+
+        # Second pass: batch insert new articles
+        if articles_to_add:
+            try:
+                for article in articles_to_add:
+                    self.db.add(article)
+
+                # Single commit for all articles
+                self.db.commit()
+
+                # Refresh to get IDs
+                for article in articles_to_add:
+                    self.db.refresh(article)
+                    article_ids.append(article.id)
+                    stored_count += 1
+
+            except IntegrityError as e:
+                # Rollback batch and try one-by-one (rare case)
+                self.db.rollback()
+                print(f"[Ingest] Batch insert failed, falling back to individual inserts: {e}")
+
+                for article in articles_to_add:
+                    try:
+                        self.db.add(article)
+                        self.db.commit()
+                        self.db.refresh(article)
+                        article_ids.append(article.id)
+                        stored_count += 1
+                    except IntegrityError:
+                        self.db.rollback()
+                        print(f"[Ingest] Duplicate detected: {article.external_id}")
+                    except Exception as e:
+                        self.db.rollback()
+                        print(f"[Ingest] Error storing article {article.external_id}: {e}")
+
             except Exception as e:
                 self.db.rollback()
-                print(f"[Ingest] Error storing article {raw.external_id}: {e}")
-                continue
+                print(f"[Ingest] Batch insert error: {e}")
 
-        return stored_count
+        return stored_count, article_ids
 
     def get_pending_articles(self, limit: int = 50) -> List[Article]:
         """
