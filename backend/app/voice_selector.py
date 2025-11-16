@@ -2,9 +2,9 @@
 Voice Selection System for TTS
 Allows users to preview and select voices from ElevenLabs
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
-
 from __future__ import annotations
+
+from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
 import os
 from typing import Dict, List, Optional
