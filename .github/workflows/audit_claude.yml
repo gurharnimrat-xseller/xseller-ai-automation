@@ -1,0 +1,24 @@
+name: Audit Claude MO1
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 13 * * *"  # Daily at 01:00 AM NZT (13:00 UTC = 01:00 NZT in summer)
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+  actions: write  # Required to read workflow runs and dispatch workflows
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      
+      - name: Run Audit & Wake Script
+        run: python3 agents/checks/audit_wake_claude.py
+        env:
+          GH_TOKEN: ${{ github.token }}
