@@ -9,12 +9,12 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
-from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401 guardrails
+from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401,E402 guardrails
 
-import argparse
-import logging
-from typing import Dict, Any, List
-import requests
+import argparse  # noqa: E402
+import logging  # noqa: E402
+from typing import Dict, Any, List  # noqa: E402
+import requests  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO,
@@ -78,7 +78,8 @@ def run_ingestion(
         "limit_per_source": limit_per_source
     }
 
-    logger.info(f"Triggering ingestion: {payload}")
+    logger.info(f"Calling endpoint: POST {url}")
+    logger.info(f"Payload: {payload}")
     response = requests.post(url, json=payload, timeout=300)
     response.raise_for_status()
 
@@ -113,7 +114,8 @@ def run_ranking(
         "force_rerank": False
     }
 
-    logger.info(f"Triggering ranking for {len(article_ids)} articles (min_score={min_score})")
+    logger.info(f"Calling endpoint: POST {url}")
+    logger.info(f"Ranking {len(article_ids)} articles (min_score={min_score})")
     response = requests.post(url, json=payload, timeout=600)
     response.raise_for_status()
 
