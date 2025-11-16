@@ -40,7 +40,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         scheduler.stop_scheduler()
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan)  # v1.1.0 - BackgroundTasks fix deployed
 
 # CORS: allow localhost:3000 (MUST be added before routers)
 # Production: Set ALLOWED_ORIGINS environment variable (comma-separated)
