@@ -3,6 +3,8 @@ News ingestion service (M01A).
 
 Handles fetching articles from external sources and storing them in the database.
 """
+from __future__ import annotations
+
 from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401 guardrails
 
 import os

@@ -7,9 +7,9 @@ Replicates viral YouTube Shorts/TikTok tech videos with:
 - Clean tech aesthetic
 - Professional transitions
 """
+from __future__ import annotations
 from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
-from __future__ import annotations
 
 import os
 import re
