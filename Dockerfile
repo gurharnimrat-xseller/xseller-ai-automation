@@ -1,21 +1,17 @@
 FROM python:3.11-slim
 
-# Work inside /app
 WORKDIR /app
 
-# Copy backend requirements into the image
-COPY backend/requirements.txt ./requirements.txt
+RUN apt-get update && apt-get install -y gcc && rm -rf /var/lib/apt/lists/*
 
-# Install system deps + Python deps
-RUN apt-get update && apt-get install -y --no-install-recommends build-essential ffmpeg && rm -rf /var/lib/apt/lists/* \
-    && pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r ./requirements.txt
+COPY backend/requirements.txt backend/requirements.txt
+RUN pip install --no-cache-dir -r backend/requirements.txt
 
-# Copy the whole repo (backend + agents + everything)
-COPY . /app
+COPY . .
 
-# Expose port (Railway maps this)
+# 👇 ADD THIS LINE (very important)
+ENV PYTHONPATH=/app/backend
+
 EXPOSE 8000
 
-# Start the app
-CMD uvicorn backend.app.main:app --host 0.0.0.0 --port 8000
+CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
