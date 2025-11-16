@@ -6,7 +6,7 @@ import json
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Body
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Body
 from sqlmodel import Session, select, func
 
 from app.database import engine
@@ -2093,51 +2093,77 @@ async def get_energy_modes() -> Dict[str, Any]:
 
 # ==================== NEWS INGESTION & RANKING (M01A) ====================
 
-@router.post("/api/news/ingest")
-async def ingest_news(
-    request: "schemas_news.IngestRequest",
-    session: Session = Depends(get_session)
-) -> "schemas_news.IngestResponse":
+def process_ingestion_task(sources: List[str], limit_per_source: int):
     """
-    Trigger news ingestion from specified sources.
+    Background task to process news ingestion.
 
     Args:
-        request: Ingestion configuration (sources, limits)
-        session: Database session
-
-    Returns:
-        Ingestion job status and results
+        sources: List of news sources to ingest from
+        limit_per_source: Max articles per source
     """
-    from app import service_news_ingest, schemas_news
+    from app import service_news_ingest
     import logging
 
     logger = logging.getLogger(__name__)
 
     try:
-        logger.info(f"[API] Starting ingestion: sources={request.sources}, limit={request.limit_per_source}")
+        with Session(engine) as session:
+            logger.info(f"[BACKGROUND] Starting ingestion: sources={sources}, limit={limit_per_source}")
 
-        service = service_news_ingest.NewsIngestService(session)
-        job, article_ids = service.run_ingestion(
-            sources=request.sources,
-            limit_per_source=request.limit_per_source
-        )
+            service = service_news_ingest.NewsIngestService(session)
+            job, article_ids = service.run_ingestion(
+                sources=sources,
+                limit_per_source=limit_per_source
+            )
 
-        logger.info(f"[API] Ingestion complete: job_id={job.id}, status={job.status}, articles={job.articles_fetched}, ids={len(article_ids)}")
-
-        return schemas_news.IngestResponse(
-            job_id=job.id,
-            status=job.status,
-            started_at=job.started_at,
-            articles_fetched=job.articles_fetched,
-            article_ids=article_ids,
-            message=f"Ingestion {job.status}: fetched {job.articles_fetched} articles"
-        )
+            logger.info(f"[BACKGROUND] Ingestion complete: job_id={job.id}, status={job.status}, articles={job.articles_fetched}, ids={len(article_ids)}")
 
     except Exception as e:
-        logger.error(f"[API] Ingestion error: {e}", exc_info=True)
+        logger.error(f"[BACKGROUND] Ingestion error: {e}", exc_info=True)
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Ingestion failed: {str(e)}")
+
+
+@router.post("/api/news/ingest", status_code=202)
+async def ingest_news(
+    request: "schemas_news.IngestRequest",
+    background_tasks: BackgroundTasks
+) -> Dict[str, Any]:
+    """
+    Trigger news ingestion from specified sources (returns immediately, processes in background).
+
+    Args:
+        request: Ingestion configuration (sources, limits)
+        background_tasks: FastAPI background tasks
+
+    Returns:
+        Acknowledgment that ingestion has been queued
+    """
+    from app import schemas_news
+    import logging
+
+    logger = logging.getLogger(__name__)
+
+    try:
+        logger.info(f"[API] Queuing ingestion: sources={request.sources}, limit={request.limit_per_source}")
+
+        # Add task to background
+        background_tasks.add_task(
+            process_ingestion_task,
+            request.sources,
+            request.limit_per_source
+        )
+
+        return {
+            "status": "accepted",
+            "message": f"Ingestion queued for sources: {', '.join(request.sources)}",
+            "sources": request.sources,
+            "limit_per_source": request.limit_per_source
+        }
+
+    except Exception as e:
+        logger.error(f"[API] Error queuing ingestion: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to queue ingestion: {str(e)}")
 
 
 @router.post("/api/news/rank")
