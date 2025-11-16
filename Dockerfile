@@ -3,8 +3,8 @@ FROM python:3.11-slim
 # Work inside /app
 WORKDIR /app
 
-# Copy backend requirements
-COPY backend/requirements.txt /app/requirements.txt
+# Copy whole repo (backend + agents + everything)
+COPY . /app
 
 # Install system deps
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -14,10 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Install Python deps
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r /app/requirements.txt
-
-# Copy whole repo (backend + agents + everything)
-COPY . /app
+    pip install --no-cache-dir -r backend/requirements.txt
 
 # Expose port
 EXPOSE 8000
