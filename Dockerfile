@@ -1,5 +1,6 @@
 FROM python:3.11-slim
 
+# MAGIC_DOCKERFILE_TEST_LINE
 # Work inside /app
 WORKDIR /app
 
