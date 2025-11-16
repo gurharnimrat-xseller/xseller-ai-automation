@@ -1,0 +1,52 @@
+name: Start Claude MO1
+
+on:
+  schedule:
+    - cron: "30 11 * * *"   # 12:30 AM NZT (UTC cron)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  start-claude:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wake Claude for MO1
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const title = "Start Claude MO1 (auto)";
+            // search or create issue
+            const search = await github.rest.search.issuesAndPullRequests({
+              q: `repo:${owner}/${repo} is:issue in:title "${title}"`
+            });
+            let issueNumber;
+            if (search.data.items.length > 0) {
+              issueNumber = search.data.items[0].number;
+            } else {
+              const created = await github.rest.issues.create({
+                owner, repo, title,
+                body: "This issue is used by the scheduler to wake Claude and begin MO1 (News Scraper + Ranking Engine).",
+                labels: ["ops"]
+              });
+              issueNumber = created.data.number;
+            }
+            const body = `
+🧠 Claude — please start MO1 now (News Scraper + Ranking Engine):
+
+• Follow /docs/style/XSeller_Guidelines.md and the router-only rule.
+• Use agents/checks/router.py for all LLM/API calls (no direct SDK imports).
+• Respect cost caps (NZD ≤ 20/mo) and offload threshold (≥12k tokens or ≥90s).
+• Open separate PRs:
+  - feat(scraper): M01A news fetch (sources + filters + tests)
+  - feat(rank):   M01B ranking engine (scoring + tests)
+• Ensure Guardrails / scan passes and CI is green.
+• Comment PR links and next steps when ready.
+            `.trim();
+            await github.rest.issues.createComment({
+              owner, repo, issue_number: issueNumber, body
+            });
+            core.info(\`Comment posted on issue #\${issueNumber}\`);
