@@ -1,7 +1,7 @@
 name: M01 Daily Batch
 
 on:
-  # Run once per day (about 9am NZT ≈ 20:00 UTC previous day)
+  # Run once per day (about 9am NZT = 20:00 UTC previous day)
   schedule:
     - cron: "0 20 * * *"
   # Allow manual runs from the GitHub UI
@@ -15,12 +15,13 @@ jobs:
     name: Run M01 news ingestion + ranking
     runs-on: ubuntu-latest
 
-    # External config goes in secrets so we don't hard-code URLs or keys
+    # Make sure Python can see both backend/ and the top-level repo (agents/)
     env:
       BACKEND_API_BASE_URL: ${{ secrets.BACKEND_API_BASE_URL }}
       NEWS_SOURCES: newsapi,mock
       NEWS_LIMIT_PER_SOURCE: "20"
       MIN_SCORE: "0.6"
+      PYTHONPATH: "${{ github.workspace }}:${{ github.workspace }}/backend"
 
     steps:
       - name: Checkout repository
@@ -38,8 +39,11 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run M01 daily batch
-        working-directory: backend
         run: |
+          echo "Working directory: $(pwd)"
+          echo "PYTHONPATH: $PYTHONPATH"
+          echo "Python version: $(python --version)"
+          cd backend
           python -m app.jobs.m01_daily_batch \
             --base-url "${BACKEND_API_BASE_URL}" \
             --sources "${NEWS_SOURCES}" \
