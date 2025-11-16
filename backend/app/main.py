@@ -3,43 +3,73 @@ from __future__ import annotations
 
 # CRITICAL: Load .env file FIRST before any other imports that might use environment variables
 import os
+import logging
 from pathlib import Path
 from dotenv import load_dotenv
+
+# Set up logging ASAP
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
+
+logger.info("=" * 80)
+logger.info("🚀 FastAPI Application Starting...")
+logger.info("=" * 80)
 
 # Load environment variables from .env file
 env_path = Path(__file__).parent.parent / ".env"
 load_dotenv(env_path)
+logger.info(f"✅ Environment loaded from: {env_path}")
 
 # Now import everything else (after .env is loaded)
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
+logger.info("📦 Importing FastAPI and dependencies...")
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlmodel import SQLModel
 from app.database import engine
 
+logger.info("📦 Importing app modules...")
 from app.models import *  # noqa: F401,F403 - import models to register metadata
 from app import scheduler
 from app.routes import router
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./xseller.db")
+logger.info(f"🗄️  Database URL: {DATABASE_URL[:30]}...")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # Startup: create tables and start scheduler
+    logger.info("🔧 Creating database tables...")
     SQLModel.metadata.create_all(engine)
+    logger.info("✅ Database tables created")
+    
+    logger.info("⏰ Starting scheduler...")
     scheduler.start_scheduler()
+    logger.info("✅ Scheduler started")
+    
+    logger.info("=" * 80)
+    logger.info("✅ FastAPI Application Ready!")
+    logger.info("=" * 80)
+    
     try:
         yield
     finally:
         # Shutdown: stop scheduler
+        logger.info("🛑 Shutting down scheduler...")
         scheduler.stop_scheduler()
+        logger.info("✅ Scheduler stopped")
 
 
+logger.info("🏗️  Creating FastAPI app instance...")
 app = FastAPI(lifespan=lifespan)
+logger.info("✅ FastAPI app created")
 
 # CORS: allow localhost:3000 (MUST be added before routers)
 # Production: Set ALLOWED_ORIGINS environment variable (comma-separated)
@@ -48,6 +78,7 @@ ALLOWED_ORIGINS = os.getenv(
     "http://localhost:3000"
 ).split(",")
 
+logger.info(f"🌐 Adding CORS middleware for origins: {ALLOWED_ORIGINS}")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
@@ -57,7 +88,18 @@ app.add_middleware(
 )
 
 # Include router with all API endpoints
+logger.info("📍 Including API router...")
 app.include_router(router)
+logger.info("✅ API router included")
+
+# Log all registered routes
+logger.info("📋 Registered Routes:")
+for route in app.routes:
+    if hasattr(route, 'methods') and hasattr(route, 'path'):
+        logger.info(f"  {', '.join(route.methods):8} {route.path}")
+    elif hasattr(route, 'path'):
+        logger.info(f"  {'MOUNT':8} {route.path}")
+logger.info("=" * 80)
 
 # Mount static files for serving videos and other output
 output_dir = Path(__file__).parent.parent / "output"
