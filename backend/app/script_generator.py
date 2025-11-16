@@ -2,9 +2,9 @@
 Viral Script Generator Module
 Advanced script generation with proven hooks, formulas, and psychological triggers.
 """
+from __future__ import annotations
 from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
-from __future__ import annotations
 
 import json
 import random
