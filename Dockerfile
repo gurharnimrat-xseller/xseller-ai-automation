@@ -3,21 +3,19 @@ FROM python:3.11-slim
 # Work inside /app
 WORKDIR /app
 
-# Copy whole repo (backend + agents + everything)
-COPY . /app
+# Copy backend requirements into the image
+COPY backend/requirements.txt ./requirements.txt
 
-# Install system deps
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    ffmpeg && \
-    rm -rf /var/lib/apt/lists/*
+# Install system deps + Python deps
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential ffmpeg && rm -rf /var/lib/apt/lists/* \
+    && pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r ./requirements.txt
 
-# Install Python deps
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r backend/requirements.txt
+# Copy the whole repo (backend + agents + everything) into /app
+COPY . .
 
-# Expose port
+# Expose port (Railway maps this to $PORT)
 EXPOSE 8000
 
-# Start the backend
+# Start the FastAPI app
 CMD uvicorn backend.app.main:app --host 0.0.0.0 --port ${PORT:-8000}
