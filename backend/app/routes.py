@@ -1,5 +1,6 @@
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 from __future__ import annotations
+
+from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
 import json
 from datetime import datetime, timedelta
@@ -2108,24 +2109,32 @@ async def ingest_news(
         Ingestion job status and results
     """
     from app import service_news_ingest, schemas_news
+    import logging
+
+    logger = logging.getLogger(__name__)
 
     try:
+        logger.info(f"[API] Starting ingestion: sources={request.sources}, limit={request.limit_per_source}")
+
         service = service_news_ingest.NewsIngestService(session)
-        job = service.run_ingestion(
+        job, article_ids = service.run_ingestion(
             sources=request.sources,
             limit_per_source=request.limit_per_source
         )
+
+        logger.info(f"[API] Ingestion complete: job_id={job.id}, status={job.status}, articles={job.articles_fetched}, ids={len(article_ids)}")
 
         return schemas_news.IngestResponse(
             job_id=job.id,
             status=job.status,
             started_at=job.started_at,
             articles_fetched=job.articles_fetched,
+            article_ids=article_ids,
             message=f"Ingestion {job.status}: fetched {job.articles_fetched} articles"
         )
 
     except Exception as e:
-        print(f"[API] Ingestion error: {e}")
+        logger.error(f"[API] Ingestion error: {e}", exc_info=True)
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Ingestion failed: {str(e)}")
@@ -2147,10 +2156,15 @@ async def rank_articles(
         Ranking results with scores
     """
     from app import service_news_ranking, schemas_news
+    import logging
+
+    logger = logging.getLogger(__name__)
 
     try:
+        logger.info(f"[API] Starting ranking: article_ids={len(request.article_ids)}, force_rerank={request.force_rerank}")
+
         service = service_news_ranking.NewsRankingService(session)
-        results = service.rank_articles(
+        results, errors = service.rank_articles(
             article_ids=request.article_ids,
             force_rerank=request.force_rerank
         )
@@ -2170,14 +2184,17 @@ async def rank_articles(
         ranked_count = len([s for s in scores if s.article_id in request.article_ids])
         skipped_count = len(request.article_ids) - ranked_count
 
+        logger.info(f"[API] Ranking complete: ranked={ranked_count}, skipped={skipped_count}, errors={len(errors)}")
+
         return schemas_news.RankResponse(
             ranked_count=ranked_count,
             skipped_count=skipped_count,
-            scores=scores
+            scores=scores,
+            errors=errors if errors else None
         )
 
     except Exception as e:
-        print(f"[API] Ranking error: {e}")
+        logger.error(f"[API] Ranking error: {e}", exc_info=True)
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Ranking failed: {str(e)}")
