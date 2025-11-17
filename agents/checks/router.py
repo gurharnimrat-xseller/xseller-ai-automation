@@ -30,7 +30,7 @@ RATE_LIMIT_CALLS = int(os.getenv("RATE_LIMIT_CALLS", "15"))
 RATE_LIMIT_WINDOW = int(os.getenv("RATE_LIMIT_WINDOW", "60"))  # seconds
 
 # Track API call timestamps
-_call_history = deque(maxlen=RATE_LIMIT_CALLS)
+_call_history: deque[float] = deque(maxlen=RATE_LIMIT_CALLS)
 
 
 def estimate_tokens(text: str) -> int:
