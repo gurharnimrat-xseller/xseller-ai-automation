@@ -70,7 +70,7 @@ def start_scheduler() -> None:
 
 
 def stop_scheduler() -> None:
-    global _scheduler  # noqa: PLW0602
+    global _scheduler  # noqa: F824
     if _scheduler and _scheduler.running:
         _scheduler.shutdown(wait=False)
         print("[scheduler] Stopped AsyncIOScheduler")
