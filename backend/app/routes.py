@@ -2127,8 +2127,8 @@ def process_ingestion_task(sources: List[str], limit_per_source: int):
 
 @router.post("/api/news/ingest", status_code=202)
 async def ingest_news(
-    request: schemas_news.IngestRequest = Body(...),
-    background_tasks: BackgroundTasks
+    background_tasks: BackgroundTasks,
+    request: schemas_news.IngestRequest = Body(...)
 ) -> Dict[str, Any]:
     """
     Trigger news ingestion from specified sources (returns immediately, processes in background).
