@@ -17,6 +17,7 @@ from app import content_scraper
 from app import scheduler
 from app import video_production
 from app import video_competitor_exact
+from app import schemas_news
 
 # Create router
 router = APIRouter()
@@ -2126,7 +2127,7 @@ def process_ingestion_task(sources: List[str], limit_per_source: int):
 
 @router.post("/api/news/ingest", status_code=202)
 async def ingest_news(
-    request: "schemas_news.IngestRequest" = Body(...),
+    request: schemas_news.IngestRequest = Body(...),
     background_tasks: BackgroundTasks
 ) -> Dict[str, Any]:
     """
