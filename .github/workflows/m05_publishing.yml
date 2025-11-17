@@ -1,0 +1,48 @@
+name: M05 Publishing
+
+on:
+  # Run daily at 11:00am NZDT = 23:00 UTC previous day
+  schedule:
+    - cron: "0 23 * * *"
+  # Allow manual runs from the GitHub UI
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  m05_publishing:
+    name: Run M05 publishing + analytics + learning
+    runs-on: ubuntu-latest
+
+    env:
+      BACKEND_API_BASE_URL: ${{ secrets.BACKEND_API_BASE_URL }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      PUBLER_API_KEY: ${{ secrets.PUBLER_API_KEY }}
+      PYTHONPATH: "${{ github.workspace }}:${{ github.workspace }}/backend"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run M05 publishing
+        run: |
+          echo "Working directory: $(pwd)"
+          echo "PYTHONPATH: $PYTHONPATH"
+          echo "Python version: $(python --version)"
+          cd backend
+          # M05 workflow script will be created later
+          echo "⚠️ M05 publishing script not yet implemented"
+          echo "Placeholder: Would publish approved videos + collect analytics + update learning model"
+          # python -m app.jobs.m05_publishing --base-url "${BACKEND_API_BASE_URL}"

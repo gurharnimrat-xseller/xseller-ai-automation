@@ -1,0 +1,50 @@
+name: M02 Media Production
+
+on:
+  # Run daily at 9:30am NZDT = 21:30 UTC previous day
+  schedule:
+    - cron: "30 21 * * *"
+  # Allow manual runs from the GitHub UI
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  m02_media_production:
+    name: Run M02 voice generation + B-roll search
+    runs-on: ubuntu-latest
+
+    env:
+      BACKEND_API_BASE_URL: ${{ secrets.BACKEND_API_BASE_URL }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+      PYTHONPATH: "${{ github.workspace }}:${{ github.workspace }}/backend"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run M02 media production
+        run: |
+          echo "Working directory: $(pwd)"
+          echo "PYTHONPATH: $PYTHONPATH"
+          echo "Python version: $(python --version)"
+          cd backend
+          # M02 workflow script will be created later
+          echo "⚠️ M02 media production script not yet implemented"
+          echo "Placeholder: Would generate voice + search B-roll for approved posts"
+          # python -m app.jobs.m02_media_production --base-url "${BACKEND_API_BASE_URL}"
