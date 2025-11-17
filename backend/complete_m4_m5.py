@@ -1,6 +1,10 @@
 """
 Complete M4 & M5 with detailed tasks + add missing metadata
 """
+from __future__ import annotations
+
+from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401
+
 import os
 from datetime import datetime, timedelta
 from notion_client import Client

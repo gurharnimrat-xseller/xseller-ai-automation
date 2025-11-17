@@ -2,6 +2,9 @@
 Notion Integration Service
 Automatically posts daily updates to Notion database
 """
+from __future__ import annotations
+
+from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401
 
 import os
 from datetime import datetime

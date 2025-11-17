@@ -1,6 +1,9 @@
 """
 Test voice energy modes (professional vs energetic vs viral)
 """
+from __future__ import annotations
+
+from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401
 
 import asyncio
 import sys

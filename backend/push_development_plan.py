@@ -2,6 +2,10 @@
 Push complete development plan to Notion
 Creates entries for all milestones and daily tasks
 """
+from __future__ import annotations
+
+from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401
+
 import os
 from datetime import datetime, timedelta
 from notion_client import Client
