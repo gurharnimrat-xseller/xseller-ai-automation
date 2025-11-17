@@ -62,7 +62,11 @@ pytest --cov=app
 
 ## 📅 Automated Schedule
 
-- **M01 Daily Batch:** 9am NZDT (news ingestion)
+- **M01 Daily Batch:** 9:00am NZDT (news ingestion + ranking + scripts)
+- **M02 Media Production:** 9:30am NZDT (voice + B-roll search)
+- **M03 Video Assembly:** 10:00am NZDT (assembly + overlays + QC)
+- **M04 Review:** 10:30am NZDT (review queue preparation)
+- **M05 Publishing:** 11:00am NZDT (publish + analytics + learning)
 - **Backend CI:** On every push
 - **Guardrails Check:** On PRs
 
