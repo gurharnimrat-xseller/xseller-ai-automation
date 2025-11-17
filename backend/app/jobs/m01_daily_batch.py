@@ -121,8 +121,8 @@ def run_ingestion(
 
         logger.info(f"Job {job_id} status: {job_status['status']} (elapsed: {elapsed}s)")
 
-        if job_status["status"] == "completed":
-            logger.info(f"Ingestion complete: {job_status.get('articles_fetched', 0)} articles fetched")
+        if job_status["status"] in ("completed", "partial_failure"):
+            logger.info(f"Ingestion complete: {job_status.get('articles_fetched', 0)} articles fetched (status: {job_status['status']})")
             return job_status
         elif job_status["status"] == "failed":
             raise RuntimeError(f"Ingestion job {job_id} failed: {job_status.get('errors')}")
