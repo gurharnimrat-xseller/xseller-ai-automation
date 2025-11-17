@@ -9,9 +9,8 @@ from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401
 import json
 import random
 from typing import Any, Dict, List, Optional
-# removed per guardrails; use router
-# # removed per guardrails; use router
-# from openai import AsyncOpenAI
+
+from openai import AsyncOpenAI
 
 
 # ==================== VIRAL HOOK FORMULAS ====================

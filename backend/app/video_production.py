@@ -23,7 +23,7 @@ try:
         VideoFileClip, ColorClip, CompositeVideoClip,
         concatenate_videoclips, AudioFileClip, ImageClip
     )
-    from moviepy.video.fx.all import fadein, fadeout
+    from moviepy.video.fx.all import fadein, fadeout  # noqa: F401
     import numpy as np
     MOVIEPY_AVAILABLE = True
 except ImportError:

@@ -8,4 +8,4 @@ _repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 if _repo_root not in sys.path:
     sys.path.insert(0, _repo_root)
 
-from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401 guardrails
+from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401,E402

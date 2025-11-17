@@ -20,11 +20,11 @@ from pathlib import Path
 # Video generation imports
 try:
     from moviepy.editor import (
-        VideoFileClip, ColorClip, TextClip, CompositeVideoClip,
+        VideoFileClip, ColorClip, TextClip, CompositeVideoClip,  # noqa: F401
         concatenate_videoclips, AudioFileClip, ImageClip
     )
-    from moviepy.video.fx.all import fadein, fadeout, resize
-    from moviepy.video.fx.all import crop
+    from moviepy.video.fx.all import fadein, fadeout, resize  # noqa: F401
+    from moviepy.video.fx.all import crop  # noqa: F401
     import numpy as np
     MOVIEPY_AVAILABLE = True
 except ImportError:
@@ -32,6 +32,13 @@ except ImportError:
 
 import httpx
 from PIL import Image, ImageDraw, ImageFont
+
+
+# ==================== CONFIGURATION ====================
+
+# Video settings (9:16 vertical for shorts)
+VIDEO_WIDTH = 1080
+VIDEO_HEIGHT = 1920
 
 
 # ==================== PIL-BASED TEXT RENDERING (NO IMAGEMAGICK) ====================
@@ -93,15 +100,13 @@ def create_text_image_pil(
     return img
 
 
-# ==================== CONFIGURATION ====================
+# ==================== API CONFIGURATION ====================
 
 # API Keys
 PEXELS_API_KEY = os.getenv("PEXELS_API_KEY", "")
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "")
 
-# Video settings (9:16 vertical for shorts)
-VIDEO_WIDTH = 1080
-VIDEO_HEIGHT = 1920
+# Video FPS
 VIDEO_FPS = 30
 
 # Competitor-style text settings

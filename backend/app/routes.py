@@ -2,10 +2,13 @@ from __future__ import annotations
 
 from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401
 
+import os
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Body
+from openai import AsyncOpenAI
 from sqlmodel import Session, select, func
 
 from app.database import engine
@@ -245,8 +248,6 @@ async def approve_post(
 
         if post.deleted_at:
             raise HTTPException(status_code=400, detail="Post is deleted")
-
-        schedule_immediately = body_data.get("schedule_immediately", False)
 
         # Update text post status to approved
         post.status = "approved"
@@ -842,8 +843,6 @@ async def regenerate_video(
                 status_code=400, detail="Post must be a video post")
 
         # Extract options - handle both camelCase and snake_case
-        num_variants = body_data.get(
-            "variantCount") or body_data.get("num_variants", 1)
         custom_instructions = body_data.get(
             "customInstructions") or body_data.get("custom_instructions", "")
         change_hook_style = body_data.get(
