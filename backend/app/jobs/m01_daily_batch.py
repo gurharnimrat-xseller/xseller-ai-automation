@@ -59,7 +59,7 @@ def run_ingestion(
     limit_per_source: int
 ) -> Dict[str, Any]:
     """
-    Trigger news ingestion via API.
+    Trigger news ingestion via API and poll for completion.
 
     Args:
         base_url: Backend API base URL
@@ -67,11 +67,13 @@ def run_ingestion(
         limit_per_source: Max articles per source
 
     Returns:
-        Response JSON with ingestion results
+        Response JSON with ingestion results including article_ids
 
     Raises:
         requests.HTTPError: If API call fails
     """
+    import time
+
     url = f"{base_url.rstrip('/')}/api/news/ingest"
     payload = {
         "sources": sources,
@@ -84,8 +86,36 @@ def run_ingestion(
     response.raise_for_status()
 
     result = response.json()
-    logger.info(f"Ingestion complete: {result.get('articles_fetched', 0)} articles fetched")
-    return result
+    job_id = result.get("job_id")
+
+    if not job_id:
+        raise ValueError("No job_id in response")
+
+    logger.info(f"Job queued: job_id={job_id}")
+
+    # Poll for completion
+    status_url = f"{base_url.rstrip('/')}/api/news/jobs/{job_id}"
+    max_wait = 300  # 5 minutes max
+    poll_interval = 2  # seconds
+    elapsed = 0
+
+    while elapsed < max_wait:
+        time.sleep(poll_interval)
+        elapsed += poll_interval
+
+        status_response = requests.get(status_url, timeout=30)
+        status_response.raise_for_status()
+        job_status = status_response.json()
+
+        logger.info(f"Job {job_id} status: {job_status['status']} (elapsed: {elapsed}s)")
+
+        if job_status["status"] == "completed":
+            logger.info(f"Ingestion complete: {job_status.get('articles_fetched', 0)} articles fetched")
+            return job_status
+        elif job_status["status"] == "failed":
+            raise RuntimeError(f"Ingestion job {job_id} failed: {job_status.get('errors')}")
+
+    raise TimeoutError(f"Job {job_id} did not complete within {max_wait}s")
 
 
 def run_ranking(

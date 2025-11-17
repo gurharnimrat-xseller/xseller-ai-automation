@@ -2094,22 +2094,30 @@ async def get_energy_modes() -> Dict[str, Any]:
 
 # ==================== NEWS INGESTION & RANKING (M01A) ====================
 
-def process_ingestion_task(sources: List[str], limit_per_source: int):
+def process_ingestion_task(job_id: int, sources: List[str], limit_per_source: int):
     """
     Background task to process news ingestion.
 
     Args:
+        job_id: ID of the job record to update
         sources: List of news sources to ingest from
         limit_per_source: Max articles per source
     """
     from app import service_news_ingest
+    from app.models import IngestionJob
     import logging
 
     logger = logging.getLogger(__name__)
 
     try:
         with Session(engine) as session:
-            logger.info(f"[BACKGROUND] Starting ingestion: sources={sources}, limit={limit_per_source}")
+            # Get the existing job
+            job_record = session.get(IngestionJob, job_id)
+            if not job_record:
+                logger.error(f"[BACKGROUND] Job {job_id} not found")
+                return
+
+            logger.info(f"[BACKGROUND] Starting ingestion: job_id={job_id}, sources={sources}, limit={limit_per_source}")
 
             service = service_news_ingest.NewsIngestService(session)
             job, article_ids = service.run_ingestion(
@@ -2117,12 +2125,30 @@ def process_ingestion_task(sources: List[str], limit_per_source: int):
                 limit_per_source=limit_per_source
             )
 
-            logger.info(f"[BACKGROUND] Ingestion complete: job_id={job.id}, status={job.status}, articles={job.articles_fetched}, ids={len(article_ids)}")
+            # Update the job record with results
+            job_record.status = job.status
+            job_record.articles_fetched = job.articles_fetched
+            job_record.article_ids = article_ids
+            job_record.completed_at = datetime.utcnow()
+            session.add(job_record)
+            session.commit()
+
+            logger.info(f"[BACKGROUND] Ingestion complete: job_id={job_id}, status={job.status}, articles={job.articles_fetched}, ids={len(article_ids)}")
 
     except Exception as e:
-        logger.error(f"[BACKGROUND] Ingestion error: {e}", exc_info=True)
-        import traceback
-        traceback.print_exc()
+        logger.error(f"[BACKGROUND] Ingestion error for job {job_id}: {e}", exc_info=True)
+        # Mark job as failed
+        try:
+            with Session(engine) as session:
+                job_record = session.get(IngestionJob, job_id)
+                if job_record:
+                    job_record.status = "failed"
+                    job_record.errors = {"error": str(e)}
+                    job_record.completed_at = datetime.utcnow()
+                    session.add(job_record)
+                    session.commit()
+        except Exception as update_error:
+            logger.error(f"[BACKGROUND] Failed to update job {job_id} error status: {update_error}")
 
 
 @router.post("/api/news/ingest", status_code=202)
@@ -2148,15 +2174,26 @@ async def ingest_news(
     try:
         logger.info(f"[API] Queuing ingestion: sources={request.sources}, limit={request.limit_per_source}")
 
+        # Create job record immediately before queuing
+        from app.models import IngestionJob
+        with Session(engine) as session:
+            job = IngestionJob(status="running")
+            session.add(job)
+            session.commit()
+            session.refresh(job)
+            job_id = job.id
+
         # Add task to background
         background_tasks.add_task(
             process_ingestion_task,
+            job_id,
             request.sources,
             request.limit_per_source
         )
 
         return {
             "status": "accepted",
+            "job_id": job_id,
             "message": f"Ingestion queued for sources: {', '.join(request.sources)}",
             "sources": request.sources,
             "limit_per_source": request.limit_per_source
@@ -2165,6 +2202,38 @@ async def ingest_news(
     except Exception as e:
         logger.error(f"[API] Error queuing ingestion: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to queue ingestion: {str(e)}")
+
+
+@router.get("/api/news/jobs/{job_id}")
+async def get_job_status(
+    job_id: int,
+    session: Session = Depends(get_session)
+) -> Dict[str, Any]:
+    """
+    Get status of an ingestion job.
+
+    Args:
+        job_id: Job ID to check
+        session: Database session
+
+    Returns:
+        Job status with article_ids when completed
+    """
+    from app.models import IngestionJob
+
+    job = session.get(IngestionJob, job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
+
+    return {
+        "job_id": job.id,
+        "status": job.status,
+        "articles_fetched": job.articles_fetched,
+        "article_ids": job.article_ids or [],
+        "started_at": job.started_at.isoformat() if job.started_at else None,
+        "completed_at": job.completed_at.isoformat() if job.completed_at else None,
+        "errors": job.errors
+    }
 
 
 @router.post("/api/news/rank")

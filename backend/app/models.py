@@ -201,4 +201,5 @@ class IngestionJob(SQLModel, table=True):
     status: str = Field(default="running", index=True)
     articles_fetched: int = Field(default=0, sa_column=Column(Integer))
     articles_ranked: int = Field(default=0, sa_column=Column(Integer))
+    article_ids: Optional[List[int]] = Field(default=None, sa_column=Column(JSON))
     errors: Optional[dict] = Field(default=None, sa_column=Column(JSON))
