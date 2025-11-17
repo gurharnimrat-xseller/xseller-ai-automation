@@ -22,6 +22,7 @@ success_count = 0
 error_count = 0
 errors = []
 
+
 def add_page_content(page_id, blocks):
     """Add rich content blocks to a page"""
     try:
@@ -33,6 +34,7 @@ def add_page_content(page_id, blocks):
     except Exception as e:
         return str(e)
 
+
 def create_heading(text, level=2):
     """Create a heading block"""
     return {
@@ -42,6 +44,7 @@ def create_heading(text, level=2):
             "rich_text": [{"type": "text", "text": {"content": text[:2000]}}]
         }
     }
+
 
 def create_paragraph(text):
     """Create a paragraph block"""
@@ -53,6 +56,7 @@ def create_paragraph(text):
         }
     }
 
+
 def create_bulleted_list(text):
     """Create a bulleted list item"""
     return {
@@ -62,6 +66,7 @@ def create_bulleted_list(text):
             "rich_text": [{"type": "text", "text": {"content": text[:2000]}}]
         }
     }
+
 
 def create_todo(text, checked=False):
     """Create a to-do checkbox"""
@@ -74,6 +79,7 @@ def create_todo(text, checked=False):
         }
     }
 
+
 def create_callout(text, emoji="💡"):
     """Create a callout block"""
     return {
@@ -84,6 +90,7 @@ def create_callout(text, emoji="💡"):
             "icon": {"type": "emoji", "emoji": emoji}
         }
     }
+
 
 def create_code(text, language="python"):
     """Create a code block"""
@@ -96,6 +103,7 @@ def create_code(text, language="python"):
         }
     }
 
+
 def create_divider():
     """Create a divider"""
     return {
@@ -103,6 +111,7 @@ def create_divider():
         "type": "divider",
         "divider": {}
     }
+
 
 def find_page_by_title(title_search):
     """Find a page by searching title"""
@@ -120,6 +129,7 @@ def find_page_by_title(title_search):
         return results['results'][0]['id']
     return None
 
+
 print("="*80)
 print("🚀 COMPLETING EVERYTHING - MAKING PLAN 100%")
 print("="*80)
@@ -136,19 +146,22 @@ page_id = find_page_by_title("PROJECT OVERVIEW")
 if page_id:
     blocks = [
         create_heading("🎯 Vision", 2),
-        create_paragraph("Xseller.ai is an AI-powered video automation platform that generates viral-quality short-form videos from news sources, matching professional creator standards."),
+        create_paragraph(
+            "Xseller.ai is an AI-powered video automation platform that generates viral-quality short-form videos from news sources, matching professional creator standards."),
 
         create_heading("📊 Success Metrics", 2),
         create_bulleted_list("Generate 4 videos per day automatically"),
         create_bulleted_list("90% quality approval rate (first attempt)"),
-        create_bulleted_list("Match competitor quality benchmarks (1080x1920, 30fps)"),
+        create_bulleted_list(
+            "Match competitor quality benchmarks (1080x1920, 30fps)"),
         create_bulleted_list("Full autonomy (< 30 min/day human time)"),
         create_bulleted_list("Cost < $100/month"),
         create_bulleted_list("10K+ views per video average"),
 
         create_heading("🛠️ Tech Stack", 2),
         create_callout("Backend: Python 3.11 + FastAPI + SQLite", "🔧"),
-        create_callout("Frontend: Next.js 14 + TypeScript + Tailwind CSS", "⚛️"),
+        create_callout(
+            "Frontend: Next.js 14 + TypeScript + Tailwind CSS", "⚛️"),
         create_callout("AI: Gemini 2.5 Pro (FREE) + ElevenLabs TTS", "🤖"),
         create_callout("Media: Artlist + Pexels + FFmpeg + OpenCV", "🎬"),
         create_callout("Publishing: Publer API (multi-platform)", "📱"),
@@ -158,11 +171,16 @@ if page_id:
 
         create_heading("📅 Timeline Overview", 2),
         create_paragraph("5 weeks from start to MVP (Nov 10 - Dec 15, 2025)"),
-        create_bulleted_list("Week 1 (M1): Content Intelligence - News scraping + script generation"),
-        create_bulleted_list("Week 2 (M2): Media Production - Voice + B-roll integration"),
-        create_bulleted_list("Week 3 (M3): Video Assembly - Complete video production pipeline"),
-        create_bulleted_list("Week 4 (M4): Review Interface - Approval workflow + feedback"),
-        create_bulleted_list("Week 5 (M5): Publishing - Multi-platform automation + learning"),
+        create_bulleted_list(
+            "Week 1 (M1): Content Intelligence - News scraping + script generation"),
+        create_bulleted_list(
+            "Week 2 (M2): Media Production - Voice + B-roll integration"),
+        create_bulleted_list(
+            "Week 3 (M3): Video Assembly - Complete video production pipeline"),
+        create_bulleted_list(
+            "Week 4 (M4): Review Interface - Approval workflow + feedback"),
+        create_bulleted_list(
+            "Week 5 (M5): Publishing - Multi-platform automation + learning"),
     ]
 
     result = add_page_content(page_id, blocks)
@@ -222,7 +240,8 @@ page_id = find_page_by_title("M1A: Build News Scraper")
 if page_id:
     blocks = [
         create_heading("📋 Implementation Checklist", 2),
-        create_todo("Install dependencies: feedparser, requests, beautifulsoup4"),
+        create_todo(
+            "Install dependencies: feedparser, requests, beautifulsoup4"),
         create_todo("Create news_sources.json configuration file"),
         create_todo("Implement RSS feed parser function"),
         create_todo("Add data normalization (title, description, URL, date)"),
@@ -274,11 +293,16 @@ class NewsScraper:
         create_divider(),
 
         create_heading("🧪 Test Scenarios", 2),
-        create_callout("Test 1: Fetch from all sources - Expected: 100+ articles", "✅"),
-        create_callout("Test 2: Handle offline source - Expected: Skip gracefully", "✅"),
-        create_callout("Test 3: Duplicate detection - Expected: 0 duplicates", "✅"),
-        create_callout("Test 4: Invalid RSS feed - Expected: Error logged", "✅"),
-        create_callout("Test 5: Database save - Expected: All fields populated", "✅"),
+        create_callout(
+            "Test 1: Fetch from all sources - Expected: 100+ articles", "✅"),
+        create_callout(
+            "Test 2: Handle offline source - Expected: Skip gracefully", "✅"),
+        create_callout(
+            "Test 3: Duplicate detection - Expected: 0 duplicates", "✅"),
+        create_callout(
+            "Test 4: Invalid RSS feed - Expected: Error logged", "✅"),
+        create_callout(
+            "Test 5: Database save - Expected: All fields populated", "✅"),
     ]
 
     result = add_page_content(page_id, blocks)
@@ -297,7 +321,8 @@ page_id = find_page_by_title("M1B: Content Ranking Engine")
 if page_id:
     blocks = [
         create_heading("📋 Implementation Checklist", 2),
-        create_todo("Design scoring algorithm (recency + authority + engagement)"),
+        create_todo(
+            "Design scoring algorithm (recency + authority + engagement)"),
         create_todo("Implement recency scoring function"),
         create_todo("Create source authority mapping"),
         create_todo("Add keyword matching system"),
@@ -312,10 +337,13 @@ if page_id:
         create_divider(),
 
         create_heading("📊 Scoring Formula", 2),
-        create_callout("Score = (Recency × 0.3) + (Authority × 0.3) + (Engagement × 0.2) + (Keywords × 0.2)", "📐"),
+        create_callout(
+            "Score = (Recency × 0.3) + (Authority × 0.3) + (Engagement × 0.2) + (Keywords × 0.2)", "📐"),
         create_paragraph(""),
-        create_paragraph("Recency: 100 points for < 1 hour, decay to 0 over 24 hours"),
-        create_paragraph("Authority: TechCrunch=100, VentureBeat=90, Medium blogs=50"),
+        create_paragraph(
+            "Recency: 100 points for < 1 hour, decay to 0 over 24 hours"),
+        create_paragraph(
+            "Authority: TechCrunch=100, VentureBeat=90, Medium blogs=50"),
         create_paragraph("Engagement: Based on social shares (if available)"),
         create_paragraph("Keywords: +10 points per trending keyword match"),
 
@@ -511,7 +539,8 @@ def generate_voice(script_text: str) -> bytes:
 
     return audio""", "python"),
 
-        create_callout("Voice Profile: British female, energy 7/10, 150 WPM, professional but engaging", "🎤"),
+        create_callout(
+            "Voice Profile: British female, energy 7/10, 150 WPM, professional but engaging", "🎤"),
     ]
 
     result = add_page_content(page_id, blocks)
@@ -563,7 +592,8 @@ if page_id:
   -movflags +faststart \\
   output.mp4""", "bash"),
 
-        create_callout("Output: 1080x1920, 30fps, H.264, ~50MB for 60sec video", "📊"),
+        create_callout(
+            "Output: 1080x1920, 30fps, H.264, ~50MB for 60sec video", "📊"),
     ]
 
     result = add_page_content(page_id, blocks)
@@ -628,7 +658,8 @@ export function VideoPreview({ videoUrl, onApprove, onReject }) {
   );
 }""", "typescript"),
 
-        create_callout("Keyboard Shortcuts: A = Approve, R = Reject, Space = Play/Pause", "⌨️"),
+        create_callout(
+            "Keyboard Shortcuts: A = Approve, R = Reject, Space = Play/Pause", "⌨️"),
     ]
 
     result = add_page_content(page_id, blocks)
@@ -648,7 +679,8 @@ if page_id:
     blocks = [
         create_heading("📋 Implementation Checklist", 2),
         create_todo("Create Publer account and get API key"),
-        create_todo("Connect social accounts (YouTube, TikTok, Instagram, Facebook, LinkedIn)"),
+        create_todo(
+            "Connect social accounts (YouTube, TikTok, Instagram, Facebook, LinkedIn)"),
         create_todo("Install Publer Python SDK"),
         create_todo("Implement platform-specific formatters"),
         create_todo("Build caption generator"),
@@ -665,7 +697,8 @@ if page_id:
         create_callout("TikTok: 9:16, max 60s, trending hashtags", "🎵"),
         create_callout("Instagram Reels: 9:16, max 90s, 30 hashtags max", "📸"),
         create_callout("Facebook: 9:16, max 60s, 5-10 hashtags", "👥"),
-        create_callout("LinkedIn: 16:9 (convert!), max 10min, professional tone", "💼"),
+        create_callout(
+            "LinkedIn: 16:9 (convert!), max 10min, professional tone", "💼"),
 
         create_divider(),
 
@@ -737,33 +770,41 @@ try:
         create_heading("🎯 Key Decisions", 2),
 
         create_heading("Decision 1: TTS Provider", 3),
-        create_callout("Choice: ElevenLabs (primary) + OpenAI TTS (backup)", "✅"),
-        create_paragraph("Reasoning: ElevenLabs has most natural voice, matches competitor quality. OpenAI TTS as fallback for rate limits."),
-        create_paragraph("Alternatives considered: Google TTS (robotic), gTTS (free but low quality)"),
+        create_callout(
+            "Choice: ElevenLabs (primary) + OpenAI TTS (backup)", "✅"),
+        create_paragraph(
+            "Reasoning: ElevenLabs has most natural voice, matches competitor quality. OpenAI TTS as fallback for rate limits."),
+        create_paragraph(
+            "Alternatives considered: Google TTS (robotic), gTTS (free but low quality)"),
 
         create_divider(),
 
         create_heading("Decision 2: Video Storage", 3),
         create_callout("Choice: Local filesystem + S3 for backups", "✅"),
-        create_paragraph("Reasoning: Faster access for local dev, S3 for production backups and CDN delivery."),
+        create_paragraph(
+            "Reasoning: Faster access for local dev, S3 for production backups and CDN delivery."),
 
         create_divider(),
 
         create_heading("Decision 3: Database", 3),
-        create_callout("Choice: SQLite for MVP, PostgreSQL for production", "✅"),
-        create_paragraph("Reasoning: SQLite is simple for MVP. Migrate to PostgreSQL when scaling."),
+        create_callout(
+            "Choice: SQLite for MVP, PostgreSQL for production", "✅"),
+        create_paragraph(
+            "Reasoning: SQLite is simple for MVP. Migrate to PostgreSQL when scaling."),
 
         create_divider(),
 
         create_heading("Decision 4: Frontend Framework", 3),
         create_callout("Choice: Next.js 14 (App Router)", "✅"),
-        create_paragraph("Reasoning: Modern React with server components, excellent DX, easy deployment on Vercel."),
+        create_paragraph(
+            "Reasoning: Modern React with server components, excellent DX, easy deployment on Vercel."),
 
         create_divider(),
 
         create_heading("Decision 5: Publishing Platform", 3),
         create_callout("Choice: Publer API", "✅"),
-        create_paragraph("Reasoning: Single API for multiple platforms, free tier available, good documentation."),
+        create_paragraph(
+            "Reasoning: Single API for multiple platforms, free tier available, good documentation."),
     ]
 
     add_page_content(page_id, blocks)
@@ -802,36 +843,46 @@ try:
 
         create_callout("RISK-001: API Rate Limits", "⚠️"),
         create_paragraph("Impact: HIGH | Probability: MEDIUM"),
-        create_paragraph("Mitigation: Implement caching, use free Gemini API, respect rate limits with queuing"),
-        create_paragraph("Contingency: Fall back to alternative APIs (OpenAI → Gemini, ElevenLabs → OpenAI TTS)"),
+        create_paragraph(
+            "Mitigation: Implement caching, use free Gemini API, respect rate limits with queuing"),
+        create_paragraph(
+            "Contingency: Fall back to alternative APIs (OpenAI → Gemini, ElevenLabs → OpenAI TTS)"),
 
         create_divider(),
 
         create_callout("RISK-002: Video Quality Below Benchmark", "⚠️"),
         create_paragraph("Impact: HIGH | Probability: MEDIUM"),
-        create_paragraph("Mitigation: Extensive testing with competitor comparison, iterative quality improvements"),
-        create_paragraph("Contingency: Manual video editing for critical launches"),
+        create_paragraph(
+            "Mitigation: Extensive testing with competitor comparison, iterative quality improvements"),
+        create_paragraph(
+            "Contingency: Manual video editing for critical launches"),
 
         create_divider(),
 
         create_callout("RISK-003: Platform Publishing Failures", "⚠️"),
         create_paragraph("Impact: MEDIUM | Probability: MEDIUM"),
-        create_paragraph("Mitigation: Retry logic (3 attempts), queue failed posts, multi-platform fallback"),
-        create_paragraph("Contingency: Manual posting via native apps if API fails"),
+        create_paragraph(
+            "Mitigation: Retry logic (3 attempts), queue failed posts, multi-platform fallback"),
+        create_paragraph(
+            "Contingency: Manual posting via native apps if API fails"),
 
         create_divider(),
 
         create_callout("RISK-004: Budget Overrun (API Costs)", "⚠️"),
         create_paragraph("Impact: MEDIUM | Probability: LOW"),
-        create_paragraph("Mitigation: Use free tiers (Gemini), monitor usage daily, set billing alerts"),
-        create_paragraph("Contingency: Reduce video generation frequency if costs exceed $100/month"),
+        create_paragraph(
+            "Mitigation: Use free tiers (Gemini), monitor usage daily, set billing alerts"),
+        create_paragraph(
+            "Contingency: Reduce video generation frequency if costs exceed $100/month"),
 
         create_divider(),
 
         create_callout("RISK-005: Timeline Delays", "⚠️"),
         create_paragraph("Impact: MEDIUM | Probability: MEDIUM"),
-        create_paragraph("Mitigation: Daily standups, blockers escalated immediately, buffer time in estimates"),
-        create_paragraph("Contingency: Cut scope (defer M5 learning loop if needed)"),
+        create_paragraph(
+            "Mitigation: Daily standups, blockers escalated immediately, buffer time in estimates"),
+        create_paragraph(
+            "Contingency: Cut scope (defer M5 learning loop if needed)"),
     ]
 
     add_page_content(page_id, blocks)
@@ -869,31 +920,36 @@ try:
         create_heading("🚀 Getting Started", 2),
 
         create_callout("Q: How do I set up the development environment?", "❓"),
-        create_paragraph("A: Open GitHub Codespaces, run 'pip install -r requirements.txt' and 'npm install'. Start backend with 'uvicorn app.main:app --reload', frontend with 'npm run dev'."),
+        create_paragraph(
+            "A: Open GitHub Codespaces, run 'pip install -r requirements.txt' and 'npm install'. Start backend with 'uvicorn app.main:app --reload', frontend with 'npm run dev'."),
 
         create_divider(),
 
         create_callout("Q: How do I test locally?", "❓"),
-        create_paragraph("A: Use test scripts in backend/ folder: 'python3 test_scraper.py', 'python3 test_script.py', etc. Each test is self-contained."),
+        create_paragraph(
+            "A: Use test scripts in backend/ folder: 'python3 test_scraper.py', 'python3 test_script.py', etc. Each test is self-contained."),
 
         create_divider(),
 
         create_heading("🔧 Development", 2),
 
         create_callout("Q: Video generation fails - what to check?", "❓"),
-        create_paragraph("A: 1) Check all API keys in .env, 2) Verify FFmpeg installed, 3) Check disk space, 4) Look at error logs in backend/logs/"),
+        create_paragraph(
+            "A: 1) Check all API keys in .env, 2) Verify FFmpeg installed, 3) Check disk space, 4) Look at error logs in backend/logs/"),
 
         create_divider(),
 
         create_callout("Q: Audio is out of sync - how to fix?", "❓"),
-        create_paragraph("A: 1) Check Whisper timing accuracy, 2) Verify B-roll clip durations match sync map, 3) Re-run sync engine with corrected parameters"),
+        create_paragraph(
+            "A: 1) Check Whisper timing accuracy, 2) Verify B-roll clip durations match sync map, 3) Re-run sync engine with corrected parameters"),
 
         create_divider(),
 
         create_heading("📱 Publishing", 2),
 
         create_callout("Q: Publishing failed - what now?", "❓"),
-        create_paragraph("A: 1) Check Publer API key, 2) Verify platform connections in Publer dashboard, 3) Check retry queue, 4) Manual post if urgent"),
+        create_paragraph(
+            "A: 1) Check Publer API key, 2) Verify platform connections in Publer dashboard, 3) Check retry queue, 4) Manual post if urgent"),
     ]
 
     add_page_content(page_id, blocks)
