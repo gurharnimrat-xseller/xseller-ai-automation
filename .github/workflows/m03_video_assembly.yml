@@ -41,7 +41,4 @@ jobs:
           echo "PYTHONPATH: $PYTHONPATH"
           echo "Python version: $(python --version)"
           cd backend
-          # M03 workflow script will be created later
-          echo "⚠️ M03 video assembly script not yet implemented"
-          echo "Placeholder: Would assemble videos + add text overlays + quality check"
-          # python -m app.jobs.m03_video_assembly --base-url "${BACKEND_API_BASE_URL}"
+          python -m app.jobs.m03_video_assembly

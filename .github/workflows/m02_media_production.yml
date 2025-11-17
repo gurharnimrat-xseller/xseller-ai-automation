@@ -44,7 +44,4 @@ jobs:
           echo "PYTHONPATH: $PYTHONPATH"
           echo "Python version: $(python --version)"
           cd backend
-          # M02 workflow script will be created later
-          echo "⚠️ M02 media production script not yet implemented"
-          echo "Placeholder: Would generate voice + search B-roll for approved posts"
-          # python -m app.jobs.m02_media_production --base-url "${BACKEND_API_BASE_URL}"
+          python -m app.jobs.m02_media_production

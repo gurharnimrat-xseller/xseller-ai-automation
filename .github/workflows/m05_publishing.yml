@@ -42,7 +42,4 @@ jobs:
           echo "PYTHONPATH: $PYTHONPATH"
           echo "Python version: $(python --version)"
           cd backend
-          # M05 workflow script will be created later
-          echo "⚠️ M05 publishing script not yet implemented"
-          echo "Placeholder: Would publish approved videos + collect analytics + update learning model"
-          # python -m app.jobs.m05_publishing --base-url "${BACKEND_API_BASE_URL}"
+          python -m app.jobs.m05_publishing

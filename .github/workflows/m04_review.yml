@@ -41,7 +41,4 @@ jobs:
           echo "PYTHONPATH: $PYTHONPATH"
           echo "Python version: $(python --version)"
           cd backend
-          # M04 workflow script will be created later
-          echo "⚠️ M04 review preparation script not yet implemented"
-          echo "Placeholder: Would prepare review queue + send notifications"
-          # python -m app.jobs.m04_review --base-url "${BACKEND_API_BASE_URL}"
+          python -m app.jobs.m04_review
