@@ -6,21 +6,31 @@ This module provides a controlled interface for LLM calls, ensuring:
 - Cost tracking and budget enforcement
 - Automatic offload for heavy prompts
 - Retry logic with exponential backoff
+- Rate limiting (15 calls/min for Gemini API)
 """
 
 import os
 import json
 import base64
 import hashlib
+import time
 from datetime import datetime
 from typing import Optional, Dict, Any
 import subprocess
+from collections import deque
 
 
 # Configuration from environment
 MAX_TOKENS = int(os.getenv("MAX_TOKENS", "12000"))
 HEAVY_TIMEOUT_SEC = int(os.getenv("HEAVY_TIMEOUT_SEC", "90"))
 OFFLOAD_MODEL = os.getenv("OFFLOAD_MODEL", "gemini-1.5-pro-latest")
+
+# Rate limiting (Gemini free tier: 15 requests/min)
+RATE_LIMIT_CALLS = int(os.getenv("RATE_LIMIT_CALLS", "15"))
+RATE_LIMIT_WINDOW = int(os.getenv("RATE_LIMIT_WINDOW", "60"))  # seconds
+
+# Track API call timestamps
+_call_history = deque(maxlen=RATE_LIMIT_CALLS)
 
 
 def estimate_tokens(text: str) -> int:
@@ -29,6 +39,30 @@ def estimate_tokens(text: str) -> int:
     Uses ~4 chars per token heuristic (conservative for English).
     """
     return len(text) // 4
+
+
+def _check_rate_limit() -> None:
+    """
+    Enforce rate limiting for Gemini API calls.
+    Sleeps if we've hit the rate limit (15 calls/min).
+    """
+    now = time.time()
+
+    # Remove calls older than the window
+    while _call_history and (now - _call_history[0]) > RATE_LIMIT_WINDOW:
+        _call_history.popleft()
+
+    # If we're at the limit, wait
+    if len(_call_history) >= RATE_LIMIT_CALLS:
+        sleep_time = RATE_LIMIT_WINDOW - (now - _call_history[0])
+        if sleep_time > 0:
+            time.sleep(sleep_time)
+            # Clear old entries after sleeping
+            while _call_history and (time.time() - _call_history[0]) > RATE_LIMIT_WINDOW:
+                _call_history.popleft()
+
+    # Record this call
+    _call_history.append(time.time())
 
 
 def should_offload(prompt: str, est_sec: Optional[int] = None) -> bool:
@@ -143,8 +177,11 @@ def route_request(
                 "error": True
             }
 
+        # Check rate limit before making API call
+        _check_rate_limit()
+
         genai.configure(api_key=api_key)
-        model_name = model or "gemini-1.5-flash"  # Use flash for lightweight requests
+        model_name = model or "gemini-2.0-flash-exp"  # Use Gemini 2.0 Flash (experimental)
 
         model_obj = genai.GenerativeModel(model_name)
         response = model_obj.generate_content(

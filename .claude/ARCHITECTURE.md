@@ -1,4 +1,4 @@
-# 🤖 CLAUDE + GEMINI + CODEX COLLABORATION PLAYBOOK
+# 🏗️ XSELLER.AI ARCHITECTURE & TEAM PLAYBOOK
 
 ## 📋 PROJECT CONTEXT
 
@@ -6,7 +6,8 @@
 **Goal**: Generate viral-quality short-form videos automatically from news sources
 **Timeline**: 5 weeks (Nov 10 - Dec 15, 2025)
 **Budget**: $75/month
-**Team**: Claude (Architect/QA/PM) + Gemini (Analysis/Review) + Codex (Implementation)
+**MVP Architecture**: Gemini-powered (primary LLM)
+**Team**: Claude Code (Architect/QA) + Gemini CLI (Analysis) + GitHub Copilot (Implementation)
 
 ---
 
