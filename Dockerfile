@@ -14,4 +14,5 @@ ENV PYTHONPATH=/app/backend
 
 EXPOSE 8000
 
+# CRITICAL: Railway uses this CMD. Do NOT override in railway.toml or UI.
 CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
