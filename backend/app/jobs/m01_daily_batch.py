@@ -80,10 +80,22 @@ def run_ingestion(
         "limit_per_source": limit_per_source
     }
 
-    logger.info(f"Calling endpoint: POST {url}")
-    logger.info(f"Payload: {payload}")
-    response = requests.post(url, json=payload, timeout=300)
-    response.raise_for_status()
+    # Retry logic for initial POST
+    max_retries = 5
+    response = None
+    for attempt in range(max_retries):
+        try:
+            logger.info(f"POST {url} (attempt {attempt + 1}/{max_retries})")
+            logger.info(f"Payload: {payload}")
+            response = requests.post(url, json=payload, timeout=60)
+            response.raise_for_status()
+            break  # Success
+        except requests.exceptions.RequestException as e:
+            if attempt == max_retries - 1:
+                raise  # Final attempt failed
+            wait = 2 ** attempt  # Exponential: 1s, 2s, 4s, 8s, 16s
+            logger.warning(f"Attempt {attempt + 1} failed: {e}. Retrying in {wait}s...")
+            time.sleep(wait)
 
     result = response.json()
     job_id = result.get("job_id")
