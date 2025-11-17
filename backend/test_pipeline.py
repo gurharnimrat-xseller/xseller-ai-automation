@@ -4,7 +4,6 @@ Test the entire content generation pipeline:
 2. Generate viral text posts
 3. Generate viral video scripts
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
 import asyncio
 import sys

@@ -2,7 +2,6 @@
 Test EXACT Competitor-Style Video Generation
 Matches viral tech shorts (30 seconds, 5-scene structure)
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
 import asyncio
 import sys
@@ -60,7 +59,7 @@ CTA: Link in bio for full tutorial. Follow @yourhandle for daily AI updates!"""
         print(f"📍 Video Location: {result['video_path']}")
         print(f"⏱️  Duration: {result['duration']} seconds")
         print(f"🎬 Structure: {result.get('structure', 'Hook/Demo/Proof/Impact/CTA')}")
-        print(f"🎞️  Scenes: 5 (rapid-fire tech shorts style)")
+        print("🎞️  Scenes: 5 (rapid-fire tech shorts style)")
         print("\n💡 Next Steps:")
         print("   1. Open the video file to review")
         print("   2. Test on actual social media (YouTube Shorts/TikTok/Instagram)")

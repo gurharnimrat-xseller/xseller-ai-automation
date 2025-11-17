@@ -7,10 +7,8 @@ Supports multiple TTS providers with automatic fallback:
 """
 from __future__ import annotations
 
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
 import os
-import tempfile
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Literal
@@ -251,7 +249,7 @@ async def generate_tts_gtts(
         return None
 
     try:
-        print(f"[TTS] Generating gTTS with British accent (free fallback)")
+        print("[TTS] Generating gTTS with British accent (free fallback)")
 
         # Create TTS with British accent
         tts = gTTS(text=text[:5000], lang=lang, tld=tld, slow=False)

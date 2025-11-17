@@ -8,7 +8,6 @@ Generates viral short-form videos with:
 """
 from __future__ import annotations
 
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
 import os
 import re
@@ -636,7 +635,7 @@ async def generate_video_from_script(
                 if audio_clip.duration > final_video.duration:
                     audio_clip = audio_clip.subclip(0, final_video.duration)
                 final_video = final_video.set_audio(audio_clip)
-                print(f"[video_production] ✅ Voiceover added to video")
+                print("[video_production] ✅ Voiceover added to video")
             except Exception as e:
                 print(f"[video_production] Warning: Could not add audio: {e}")
 

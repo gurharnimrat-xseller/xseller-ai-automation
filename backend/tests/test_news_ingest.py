@@ -3,12 +3,10 @@ Test suite for M01A: News Ingestion + Ranking Pipeline
 
 Tests the news ingestion and ranking functionality using mock data.
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
 import pytest
-from datetime import datetime, timezone
 from sqlmodel import Session, create_engine, SQLModel
-from app.models import Article, RankingScore, IngestionJob
+from app.models import Article
 from app.news_sources import MockNewsClient
 from app.service_news_ingest import NewsIngestService
 from app.service_news_ranking import NewsRankingService

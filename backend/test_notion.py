@@ -1,7 +1,6 @@
 """
 Quick script to find database ID in Notion page
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 import os
 from notion_client import Client
 from dotenv import load_dotenv
@@ -19,7 +18,7 @@ try:
     # Get blocks on the page (this includes databases)
     blocks = client.blocks.children.list(block_id=page_id)
 
-    print(f"\n📋 Blocks on page:")
+    print("\n📋 Blocks on page:")
     for block in blocks.get('results', []):
         block_type = block.get('type')
         block_id = block.get('id')
@@ -33,7 +32,7 @@ try:
             print(f"  • {block_type}: {block_id}")
 
     # Try to search for databases
-    print(f"\n🔍 Searching for databases...")
+    print("\n🔍 Searching for databases...")
     search_results = client.search(
         query="Work Log",
         filter={"property": "object", "value": "database"}

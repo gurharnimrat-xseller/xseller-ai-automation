@@ -1,11 +1,9 @@
 """
 Quick script to check database schema
 """
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 import os
 from notion_client import Client
 from dotenv import load_dotenv
-import json
 
 load_dotenv()
 
@@ -17,7 +15,7 @@ try:
     database = client.databases.retrieve(database_id=db_id)
 
     print(f"✅ Database: {database.get('title', [{}])[0].get('plain_text', 'Unknown')}")
-    print(f"\n📋 Properties:")
+    print("\n📋 Properties:")
 
     for prop_name, prop_info in database.get('properties', {}).items():
         prop_type = prop_info.get('type')

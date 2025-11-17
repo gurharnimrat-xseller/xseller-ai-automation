@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
 # CRITICAL: Load .env file FIRST before any other imports that might use environment variables
 import os

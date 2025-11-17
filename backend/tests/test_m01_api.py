@@ -98,7 +98,7 @@ def test_news_rank_with_article_ids():
     assert "skipped_count" in rank_data, "Missing skipped_count in ranking response"
     assert "scores" in rank_data, "Missing scores in ranking response"
 
-    print(f"✅ End-to-end test passed!")
+    print("✅ End-to-end test passed!")
     print(f"   Ingested {len(article_ids)} articles")
     print(f"   Ranked {rank_data['ranked_count']}, skipped {rank_data['skipped_count']}")
 

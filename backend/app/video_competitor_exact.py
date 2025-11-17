@@ -11,7 +11,6 @@ Structure:
 """
 from __future__ import annotations
 
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
 import os
 import tempfile
@@ -445,7 +444,7 @@ async def fetch_relevant_pexels_video(keywords: List[str], duration: int = 5) ->
                                     print(f"[competitor] ✅ Found relevant video for '{query}'")
                                     return file.get("link")
 
-            print(f"[competitor] No specific video found, using solid background")
+            print("[competitor] No specific video found, using solid background")
             return None
 
     except Exception as e:
@@ -610,7 +609,7 @@ async def generate_exact_competitor_video(
         return {"success": False, "error": "MoviePy not installed"}
 
     print(f"\n{'='*80}")
-    print(f"🎬 GENERATING EXACT COMPETITOR VIDEO (30s)")
+    print("🎬 GENERATING EXACT COMPETITOR VIDEO (30s)")
     print(f"Title: {title}")
     print(f"{'='*80}\n")
 
@@ -684,11 +683,11 @@ async def generate_exact_competitor_video(
             clip.close()
 
         print(f"\n{'='*80}")
-        print(f"✅ COMPETITOR VIDEO COMPLETE!")
+        print("✅ COMPETITOR VIDEO COMPLETE!")
         print(f"{'='*80}")
         print(f"📍 Location: {output_path}")
-        print(f"⏱️  Duration: 30 seconds")
-        print(f"🎬 Scenes: 5 (Hook → Demo → Proof → Impact → CTA)")
+        print("⏱️  Duration: 30 seconds")
+        print("🎬 Scenes: 5 (Hook → Demo → Proof → Impact → CTA)")
         print(f"{'='*80}\n")
 
         return {
@@ -700,7 +699,7 @@ async def generate_exact_competitor_video(
         }
 
     except Exception as e:
-        print(f"\n❌ VIDEO GENERATION FAILED")
+        print("\n❌ VIDEO GENERATION FAILED")
         print(f"Error: {str(e)}")
         import traceback
         traceback.print_exc()

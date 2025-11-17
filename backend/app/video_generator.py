@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
 import os
-import json
 import httpx
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 from datetime import datetime
 
 from sqlmodel import Session, select

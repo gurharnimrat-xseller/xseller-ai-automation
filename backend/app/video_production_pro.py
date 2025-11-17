@@ -9,11 +9,9 @@ Replicates viral YouTube Shorts/TikTok tech videos with:
 """
 from __future__ import annotations
 
-from agents.checks.router import should_offload, offload_to_gemini  # guardrails
 
 import os
 import re
-import tempfile
 from datetime import datetime
 from typing import Dict, List, Any, Optional, Tuple
 from pathlib import Path
@@ -464,7 +462,7 @@ async def generate_competitor_video(
         return {"success": False, "error": "MoviePy not installed"}
 
     print(f"\n{'='*80}")
-    print(f"🎬 GENERATING COMPETITOR-STYLE VIDEO")
+    print("🎬 GENERATING COMPETITOR-STYLE VIDEO")
     print(f"{'='*80}\n")
 
     try:
@@ -526,7 +524,7 @@ async def generate_competitor_video(
             clip.close()
 
         print(f"\n{'='*80}")
-        print(f"✅ VIDEO GENERATION COMPLETE!")
+        print("✅ VIDEO GENERATION COMPLETE!")
         print(f"{'='*80}")
 
         return {
