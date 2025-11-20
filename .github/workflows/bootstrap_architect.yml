@@ -1,11 +1,16 @@
 name: Bootstrap Architect
 on:
   workflow_dispatch:
+
+# Disabled - bootstrap was already run, files exist. This workflow conflicts with existing setup.
+# Only re-enable if you need to reset the entire architect setup.
+
 permissions:
   contents: write
   issues: write
 jobs:
   bootstrap:
+    if: false  # Disabled - bootstrap already complete
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
