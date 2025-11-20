@@ -56,7 +56,8 @@ def parse_args() -> argparse.Namespace:
 def run_ingestion(
     base_url: str,
     sources: List[str],
-    limit_per_source: int
+    limit_per_source: int,
+    max_job_retries: int = 3
 ) -> Dict[str, Any]:
     """
     Trigger news ingestion via API and poll for completion.
@@ -65,12 +66,14 @@ def run_ingestion(
         base_url: Backend API base URL
         sources: List of news source identifiers
         limit_per_source: Max articles per source
+        max_job_retries: Maximum number of times to retry failed jobs
 
     Returns:
         Response JSON with ingestion results including article_ids
 
     Raises:
         requests.HTTPError: If API call fails
+        RuntimeError: If all job attempts fail
     """
     import time
 
@@ -80,54 +83,81 @@ def run_ingestion(
         "limit_per_source": limit_per_source
     }
 
-    # Retry logic for initial POST
-    max_retries = 5
-    response = None
-    for attempt in range(max_retries):
-        try:
-            logger.info(f"POST {url} (attempt {attempt + 1}/{max_retries})")
-            logger.info(f"Payload: {payload}")
-            response = requests.post(url, json=payload, timeout=60)
-            response.raise_for_status()
-            break  # Success
-        except requests.exceptions.RequestException as e:
-            if attempt == max_retries - 1:
-                raise  # Final attempt failed
-            wait = 2 ** attempt  # Exponential: 1s, 2s, 4s, 8s, 16s
-            logger.warning(f"Attempt {attempt + 1} failed: {e}. Retrying in {wait}s...")
-            time.sleep(wait)
+    # Retry entire ingestion job if it fails
+    for job_attempt in range(max_job_retries):
+        # Retry logic for initial POST
+        max_retries = 5
+        response = None
+        for attempt in range(max_retries):
+            try:
+                logger.info(f"POST {url} (job attempt {job_attempt + 1}/{max_job_retries}, request attempt {attempt + 1}/{max_retries})")
+                logger.info(f"Payload: {payload}")
+                response = requests.post(url, json=payload, timeout=60)
+                response.raise_for_status()
+                break  # Success
+            except requests.exceptions.RequestException as e:
+                if attempt == max_retries - 1:
+                    raise  # Final attempt failed
+                wait = 2 ** attempt  # Exponential: 1s, 2s, 4s, 8s, 16s
+                logger.warning(f"Request attempt {attempt + 1} failed: {e}. Retrying in {wait}s...")
+                time.sleep(wait)
 
-    result = response.json()
-    job_id = result.get("job_id")
+        result = response.json()
+        job_id = result.get("job_id")
 
-    if not job_id:
-        raise ValueError("No job_id in response")
+        if not job_id:
+            raise ValueError("No job_id in response")
 
-    logger.info(f"Job queued: job_id={job_id}")
+        logger.info(f"Job queued: job_id={job_id}")
 
-    # Poll for completion
-    status_url = f"{base_url.rstrip('/')}/api/news/jobs/{job_id}"
-    max_wait = 300  # 5 minutes max
-    poll_interval = 2  # seconds
-    elapsed = 0
+        # Poll for completion
+        status_url = f"{base_url.rstrip('/')}/api/news/jobs/{job_id}"
+        max_wait = 300  # 5 minutes max
+        poll_interval = 2  # seconds
+        elapsed = 0
+        job_failed_with_no_articles = False
 
-    while elapsed < max_wait:
-        time.sleep(poll_interval)
-        elapsed += poll_interval
+        while elapsed < max_wait:
+            time.sleep(poll_interval)
+            elapsed += poll_interval
 
-        status_response = requests.get(status_url, timeout=30)
-        status_response.raise_for_status()
-        job_status = status_response.json()
+            status_response = requests.get(status_url, timeout=30)
+            status_response.raise_for_status()
+            job_status = status_response.json()
 
-        logger.info(f"Job {job_id} status: {job_status['status']} (elapsed: {elapsed}s)")
+            logger.info(f"Job {job_id} status: {job_status['status']} (elapsed: {elapsed}s)")
 
-        if job_status["status"] in ("completed", "partial_failure"):
-            logger.info(f"Ingestion complete: {job_status.get('articles_fetched', 0)} articles fetched (status: {job_status['status']})")
-            return job_status
-        elif job_status["status"] == "failed":
-            raise RuntimeError(f"Ingestion job {job_id} failed: {job_status.get('errors')}")
+            if job_status["status"] in ("completed", "partial_failure"):
+                logger.info(f"Ingestion complete: {job_status.get('articles_fetched', 0)} articles fetched (status: {job_status['status']})")
+                return job_status
+            elif job_status["status"] == "failed":
+                # Check if we have article_ids despite failure status
+                article_ids = job_status.get("article_ids", [])
+                if article_ids:
+                    logger.warning(f"Job {job_id} marked as failed but returned {len(article_ids)} article IDs")
+                    logger.warning(f"Errors: {job_status.get('errors')}")
+                    logger.warning("Treating as partial failure and continuing with available articles")
+                    return job_status
+                else:
+                    # Job failed with no articles - will retry
+                    logger.error(f"Job {job_id} failed with no articles. Errors: {job_status.get('errors')}")
+                    job_failed_with_no_articles = True
+                    break
 
-    raise TimeoutError(f"Job {job_id} did not complete within {max_wait}s")
+        if job_failed_with_no_articles:
+            if job_attempt < max_job_retries - 1:
+                retry_wait = 10 * (job_attempt + 1)  # 10s, 20s, 30s
+                logger.warning(f"Retrying ingestion job in {retry_wait}s (attempt {job_attempt + 2}/{max_job_retries})...")
+                time.sleep(retry_wait)
+                continue  # Retry the job
+            else:
+                raise RuntimeError(f"All {max_job_retries} ingestion job attempts failed with no articles")
+
+        if elapsed >= max_wait:
+            raise TimeoutError(f"Job {job_id} did not complete within {max_wait}s")
+
+    # Should never reach here, but just in case
+    raise RuntimeError("Ingestion failed after all retry attempts")
 
 
 def run_ranking(
