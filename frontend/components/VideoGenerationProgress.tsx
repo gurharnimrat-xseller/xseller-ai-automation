@@ -77,8 +77,8 @@ export default function VideoGenerationProgress({ postId, isGenerating, onComple
             index < newCurrentStep
               ? 'complete'
               : index === newCurrentStep
-              ? 'in_progress'
-              : 'pending'
+                ? 'in_progress'
+                : 'pending'
         }))
       )
 
@@ -115,6 +115,9 @@ export default function VideoGenerationProgress({ postId, isGenerating, onComple
           <h2 className="text-3xl font-bold text-white mb-2">
             🎬 Generating Video
           </h2>
+          <p className="text-gray-400 text-center mb-8">
+            It&apos;s taking longer than usual. We&apos;re still working on your video.
+          </p>
           <p className="text-gray-400">Post ID: {postId}</p>
         </div>
 
@@ -148,13 +151,12 @@ export default function VideoGenerationProgress({ postId, isGenerating, onComple
           {steps.map((step, index) => (
             <div
               key={step.id}
-              className={`flex items-start gap-3 p-4 rounded-lg transition-all ${
-                step.status === 'complete'
-                  ? 'bg-green-500/10 border border-green-500/20'
-                  : step.status === 'in_progress'
+              className={`flex items-start gap-3 p-4 rounded-lg transition-all ${step.status === 'complete'
+                ? 'bg-green-500/10 border border-green-500/20'
+                : step.status === 'in_progress'
                   ? 'bg-purple-500/10 border border-purple-500/20 scale-105'
                   : 'bg-gray-800/50'
-              }`}
+                }`}
             >
               <div className="flex-shrink-0 mt-0.5">
                 {step.status === 'complete' && (
@@ -170,13 +172,12 @@ export default function VideoGenerationProgress({ postId, isGenerating, onComple
 
               <div className="flex-1">
                 <span
-                  className={`font-medium ${
-                    step.status === 'complete'
-                      ? 'text-green-500'
-                      : step.status === 'in_progress'
+                  className={`font-medium ${step.status === 'complete'
+                    ? 'text-green-500'
+                    : step.status === 'in_progress'
                       ? 'text-purple-400'
                       : 'text-gray-400'
-                  }`}
+                    }`}
                 >
                   {step.label}
                 </span>
@@ -195,7 +196,7 @@ export default function VideoGenerationProgress({ postId, isGenerating, onComple
         {progress < 100 && (
           <div className="mt-6 p-4 bg-purple-500/10 border border-purple-500/20 rounded-lg">
             <p className="text-sm text-purple-400 text-center">
-              💡 <strong>Tip:</strong> You'll hear a notification sound when the video is ready!
+              💡 <strong>Tip:</strong> You&apos;ll hear a notification sound when the video is ready!
             </p>
           </div>
         )}

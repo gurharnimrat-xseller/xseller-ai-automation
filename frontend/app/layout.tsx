@@ -1,26 +1,25 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import ClientLayout from './components/ClientLayout';
 import './globals.css';
+import { MainLayout } from "@/components/layout/MainLayout";
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-    title: 'Xseller.ai - Social Media Automation Dashboard',
-    description: 'AI-powered social media content generation and scheduling platform',
+    title: "Xseller.ai Dashboard",
+    description: "AI Agent Dashboard for Xseller.ai",
 };
 
 export default function RootLayout({
     children,
-}: {
+}: Readonly<{
     children: React.ReactNode;
-}) {
+}>) {
     return (
         <html lang="en">
             <body className={inter.className}>
-                <ClientLayout>{children}</ClientLayout>
+                <MainLayout>{children}</MainLayout>
             </body>
         </html>
     );
 }
-
