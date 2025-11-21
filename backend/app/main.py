@@ -23,6 +23,7 @@ from app.database import engine  # noqa: E402
 from app.models import *  # noqa: F401,F403,E402
 from app import scheduler  # noqa: E402
 from app.routes import router  # noqa: E402
+from app.api.dashboard import router as dashboard_router  # noqa: E402
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./xseller.db")
 
@@ -58,6 +59,7 @@ app.add_middleware(
 
 # Include router with all API endpoints
 app.include_router(router)
+app.include_router(dashboard_router)
 
 # Mount static files for serving videos and other output
 output_dir = Path(__file__).parent.parent / "output"
