@@ -1,11 +1,16 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Users, FileText, Video, ListChecks } from 'lucide-react';
 import { StatsCard } from '@/components/dashboard/StatsCard';
 import { AgentActivityPanel } from '@/components/dashboard/AgentActivityPanel';
 import { PerformanceMetrics } from '@/components/dashboard/PerformanceMetrics';
 import { RecentActivityFeed } from '@/components/dashboard/RecentActivityFeed';
+import { apiClient } from '@/lib/api/client';
+import { DashboardStats, PerformanceData, Activity } from '@/lib/types/dashboard';
+import { Agent } from '@/lib/types/agent';
+
+// Fallback mock data for initial load or errors
 import {
   mockDashboardStats,
   mockAgents,
@@ -14,62 +19,137 @@ import {
 } from '@/lib/api/mock';
 
 export default function DashboardPage() {
+  const [stats, setStats] = useState<DashboardStats>(mockDashboardStats);
+  const [agents, setAgents] = useState<Agent[]>(mockAgents);
+  const [performance, setPerformance] = useState<PerformanceData>(mockPerformance);
+  const [activities, setActivities] = useState<Activity[]>(mockActivities);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [statsData, agentsData, perfData, activitiesData] = await Promise.all([
+          apiClient.getStats(),
+          apiClient.getAgents(),
+          apiClient.getPerformance(),
+          apiClient.getActivities(10)
+        ]);
+
+        setStats(statsData);
+        setAgents(agentsData);
+        setPerformance(perfData);
+        setActivities(activitiesData);
+        setLastUpdated(new Date());
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch data');
+        // Keep using previous data on error
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    // Initial fetch
+    fetchData();
+
+    // Auto-refresh every 5 seconds
+    const interval = setInterval(fetchData, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Loading state for initial load only
+  if (loading && !lastUpdated) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       {/* Page Header */}
-      <div className="mb-2">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-1">Monitor your AI automation system</p>
+      <div className="mb-2 flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-gray-600 mt-1">Monitor your AI automation system</p>
+        </div>
+        {lastUpdated && (
+          <div className="text-xs text-gray-400">
+            Last updated: {lastUpdated.toLocaleTimeString()}
+            {error && <span className="ml-2 text-amber-500">(using cached data)</span>}
+          </div>
+        )}
       </div>
+
+      {/* Error Banner */}
+      {error && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-amber-800 text-sm">
+          <span className="font-medium">Connection issue:</span> {error}. Showing cached data.
+        </div>
+      )}
 
       {/* Stats Cards Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatsCard
-          title="Total Agents"
-          value={mockDashboardStats.agents.total}
+          title="Active Agents"
+          value={stats.agents.active}
+          subtitle={`${stats.agents.total} total`}
           icon={Users}
           color="blue"
           trend={{
-            value: 20,
-            isPositive: true
+            value: stats.agents.error > 0 ? -stats.agents.error : 8.3,
+            isPositive: stats.agents.error === 0
           }}
+          chartData={stats.agents.chartData}
         />
         <StatsCard
           title="News Today"
-          value={mockDashboardStats.news.today}
+          value={stats.news.today}
           icon={FileText}
           color="green"
           trend={{
-            value: mockDashboardStats.news.trend,
-            isPositive: mockDashboardStats.news.trend > 0
+            value: stats.news.trend,
+            isPositive: stats.news.trend > 0
           }}
+          chartData={stats.news.chartData}
         />
         <StatsCard
           title="Videos Created"
-          value={mockDashboardStats.videos.total}
+          value={stats.videos.total}
+          subtitle={`${stats.videos.pending} pending`}
           icon={Video}
           color="purple"
           trend={{
-            value: mockDashboardStats.videos.trend,
-            isPositive: mockDashboardStats.videos.trend > 0
+            value: Math.abs(stats.videos.trend),
+            isPositive: stats.videos.trend > 0
           }}
+          chartData={stats.videos.chartData}
         />
         <StatsCard
           title="Queue Items"
-          value={mockDashboardStats.queue.items}
+          value={stats.queue.items}
+          subtitle={`${stats.queue.processing} processing`}
           icon={ListChecks}
           color="amber"
+          chartData={stats.queue.chartData}
         />
       </div>
 
       {/* Agent Activity Panel */}
-      <AgentActivityPanel agents={mockAgents} />
+      <AgentActivityPanel agents={agents} />
 
       {/* Performance Metrics */}
-      <PerformanceMetrics data={mockPerformance} />
+      <PerformanceMetrics data={performance} />
 
       {/* Recent Activity Feed */}
-      <RecentActivityFeed activities={mockActivities} />
+      <RecentActivityFeed activities={activities} />
     </div>
   );
 }

@@ -9,12 +9,14 @@ import { cn } from '@/lib/utils';
 export interface StatsCardProps {
     title: string;
     value: number | string;
+    subtitle?: string;
     icon: LucideIcon;
     trend?: {
         value: number;
         isPositive: boolean;
     };
     color?: 'blue' | 'green' | 'amber' | 'red' | 'purple';
+    chartData?: { value: number }[];
     onClick?: () => void;
 }
 
@@ -45,12 +47,15 @@ const generateTrendData = (isPositive: boolean) => {
 export function StatsCard({
     title,
     value,
+    subtitle,
     icon: Icon,
     trend,
     color = 'blue',
+    chartData,
     onClick
 }: StatsCardProps) {
-    const trendData = trend ? generateTrendData(trend.isPositive) : generateTrendData(true);
+    // Use provided chartData or generate fallback
+    const trendData = chartData || (trend ? generateTrendData(trend.isPositive) : generateTrendData(true));
 
     return (
         <Card
@@ -73,6 +78,7 @@ export function StatsCard({
                 <div className="space-y-1 mb-4">
                     <p className="text-3xl font-bold text-gray-900">{value}</p>
                     <p className="text-sm text-gray-600 font-medium">{title}</p>
+                    {subtitle && <p className="text-xs text-gray-400">{subtitle}</p>}
                 </div>
 
                 {trend && (
