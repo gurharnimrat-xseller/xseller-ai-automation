@@ -92,7 +92,7 @@ export function StatsCard({
                     </div>
                 )}
 
-                {/* Mini Sparkline Chart */}
+                {/* Mini Sparkline Chart - 7-day trend visualization */}
                 <div className="mt-4 h-12">
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={trendData}>
