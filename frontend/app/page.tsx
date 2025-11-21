@@ -6,6 +6,7 @@ import { StatsCard } from '@/components/dashboard/StatsCard';
 import { AgentActivityPanel } from '@/components/dashboard/AgentActivityPanel';
 import { PerformanceMetrics } from '@/components/dashboard/PerformanceMetrics';
 import { RecentActivityFeed } from '@/components/dashboard/RecentActivityFeed';
+import { SkeletonStatsCard, SkeletonAgent, SkeletonActivity } from '@/components/ui/Skeleton';
 import { apiClient } from '@/lib/api/client';
 import { DashboardStats, PerformanceData, Activity } from '@/lib/types/dashboard';
 import { Agent } from '@/lib/types/agent';
@@ -63,10 +64,40 @@ export default function DashboardPage() {
   // Loading state for initial load only
   if (loading && !lastUpdated) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading dashboard...</p>
+      <div className="space-y-8">
+        {/* Page Header Skeleton */}
+        <div className="mb-2">
+          <div className="h-9 w-48 bg-gray-200 rounded animate-pulse mb-2" />
+          <div className="h-5 w-64 bg-gray-200 rounded animate-pulse" />
+        </div>
+
+        {/* Stats Cards Skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <SkeletonStatsCard />
+          <SkeletonStatsCard />
+          <SkeletonStatsCard />
+          <SkeletonStatsCard />
+        </div>
+
+        {/* Agent Panel Skeleton */}
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="h-6 w-32 bg-gray-200 rounded animate-pulse mb-4" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <SkeletonAgent />
+            <SkeletonAgent />
+            <SkeletonAgent />
+            <SkeletonAgent />
+          </div>
+        </div>
+
+        {/* Activity Feed Skeleton */}
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="h-6 w-40 bg-gray-200 rounded animate-pulse mb-4" />
+          <div className="space-y-4">
+            <SkeletonActivity />
+            <SkeletonActivity />
+            <SkeletonActivity />
+          </div>
         </div>
       </div>
     );
@@ -100,7 +131,7 @@ export default function DashboardPage() {
         <StatsCard
           title="Active Agents"
           value={stats.agents.active}
-          subtitle={`${stats.agents.total} total`}
+          subtitle="Est. $18k/mo saved"
           icon={Users}
           color="blue"
           trend={{
@@ -110,8 +141,9 @@ export default function DashboardPage() {
           chartData={stats.agents.chartData}
         />
         <StatsCard
-          title="News Today"
-          value={stats.news.today}
+          title="Potential Reach"
+          value="2.4M views"
+          subtitle={`${stats.news.today} articles today`}
           icon={FileText}
           color="green"
           trend={{
@@ -121,9 +153,9 @@ export default function DashboardPage() {
           chartData={stats.news.chartData}
         />
         <StatsCard
-          title="Videos Created"
-          value={stats.videos.total}
-          subtitle={`${stats.videos.pending} pending`}
+          title="Content Value"
+          value={`$${(stats.videos.total * 200).toLocaleString()}`}
+          subtitle={`${stats.videos.total} videos created`}
           icon={Video}
           color="purple"
           trend={{
@@ -133,9 +165,9 @@ export default function DashboardPage() {
           chartData={stats.videos.chartData}
         />
         <StatsCard
-          title="Queue Items"
-          value={stats.queue.items}
-          subtitle={`${stats.queue.processing} processing`}
+          title="In Pipeline"
+          value={`$${(stats.queue.items * 200).toLocaleString()}`}
+          subtitle={`${stats.queue.items} items queued`}
           icon={ListChecks}
           color="amber"
           chartData={stats.queue.chartData}

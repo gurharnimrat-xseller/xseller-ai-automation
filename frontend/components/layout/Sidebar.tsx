@@ -19,8 +19,7 @@ import {
 const sidebarItems = [
     { icon: LayoutDashboard, label: 'Overview', href: '/' },
     { icon: Users, label: 'Agents', href: '/agents' },
-    { icon: Video, label: 'Video Pipeline', href: '/pipeline' },
-    { icon: ListVideo, label: 'Queue', href: '/queue' },
+    { icon: Video, label: 'Pipeline', href: '/pipeline' },
     { icon: BarChart3, label: 'Insights', href: '/insights' },
     { icon: Settings, label: 'Settings', href: '/settings' },
 ];

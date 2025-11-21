@@ -81,3 +81,56 @@ export const SkeletonTable: React.FC<{ rows?: number; columns?: number; classNam
         ))}
     </div>
 );
+
+// Skeleton for Agent Card
+export const SkeletonAgent: React.FC<{ className?: string }> = ({ className }) => (
+    <div className={cn("p-4 border border-gray-200 rounded-lg space-y-3", className)}>
+        <div className="flex items-start justify-between">
+            <div className="flex items-center gap-2">
+                <Skeleton className="w-2 h-2 rounded-full" />
+                <Skeleton className="h-5 w-40" />
+            </div>
+            <Skeleton className="h-6 w-16 rounded-full" />
+        </div>
+        <Skeleton className="h-3 w-24" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-2 w-full rounded-full" />
+        <div className="flex justify-between pt-3 border-t border-gray-100">
+            <Skeleton className="h-3 w-16" />
+            <Skeleton className="h-3 w-12" />
+        </div>
+    </div>
+);
+
+// Skeleton for Activity Item
+export const SkeletonActivity: React.FC<{ className?: string }> = ({ className }) => (
+    <div className={cn("flex gap-4", className)}>
+        <Skeleton className="flex-shrink-0 w-8 h-8 rounded-full" />
+        <div className="flex-1 space-y-2">
+            <div className="flex justify-between gap-2">
+                <div className="space-y-1 flex-1">
+                    <Skeleton className="h-4 w-48" />
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-3 w-32" />
+                </div>
+                <Skeleton className="h-3 w-16" />
+            </div>
+        </div>
+    </div>
+);
+
+// Skeleton for Stats Card
+export const SkeletonStatsCard: React.FC<{ className?: string }> = ({ className }) => (
+    <div className={cn("bg-white rounded-xl shadow-sm p-6 space-y-4", className)}>
+        <div className="flex items-start justify-between">
+            <Skeleton className="w-12 h-12 rounded-xl" />
+        </div>
+        <div className="space-y-2">
+            <Skeleton className="h-8 w-20" />
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-3 w-24" />
+        </div>
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-12 w-full" />
+    </div>
+);
