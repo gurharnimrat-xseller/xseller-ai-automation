@@ -42,11 +42,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(lifespan=lifespan)  # v1.1.0 - BackgroundTasks fix deployed
 
-# CORS: allow localhost:3000 (MUST be added before routers)
+# CORS: allow localhost:3000 and production domains
 # Production: Set ALLOWED_ORIGINS environment variable (comma-separated)
 ALLOWED_ORIGINS = os.getenv(
     "ALLOWED_ORIGINS",
-    "http://localhost:3000"
+    "http://localhost:3000,https://app.xseller.ai,https://xseller-ai-dashboard.vercel.app"
 ).split(",")
 
 app.add_middleware(
