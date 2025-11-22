@@ -7,10 +7,12 @@ RUN apt-get update && apt-get install -y gcc && rm -rf /var/lib/apt/lists/*
 COPY backend/requirements.txt backend/requirements.txt
 RUN pip install --no-cache-dir -r backend/requirements.txt
 
-COPY . .
+# Copy backend and agents directories
+COPY backend backend
+COPY agents agents
 
-# 👇 ADD THIS LINE (very important)
-ENV PYTHONPATH=/app/backend
+# Set PYTHONPATH to include both /app (repo root) and /app/backend
+ENV PYTHONPATH=/app:/app/backend
 
 EXPOSE 8000
 
