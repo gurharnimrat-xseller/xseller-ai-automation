@@ -271,3 +271,13 @@ export const mockAgentMetrics: Record<string, AgentMetrics> = {
         }))
     }
 };
+
+// Business Impact Data (7 days)
+export const mockBusinessImpact = {
+    videosPublished: 28,
+    totalViews: 2400000,
+    engagementRate: 6.8,
+    estimatedRevenue: 8400,
+    costPerVideo: 0.15,
+    roi: 19900
+};

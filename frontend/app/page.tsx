@@ -6,6 +6,7 @@ import { StatsCard } from '@/components/dashboard/StatsCard';
 import { AgentActivityPanel } from '@/components/dashboard/AgentActivityPanel';
 import { PerformanceMetrics } from '@/components/dashboard/PerformanceMetrics';
 import { RecentActivityFeed } from '@/components/dashboard/RecentActivityFeed';
+import { BusinessImpact } from '@/components/dashboard/BusinessImpact';
 import { SkeletonStatsCard, SkeletonAgent, SkeletonActivity } from '@/components/ui/Skeleton';
 import { apiClient } from '@/lib/api/client';
 import { DashboardStats, PerformanceData, Activity } from '@/lib/types/dashboard';
@@ -16,7 +17,8 @@ import {
   mockDashboardStats,
   mockAgents,
   mockPerformance,
-  mockActivities
+  mockActivities,
+  mockBusinessImpact
 } from '@/lib/api/mock';
 
 export default function DashboardPage() {
@@ -176,6 +178,9 @@ export default function DashboardPage() {
 
       {/* Agent Activity Panel */}
       <AgentActivityPanel agents={agents} />
+
+      {/* Business Impact */}
+      <BusinessImpact data={mockBusinessImpact} />
 
       {/* Performance Metrics */}
       <PerformanceMetrics data={performance} />

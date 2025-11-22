@@ -3,7 +3,7 @@
 import React from 'react';
 import { PerformanceData } from '@/lib/types/dashboard';
 import { Card, CardContent } from '@/components/ui/Card';
-import { FileText, Star, CheckCircle, TrendingUp, TrendingDown } from 'lucide-react';
+import { DollarSign, TrendingUp, Zap, TrendingDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface PerformanceMetricsProps {
@@ -13,37 +13,40 @@ export interface PerformanceMetricsProps {
 const metrics = [
     {
         key: 'scriptsGenerated' as const,
-        title: 'Scripts Generated',
-        icon: FileText,
-        color: 'blue',
-        suffix: ''
+        title: 'Pipeline Value',
+        icon: DollarSign,
+        color: 'emerald',
+        suffix: '',
+        valueTransform: (value: number) => `$${(value * 200).toLocaleString()}`
     },
     {
         key: 'qualityScore' as const,
-        title: 'Avg Quality Score',
-        icon: Star,
-        color: 'amber',
-        suffix: '/10'
+        title: 'Viral Potential',
+        icon: Zap,
+        color: 'purple',
+        suffix: '/10',
+        valueTransform: (value: number) => value.toString()
     },
     {
         key: 'successRate' as const,
-        title: 'Success Rate',
-        icon: CheckCircle,
-        color: 'green',
-        suffix: '%'
+        title: 'Automation Rate',
+        icon: TrendingUp,
+        color: 'blue',
+        suffix: '%',
+        valueTransform: (value: number) => value.toString()
     }
 ];
 
 const colorVariants = {
-    blue: 'bg-blue-500',
-    amber: 'bg-amber-500',
-    green: 'bg-green-500'
+    emerald: 'bg-emerald-500',
+    purple: 'bg-purple-500',
+    blue: 'bg-blue-500'
 };
 
 export function PerformanceMetrics({ data }: PerformanceMetricsProps) {
     return (
         <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-gray-900">Performance (Last 24h)</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Business Value (Last 24h)</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {metrics.map((metric) => {
@@ -65,9 +68,14 @@ export function PerformanceMetrics({ data }: PerformanceMetricsProps) {
 
                                 <div className="space-y-1">
                                     <p className="text-3xl font-bold text-gray-900">
-                                        {metricData.value}{metric.suffix}
+                                        {metric.valueTransform(metricData.value)}{metric.suffix}
                                     </p>
                                     <p className="text-sm text-gray-600 font-medium">{metric.title}</p>
+                                    {metric.key === 'scriptsGenerated' && (
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            {metricData.value} videos @ $200 each
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="mt-4 flex items-center gap-1">
@@ -83,7 +91,7 @@ export function PerformanceMetrics({ data }: PerformanceMetricsProps) {
                                         {isPositive ? '+' : ''}{metricData.trend}%
                                     </span>
                                     <span className="text-xs text-gray-400 ml-1">
-                                        vs yesterday ({metricData.previousValue}{metric.suffix})
+                                        vs yesterday
                                     </span>
                                 </div>
                             </CardContent>
