@@ -11,14 +11,10 @@ RUN pip install --no-cache-dir -r backend/requirements.txt
 COPY backend backend
 COPY agents agents
 
-# Copy entrypoint script
-COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
-
 # Set PYTHONPATH to include both /app (repo root) and /app/backend
 ENV PYTHONPATH=/app:/app/backend
 
 EXPOSE 8000
 
-# Use entrypoint script to properly expand Railway's PORT env var
-ENTRYPOINT ["/app/entrypoint.sh"]
+# Use shell form CMD to enable PORT variable expansion
+CMD uvicorn backend.app.main:app --host 0.0.0.0 --port ${PORT:-8000}
