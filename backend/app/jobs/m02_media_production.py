@@ -87,7 +87,7 @@ def search_broll(keywords: str, retries=3) -> str:
             else:
                 raise
 
-def main():
+def run_m02_job():
     with Session(engine) as session:
         # Fetch articles needing media
         articles = session.execute(
@@ -122,4 +122,4 @@ def main():
                 continue
 
 if __name__ == "__main__":
-    main()
+    run_m02_job()
