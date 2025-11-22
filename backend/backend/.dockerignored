@@ -1,0 +1,3 @@
+# This Dockerfile is deprecated - use root /Dockerfile instead
+# Railway should use the root Dockerfile for deployment
+# This file is kept for reference only
