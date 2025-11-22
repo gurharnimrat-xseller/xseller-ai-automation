@@ -4,7 +4,7 @@ Advanced script generation with proven hooks, formulas, and psychological trigge
 """
 from __future__ import annotations
 
-from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401
+# from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401
 
 import json
 import random

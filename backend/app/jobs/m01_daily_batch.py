@@ -9,7 +9,7 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
-from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401,E402 guardrails
+# from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401,E402 guardrails
 
 import argparse  # noqa: E402
 import logging  # noqa: E402

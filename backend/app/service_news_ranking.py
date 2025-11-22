@@ -3,7 +3,7 @@ News ranking service (M01A).
 
 Uses LLM (via router) to rank articles by viral potential.
 """
-from agents.checks.router import should_offload, offload_to_gemini, route_request  # noqa: F401 guardrails
+# from agents.checks.router import should_offload, offload_to_gemini, route_request  # noqa: F401 guardrails
 
 import json
 import re

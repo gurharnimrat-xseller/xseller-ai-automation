@@ -3,7 +3,7 @@ News source clients for fetching articles from external providers.
 
 Provides a unified interface for different news sources with retry logic and error handling.
 """
-from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401 guardrails
+# from agents.checks.router import should_offload, offload_to_gemini  # noqa: F401 guardrails
 
 import time
 import random
