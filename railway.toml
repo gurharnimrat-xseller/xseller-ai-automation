@@ -6,3 +6,5 @@ watchPaths = ["backend/**", "agents/**", "Dockerfile"]
 [deploy]
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
+healthcheckPath = "/docs"
+healthcheckTimeout = 100
