@@ -24,6 +24,30 @@ from app import schemas_news
 # Create router
 router = APIRouter()
 
+# Import job functions
+from app.jobs.m02_media_production import run_m02_job
+
+@router.post("/api/jobs/m02")
+async def trigger_m02_job(
+    background_tasks: BackgroundTasks,
+):
+    """Trigger M02 media production job in background."""
+    print("[api] POST /api/jobs/m02 called")
+    background_tasks.add_task(run_m02_job)
+    return {"message": "M02 job triggered in background"}
+
+@router.post("/api/admin/migrate")
+async def trigger_migration():
+    """Run database migrations to add new columns."""
+    print("[api] POST /api/admin/migrate called")
+    try:
+        from migrations.add_m02_fields import migrate
+        migrate()
+        return {"message": "Migration completed successfully"}
+    except Exception as e:
+        print(f"[api] Migration failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Migration failed: {str(e)}")
+
 
 # Dependency to get database session
 def get_session() -> Session:
