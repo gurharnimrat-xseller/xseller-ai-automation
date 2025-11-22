@@ -18,6 +18,7 @@ RUN pip install --upgrade pip \
 
 # Copy backend app source (relative to backend/ build context)
 COPY app /app/app
+COPY migrations /app/migrations
 
 # Copy entrypoint script
 COPY backend/entrypoint.sh /app/entrypoint.sh
