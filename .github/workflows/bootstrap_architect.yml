@@ -97,7 +97,7 @@ jobs:
           print("Guardrails OK.")
           PY
 
-            - name: Add monitor workflow
+      - name: Add monitor workflow
         run: |
           cat > .github/workflows/monitor.yml << 'YML'
           name: Monitor
