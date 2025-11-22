@@ -1,9 +1,9 @@
 import os
 import time
 import requests
-from app.database import Session, engine
+from sqlmodel import Session,  select
+from app.database import engine
 from app.models import Article
-from sqlalchemy import select
 
 ELEVENLABS_API_KEY = os.getenv('ELEVENLABS_API_KEY')
 PEXELS_API_KEY = os.getenv('PEXELS_API_KEY')
