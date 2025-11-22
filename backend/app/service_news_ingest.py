@@ -21,6 +21,9 @@ class NewsIngestService:
     def __init__(self, db: Session):
         self.db = db
         self.news_api_key = os.getenv("NEWS_API_KEY", "")
+        # Test mode configuration
+        self.test_mode = os.getenv("TEST_MODE", "false").lower() == "true"
+        self.test_batch_id = os.getenv("TEST_BATCH_ID", "local-test")
 
     def run_ingestion(
         self,
@@ -126,7 +129,9 @@ class NewsIngestService:
                     url=raw.url,
                     image_url=raw.image_url,
                     published_at=raw.published_at,
-                    status="pending"
+                    status="pending",
+                    is_test=self.test_mode,
+                    test_batch_id=self.test_batch_id if self.test_mode else None
                 )
                 articles_to_add.append(article)
 

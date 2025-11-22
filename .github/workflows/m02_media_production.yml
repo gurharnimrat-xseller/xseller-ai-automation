@@ -1,9 +1,10 @@
 name: M02 Media Production
 
 on:
-  # Run daily at 9:30am NZDT = 21:30 UTC previous day
+  # Run twice daily (9:30am and 9:30pm NZDT)
   schedule:
-    - cron: "30 21 * * *"
+    - cron: "30 21 * * *"  # 9:30am NZDT
+    - cron: "30 9 * * *"   # 9:30pm NZDT
   # Allow manual runs from the GitHub UI
   workflow_dispatch:
 
@@ -21,6 +22,8 @@ jobs:
       ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+      TEST_MODE: 'true'
+      TEST_BATCH_ID: ${{ github.run_id }}
       PYTHONPATH: "${{ github.workspace }}:${{ github.workspace }}/backend"
 
     steps:

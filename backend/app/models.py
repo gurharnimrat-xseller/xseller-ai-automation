@@ -167,6 +167,10 @@ class Article(SQLModel, table=True):
     )
     # pending, ranked, scripted, published, rejected
     status: str = Field(default="pending", index=True)
+    
+    # Test mode fields for weekend testing
+    is_test: bool = Field(default=False)
+    test_batch_id: Optional[str] = Field(default=None)
 
 
 class RankingScore(SQLModel, table=True):
