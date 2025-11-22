@@ -172,6 +172,11 @@ class Article(SQLModel, table=True):
     is_test: bool = Field(default=False)
     test_batch_id: Optional[str] = Field(default=None)
 
+    # Media production fields
+    script: Optional[str] = None
+    voice_url: Optional[str] = None
+    broll_video_url: Optional[str] = None
+
 
 class RankingScore(SQLModel, table=True):
     """AI ranking scores for articles."""
