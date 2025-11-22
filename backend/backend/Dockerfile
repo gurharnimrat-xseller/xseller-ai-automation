@@ -19,6 +19,10 @@ RUN pip install --upgrade pip \
 # Copy backend app source (relative to backend/ build context)
 COPY app /app/app
 
+# Copy entrypoint script
+COPY backend/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
 # NOTE: agents directory is at repo root and not accessible from backend/backend build context
 # The guardrails imports in the code have # noqa: F401 to bypass import errors
 # This is acceptable because the guardrails are enforced at GitHub Actions CI/CD level
@@ -29,5 +33,5 @@ ENV PYTHONPATH=/app
 # Expose port 8000
 EXPOSE 8000
 
-# Start FastAPI using Railway's PORT env var (shell form enables variable expansion)
-CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
+# Use entrypoint script to properly expand PORT env var
+ENTRYPOINT ["/app/entrypoint.sh"]
