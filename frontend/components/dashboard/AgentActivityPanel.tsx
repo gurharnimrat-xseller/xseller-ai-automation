@@ -1,10 +1,12 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { Agent } from '@/lib/types/agent';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Progress } from '@/components/ui/Progress';
+import { Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface AgentActivityPanelProps {
@@ -52,6 +54,15 @@ function formatTimeAgo(date: Date): string {
     return `${diffDays}d ago`;
 }
 
+// Calculate health color based on uptime
+function getHealthColor(uptime?: string): string {
+    if (!uptime) return 'gray';
+    const uptimeValue = parseFloat(uptime);
+    if (uptimeValue >= 95) return 'green';
+    if (uptimeValue >= 90) return 'amber';
+    return 'red';
+}
+
 export function AgentActivityPanel({ agents }: AgentActivityPanelProps) {
     return (
         <Card>
@@ -62,11 +73,18 @@ export function AgentActivityPanel({ agents }: AgentActivityPanelProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {agents.map((agent) => {
                         const config = statusConfig[agent.status];
+                        const healthColor = getHealthColor(agent.uptime);
 
                         return (
                             <div
                                 key={agent.id}
-                                className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all"
+                                className={cn(
+                                    "p-4 border-2 rounded-lg hover:shadow-md transition-all",
+                                    healthColor === 'green' && "border-green-200 hover:border-green-300",
+                                    healthColor === 'amber' && "border-amber-200 hover:border-amber-300",
+                                    healthColor === 'red' && "border-red-200 hover:border-red-300",
+                                    healthColor === 'gray' && "border-gray-200 hover:border-gray-300"
+                                )}
                             >
                                 {/* Agent Header */}
                                 <div className="flex items-start justify-between mb-3">
@@ -106,11 +124,25 @@ export function AgentActivityPanel({ agents }: AgentActivityPanelProps) {
                                         {agent.lastRun ? formatTimeAgo(agent.lastRun) : 'Never'}
                                     </span>
                                     {agent.uptime && (
-                                        <span className="font-medium text-gray-600">
+                                        <span className={cn(
+                                            "font-medium",
+                                            healthColor === 'green' && "text-green-600",
+                                            healthColor === 'amber' && "text-amber-600",
+                                            healthColor === 'red' && "text-red-600"
+                                        )}>
                                             ↑ {agent.uptime}
                                         </span>
                                     )}
                                 </div>
+
+                                {/* View Logs Button */}
+                                <Link
+                                    href={`/agents/${agent.id}`}
+                                    className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                                >
+                                    <Eye className="w-4 h-4" />
+                                    View Logs
+                                </Link>
                             </div>
                         );
                     })}

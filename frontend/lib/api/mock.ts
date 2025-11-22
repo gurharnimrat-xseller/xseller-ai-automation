@@ -190,3 +190,84 @@ export const mockActivities: Activity[] = [
         agent: 'System'
     }
 ];
+
+// Agent Observability Data
+export interface AgentLog {
+    id: string;
+    timestamp: Date;
+    level: 'info' | 'warning' | 'error' | 'debug';
+    message: string;
+    details?: string;
+}
+
+export interface AgentDecision {
+    id: string;
+    timestamp: Date;
+    action: string;
+    reasoning: string;
+    outcome: 'success' | 'failure' | 'pending';
+}
+
+export interface PromptResponse {
+    id: string;
+    timestamp: Date;
+    prompt: string;
+    response: string;
+    tokens: { input: number; output: number; cost: number };
+    latency: number;
+}
+
+export interface AgentMetrics {
+    callsPerHour: number;
+    avgLatency: number;
+    errorRate: number;
+    tokenUsage: { input: number; output: number; total: number };
+    totalCost: number;
+    successRate: number;
+    latencyHistory: { timestamp: Date; value: number }[];
+}
+
+export const mockAgentLogs: Record<string, AgentLog[]> = {
+    '1': [
+        { id: '1', timestamp: new Date(Date.now() - 1 * 60 * 1000), level: 'info', message: 'Fetching articles from TechCrunch RSS feed', details: 'URL: https://techcrunch.com/feed/' },
+        { id: '2', timestamp: new Date(Date.now() - 2 * 60 * 1000), level: 'info', message: 'Successfully fetched 12 articles' },
+        { id: '3', timestamp: new Date(Date.now() - 3 * 60 * 1000), level: 'debug', message: 'Parsing article metadata' },
+        { id: '4', timestamp: new Date(Date.now() - 5 * 60 * 1000), level: 'info', message: 'Stored 12 articles in database' },
+        { id: '5', timestamp: new Date(Date.now() - 10 * 60 * 1000), level: 'warning', message: 'Rate limit approaching (80/100 requests)' },
+    ]
+};
+
+export const mockAgentDecisions: Record<string, AgentDecision[]> = {
+    '1': [
+        { id: '1', timestamp: new Date(Date.now() - 5 * 60 * 1000), action: 'Fetch from TechCrunch', reasoning: 'Last fetch was 15 minutes ago, scheduled interval is 10 minutes', outcome: 'success' },
+        { id: '2', timestamp: new Date(Date.now() - 20 * 60 * 1000), action: 'Skip Hacker News', reasoning: 'No new articles since last check', outcome: 'success' },
+    ]
+};
+
+export const mockPromptResponses: Record<string, PromptResponse[]> = {
+    '3': [
+        {
+            id: '1',
+            timestamp: new Date(Date.now() - 2 * 60 * 1000),
+            prompt: 'Write a viral TikTok script about: AI Breakthrough in NLP',
+            response: 'AI just got SCARY good at understanding humans...',
+            tokens: { input: 156, output: 89, cost: 0.0012 },
+            latency: 1240
+        }
+    ]
+};
+
+export const mockAgentMetrics: Record<string, AgentMetrics> = {
+    '1': {
+        callsPerHour: 24,
+        avgLatency: 340,
+        errorRate: 2.1,
+        tokenUsage: { input: 12400, output: 8900, total: 21300 },
+        totalCost: 0.42,
+        successRate: 97.9,
+        latencyHistory: Array.from({ length: 24 }, (_, i) => ({
+            timestamp: new Date(Date.now() - (23 - i) * 60 * 60 * 1000),
+            value: 300 + Math.random() * 200
+        }))
+    }
+};
