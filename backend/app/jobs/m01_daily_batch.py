@@ -183,7 +183,7 @@ def run_ranking(
     payload = {
         "article_ids": article_ids,
         "min_score": min_score,
-        "force_rerank": False
+        "force_rerank": True
     }
 
     logger.info(f"Calling endpoint: POST {url}")
