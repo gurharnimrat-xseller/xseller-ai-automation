@@ -19,9 +19,10 @@ jobs:
     # Make sure Python can see both backend/ and the top-level repo (agents/)
     env:
       BACKEND_API_BASE_URL: ${{ secrets.BACKEND_API_BASE_URL }}
-      NEWS_SOURCES: newsapi,mock
+      NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
+      NEWS_SOURCES: newsapi
       NEWS_LIMIT_PER_SOURCE: "20"
-      MIN_SCORE: "0.4"
+      MIN_SCORE: "0.7"
       TEST_MODE: 'true'
       TEST_BATCH_ID: ${{ github.run_id }}
       PYTHONPATH: "${{ github.workspace }}:${{ github.workspace }}/backend"
