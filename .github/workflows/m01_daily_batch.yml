@@ -21,7 +21,7 @@ jobs:
       BACKEND_API_BASE_URL: ${{ secrets.BACKEND_API_BASE_URL }}
       NEWS_SOURCES: newsapi,mock
       NEWS_LIMIT_PER_SOURCE: "20"
-      MIN_SCORE: "0.6"
+      MIN_SCORE: "0.4"
       TEST_MODE: 'true'
       TEST_BATCH_ID: ${{ github.run_id }}
       PYTHONPATH: "${{ github.workspace }}:${{ github.workspace }}/backend"
