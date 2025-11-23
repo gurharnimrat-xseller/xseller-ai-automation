@@ -102,8 +102,16 @@ class NewsRankingService:
                 print(f"[Ranking] LLM error: {response.get('content')}")
                 return None
 
+            # DEBUG: Print raw response
+            print(f"\n[DEBUG] Ranking Article: {article.title}")
+            print(f"[DEBUG] Raw LLM Response:\n{response.get('content', '')}\n")
+
             # Parse response
             score_data = self._parse_ranking_response(response.get("content", ""))
+            
+            # DEBUG: Print parsed score
+            print(f"[DEBUG] Parsed Score: {score_data['score']}")
+            print(f"[DEBUG] Reasoning: {score_data['reasoning']}\n")
 
             # Create ranking score record
             ranking_score = RankingScore(
